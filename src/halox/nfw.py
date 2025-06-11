@@ -1,21 +1,10 @@
 from jax import Array
 import jax.numpy as jnp
 import jax_cosmo as jc
-from functools import partial
+
+from .cosmology import Planck18
 
 G = 4.30091727e-9  # km^2 Mpc Msun^-1 s^-2
-
-Planck18 = partial(
-    jc.Cosmology,
-    Omega_c=0.2607,
-    Omega_b=0.04897,
-    Omega_k=0.0,
-    h=0.6766,
-    n_s=0.9665,
-    sigma8=0.8102,
-    w0=-1.0,
-    wa=0.0,
-)
 
 
 class NFW:
