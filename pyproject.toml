@@ -1,0 +1,20 @@
+[project]
+name = "halox"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "Florian Kéruzoré", email = "fkeruzore@anl.gov" }
+]
+requires-python = ">=3.9"
+dependencies = [
+    "jax>=0.4.30",
+    "jax-cosmo>=0.1.0",
+]
+
+[project.scripts]
+halox = "halox:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
