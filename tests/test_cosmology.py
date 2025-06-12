@@ -10,7 +10,7 @@ import astropy.cosmology as ac
 
 rtol = 1e-2
 test_cosmos = {
-    "Planck15": [jc.Planck15, ac.Planck15],
+    "Planck15": [jc.Planck15(), ac.Planck15],
     "Planck18": [hc.Planck18, ac.Planck18],
     "70_0.3": [
         jc.Cosmology(0.25, 0.05, 0.7, 0.97, 0.8, 0.0, -1.0, 0.0),
