@@ -34,6 +34,7 @@ cc.addCosmology(
         ns=0.97,
     ),
 )
+G = halox.cosmology.G
 
 
 @pytest.mark.parametrize("halo_name", test_halos.keys())
@@ -76,3 +77,28 @@ def test_enclosed_mass(halo_name, cosmo_name):
     assert jnp.allclose(
         jnp.array(mass_c), mass_h, rtol=rtol
     ), f"Different M(<{rs}): {mass_c} != {mass_h}"
+
+
+@pytest.mark.parametrize("halo_name", test_halos.keys())
+@pytest.mark.parametrize("cosmo_name", test_cosmos.keys())
+def test_potential(halo_name, cosmo_name):
+    halo = test_halos[halo_name]
+    MDelta, cDelta, z = halo["M"], halo["c"], halo["z"]
+    cosmo_j, cosmo_c = test_cosmos[cosmo_name]
+
+    cosmo_c = cc.setCosmology(cosmo_c)
+    nfw_c = profile_nfw.NFWProfile(
+        M=MDelta * cosmo_c.h, c=cDelta, z=z, mdef="200c"
+    )
+    nfw_h = halox.NFW(MDelta, cDelta, "200c", z, cosmo=cosmo_j)
+
+    rs = jnp.logspace(-2, 1, 6)  # Mpc
+
+    _r0 = nfw_c.par["rhos"] * 1e9 * cosmo_c.h**2  # Msun Mpc-3
+    _rs = nfw_c.par["rs"] / 1e3 / cosmo_c.h  # Mpc
+
+    phi_c = -4 * jnp.pi * G * _r0 * _rs**3 * jnp.log(1 + rs / _rs) / rs
+    phi_h = nfw_h.potential(rs)
+    assert jnp.allclose(
+        jnp.array(phi_c), phi_h, rtol=rtol
+    ), f"Different phi({rs}): {phi_c} != {phi_h}"
