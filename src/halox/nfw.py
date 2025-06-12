@@ -2,9 +2,7 @@ from jax import Array
 import jax.numpy as jnp
 import jax_cosmo as jc
 
-from .cosmology import Planck18
-
-G = 4.30091727e-9  # km^2 Mpc Msun^-1 s^-2
+from .cosmology import Planck18, G
 
 
 class NFW:
