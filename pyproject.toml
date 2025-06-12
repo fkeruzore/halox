@@ -24,6 +24,11 @@ tests = [
     "pytest-xdist>=3.7.0",
 ]
 
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+addopts = "-v --cov=halox --cov-report=term-missing --cov-fail-under=90"
+
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
