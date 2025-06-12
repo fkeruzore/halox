@@ -3,6 +3,7 @@ import jax.numpy as jnp
 import jax_cosmo as jc
 
 from .cosmology import Planck18, G
+from . import cosmology
 
 
 class NFW:
@@ -16,10 +17,14 @@ class NFW:
     ):
         self.MDelta = MDelta
         self.cDelta = cDelta
+        self.Delta = Delta
+        self.z = z
+        self.cosmo = cosmo
+
         if Delta == "200c":
-            mean_rho = 200 * jc.background.rho_crit(cosmo, z)
+            mean_rho = 200 * cosmology.critical_density(z, cosmo)
         elif Delta == "500c":
-            mean_rho = 500 * jc.background.rho_crit(cosmo, z)
+            mean_rho = 500 * cosmology.critical_density(z, cosmo)
         else:
             raise ValueError(
                 f"{Delta=} not supported yet, must be either '200c' or '500c'"
