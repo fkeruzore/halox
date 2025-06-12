@@ -1,1 +1,78 @@
+import jax
 
+jax.config.update("jax_enable_x64", True)
+
+import pytest
+import jax.numpy as jnp
+import jax_cosmo as jc
+import halox
+
+from colossus.halo import profile_nfw
+import colossus.cosmology.cosmology as cc
+
+rtol = 1e-2
+test_halos = {
+    "him_loz": {"M": 1e15, "c": 4.0, "z": 0.1},
+    "lom_hiz": {"M": 1e14, "c": 5.5, "z": 1.0},
+}
+test_cosmos = {
+    "Planck18": [halox.cosmology.Planck18, "planck18"],
+    "70_0.3": [
+        jc.Cosmology(0.25, 0.05, 0.7, 0.97, 0.8, 0.0, -1.0, 0.0),
+        "70_0.3",
+    ],
+}
+cc.addCosmology(
+    cosmo_name="70_0.3",
+    params=dict(
+        flat=True,
+        H0=70.0,
+        Om0=0.3,
+        Ob0=0.05,
+        de_model="lambda",
+        sigma8=0.8,
+        ns=0.97,
+    ),
+)
+
+
+@pytest.mark.parametrize("halo_name", test_halos.keys())
+@pytest.mark.parametrize("cosmo_name", test_cosmos.keys())
+def test_density(halo_name, cosmo_name):
+    halo = test_halos[halo_name]
+    MDelta, cDelta, z = halo["M"], halo["c"], halo["z"]
+    cosmo_j, cosmo_c = test_cosmos[cosmo_name]
+
+    cosmo_c = cc.setCosmology(cosmo_c)
+    nfw_c = profile_nfw.NFWProfile(
+        M=MDelta * cosmo_c.h, c=cDelta, z=z, mdef="200c"
+    )
+    nfw_h = halox.NFW(MDelta, cDelta, "200c", z, cosmo=cosmo_j)
+
+    rs = jnp.logspace(-2, 1, 6)  # Mpc
+    rho_c = nfw_c.density(rs * 1000 * cosmo_c.h) * 1e9 * (cosmo_c.h) ** 2
+    rho_h = nfw_h.density(rs)
+    assert jnp.allclose(
+        jnp.array(rho_c), rho_h, rtol=rtol
+    ), f"Different rho({rs}): {rho_c} != {rho_h}"
+
+
+@pytest.mark.parametrize("halo_name", test_halos.keys())
+@pytest.mark.parametrize("cosmo_name", test_cosmos.keys())
+def test_enclosed_mass(halo_name, cosmo_name):
+    halo = test_halos[halo_name]
+    MDelta, cDelta, z = halo["M"], halo["c"], halo["z"]
+    cosmo_j, cosmo_c = test_cosmos[cosmo_name]
+
+    cosmo_c = cc.setCosmology(cosmo_c)
+    nfw_c = profile_nfw.NFWProfile(
+        M=MDelta * cosmo_c.h, c=cDelta, z=z, mdef="200c"
+    )
+    nfw_h = halox.NFW(MDelta, cDelta, "200c", z, cosmo=cosmo_j)
+
+    rs = jnp.logspace(-2, 1, 6)  # Mpc
+    mass_c = nfw_c.enclosedMass(rs * 1000 * cosmo_c.h) / cosmo_c.h
+    mass_h = nfw_h.enclosed_mass(rs)
+    assert jnp.allclose(
+        jnp.array(mass_c), mass_h, rtol=rtol
+    ), f"Different M(<{rs}): {mass_c} != {mass_h}"
