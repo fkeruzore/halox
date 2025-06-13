@@ -7,6 +7,24 @@ from . import cosmology
 
 
 class NFW:
+    """
+    Properties of a dark matter halo following a Navarro-Frenk-White
+    density profile.
+
+    Parameters
+    ----------
+    MDelta: float
+        Mass at overdensity `Delta` [Msun]
+    cDelta: float
+        Concentration at overdensity `Delta`
+    Delta: str
+        Density contrast. Supported values are "200c" and "500c".
+    z: float
+        Redshift
+    cosmo: jc.Cosmology
+        Underlying cosmology, defaults to Planck 2018.
+    """
+
     def __init__(
         self,
         MDelta: float,
@@ -36,11 +54,13 @@ class NFW:
         self.rho0 = MDelta / rho0_denum
 
     def density(self, r: Array) -> Array:
-        """NFW density profile
+        """NFW density profile :math:`\\rho(r)`.
+
         Parameters
         ----------
         r : Array [Mpc]
             Radius
+
         Returns
         -------
         Array [Msun Mpc-3]
@@ -49,11 +69,13 @@ class NFW:
         return self.rho0 / (r / self.Rs * (1 + r / self.Rs) ** 2)
 
     def enclosed_mass(self, r: Array) -> Array:
-        """Enclosed mass profile
+        """Enclosed mass profile :math:`M(<r)`.
+
         Parameters
         ----------
         r : Array [Mpc]
             Radius
+
         Returns
         -------
         Array [Msun]
@@ -63,11 +85,13 @@ class NFW:
         return prefact * (jnp.log(1 + r / self.Rs) - r / (r + self.Rs))
 
     def potential(self, r: Array) -> Array:
-        """Potential profile
+        """Potential profile :math:`\phi(r)`.
+
         Parameters
         ----------
         r : Array [Mpc]
             Radius
+
         Returns
         -------
         Array [km2 s-2]

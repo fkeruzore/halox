@@ -21,9 +21,39 @@ Planck18 = partial(
 
 
 def hubble_parameter(z: Array, cosmo: jc.Cosmology):
+    """Computes the Hubble parameter :math:`H(z)` at a given redshift
+    for a given cosmology.
+
+    Parameters
+    ----------
+    z : Array
+        Redshift
+    cosmo : jc.Cosmology
+        Underlying cosmology
+
+    Returns
+    -------
+    Array
+        Hubble parameter at z [km s-1 Mpc-1]
+    """
     a = jc.utils.z2a(z)
     return cosmo.h * jc.background.H(cosmo, a)
 
 
 def critical_density(z: Array, cosmo: jc.Cosmology):
+    """Computes the Universe critical density :math:`\\rho_c(z)` at a
+    given redshift for a given cosmology.
+
+    Parameters
+    ----------
+    z : Array
+        Redshift
+    cosmo : jc.Cosmology
+        Underlying cosmology
+
+    Returns
+    -------
+    Array
+        Critical density at z [Msun Mpc-3]
+    """
     return (3 * hubble_parameter(z, cosmo) ** 2) / (8 * jnp.pi * G)
