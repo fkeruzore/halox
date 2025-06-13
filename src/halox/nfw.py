@@ -85,7 +85,7 @@ class NFW:
         return prefact * (jnp.log(1 + r / self.Rs) - r / (r + self.Rs))
 
     def potential(self, r: Array) -> Array:
-        """Potential profile :math:`\phi(r)`.
+        """Potential profile :math:`\\phi(r)`.
 
         Parameters
         ----------
