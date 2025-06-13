@@ -10,6 +10,7 @@ requires-python = ">=3.9"
 dependencies = [
     "jax>=0.4.30",
     "jax-cosmo>=0.1.0",
+    "setuptools>=80.9.0",
 ]
 
 [project.scripts]
