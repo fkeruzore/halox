@@ -59,3 +59,31 @@ def critical_density(z: Array, cosmo: jc.Cosmology):
         Critical density at z [Msun Mpc-3]
     """
     return (3 * hubble_parameter(z, cosmo) ** 2) / (8 * jnp.pi * G)
+
+
+def differential_comoving_volume(z: Array, cosmo: jc.Cosmology):
+    """Computes the differential comoving volume element per solid
+    angle, :math:`{\\rm d}V_c / {\\rm d}\\Omega {\\rm d}z`, at a given
+    redshift for a given cosmology.
+
+    Parameters
+    ----------
+    z : Array
+        Redshift
+    cosmo : jc.Cosmology
+        Underlying cosmology
+
+    Returns
+    -------
+    Array
+        Differential comoving volume element at z [Mpc3 sr-1]
+    """
+    a = 1.0 / (1.0 + z)
+    hubble_dist = c / (cosmo.h * 100)  # Mpc
+    ang_dist = jcb.angular_diameter_distance(cosmo, a) / cosmo.h  # Mpc
+    return (
+        hubble_dist
+        * (1.0 + z) ** 2
+        * (ang_dist**2)
+        / jnp.sqrt(jcb.Esqr(cosmo, a))
+    )  # Mpc3 sr-1
