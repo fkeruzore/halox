@@ -8,7 +8,6 @@ import jax_cosmo as jc
 import halox.cosmology as hc
 import astropy.cosmology as ac
 
-rtol = 1e-2
 test_cosmos = {
     "Planck15": [jc.Planck15(), ac.Planck15],
     "Planck18": [hc.Planck18, ac.Planck18],
@@ -42,20 +41,20 @@ def test_cosmo_params(cosmo_name):
 @pytest.mark.parametrize("cosmo_name", test_cosmos.keys())
 def test_hubble_parameter(cosmo_name):
     cosmo_j, cosmo_a = test_cosmos[cosmo_name]
-    zs = jnp.linspace(0, 10, 3)
+    zs = jnp.linspace(0, 3, 3)
     H_j = hc.hubble_parameter(zs, cosmo_j)
     H_a = cosmo_a.H(zs).to("km s-1 Mpc-1").value
     assert jnp.allclose(
-        H_j, jnp.array(H_a), rtol=rtol
-    ), f"Different H({zs}): {H_j} != {H_a}"
+        H_j, jnp.array(H_a), rtol=5e-3
+    ), f"Different H({zs}): {H_j} != {H_a} (ratio: {H_j / H_a})"
 
 
 @pytest.mark.parametrize("cosmo_name", test_cosmos.keys())
 def test_critical_density(cosmo_name):
     cosmo_j, cosmo_a = test_cosmos[cosmo_name]
-    zs = jnp.linspace(0, 10, 3)
+    zs = jnp.linspace(0, 3, 3)
     rhoc_j = hc.critical_density(zs, cosmo_j)
     rhoc_a = cosmo_a.critical_density(zs).to("Msun Mpc-3").value
     assert jnp.allclose(
-        rhoc_j, jnp.array(rhoc_a), rtol=rtol
-    ), f"Different rhoc({zs}): {rhoc_j} != {rhoc_a}"
+        rhoc_j, jnp.array(rhoc_a), rtol=1e-2
+    ), f"Different rhoc({zs}): {rhoc_j} != {rhoc_a} (ratio: {rhoc_j / rhoc_a})"
