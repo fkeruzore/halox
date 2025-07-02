@@ -22,11 +22,21 @@ test_cosmos = {
 @pytest.mark.parametrize("cosmo_name", test_cosmos.keys())
 def test_cosmo_params(cosmo_name):
     cosmo_j, cosmo_a = test_cosmos[cosmo_name]
-    assert cosmo_j.h == cosmo_a.h, "Cosmologies have different h"
-    assert cosmo_j.Omega_b == cosmo_a.Ob0, "Cosmologies have different Ob"
-    assert cosmo_j.Omega_c == cosmo_a.Odm0, "Cosmologies have different Ocdm"
-    assert cosmo_j.Omega_m == cosmo_a.Om0, "Cosmologies have different Om"
-    assert cosmo_j.Omega_k == cosmo_a.Ok0, "Cosmologies have different Om"
+    assert jnp.isclose(
+        cosmo_j.h, cosmo_a.h, atol=1e-4
+    ), "Cosmologies have different h"
+    assert jnp.isclose(
+        cosmo_j.Omega_b, cosmo_a.Ob0, atol=1e-4
+    ), "Cosmologies have different Ob"
+    assert jnp.isclose(
+        cosmo_j.Omega_c, cosmo_a.Odm0, atol=1e-4
+    ), "Cosmologies have different Ocdm"
+    assert jnp.isclose(
+        cosmo_j.Omega_m, cosmo_a.Om0, atol=1e-4
+    ), "Cosmologies have different Om"
+    assert jnp.isclose(
+        cosmo_j.Omega_k, cosmo_a.Ok0, atol=1e-4
+    ), "Cosmologies have different Om"
 
 
 @pytest.mark.parametrize("cosmo_name", test_cosmos.keys())

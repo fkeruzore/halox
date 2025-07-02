@@ -2,15 +2,17 @@ from functools import partial
 from jax import Array
 import jax.numpy as jnp
 import jax_cosmo as jc
+import jax_cosmo.background as jcb
 
 
 G = 4.30091727e-9  # km^2 Mpc Msun^-1 s^-2
+c = 299_792.458  # km s^-1
 
 # Planck 2018 cosmology parameters
 Planck18 = partial(
     jc.Cosmology,
-    Omega_c=0.26069,
-    Omega_b=0.04897,
+    Omega_c=round(0.11933 / 0.6766**2, 5),
+    Omega_b=round(0.02242 / 0.6766**2, 5),
     Omega_k=0.0,
     h=0.6766,
     n_s=0.9665,
@@ -37,7 +39,7 @@ def hubble_parameter(z: Array, cosmo: jc.Cosmology):
         Hubble parameter at z [km s-1 Mpc-1]
     """
     a = jc.utils.z2a(z)
-    return cosmo.h * jc.background.H(cosmo, a)
+    return cosmo.h * jcb.H(cosmo, a)
 
 
 def critical_density(z: Array, cosmo: jc.Cosmology):
