@@ -6,8 +6,8 @@
 .. currentmodule:: halox.nfw
 
 .. autosummary::
-    NFW
+    NFWHalo
 
-.. autoclass:: NFW
+.. autoclass:: NFWHalo
     :member-order: bysource
     :members: density, enclosed_mass, potential
