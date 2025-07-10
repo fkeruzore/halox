@@ -1,3 +1,7 @@
+<div align="center">
+<img src="https://raw.githubusercontent.com/fkeruzore/halox/main/logo/logo_text.png" alt="logo"></img>
+</div>
+
 # halox
 
 `halox` provides utility functions to compute the physical properties of dark matter halos using [JAX](https://jax.readthedocs.io/en/latest/).
