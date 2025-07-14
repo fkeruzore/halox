@@ -1,4 +1,4 @@
-from .nfw import NFW
+from . import nfw
 from . import cosmology
 
-__all__ = ["NFW", "cosmology"]
+__all__ = ["nfw", "cosmology"]

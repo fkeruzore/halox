@@ -15,7 +15,7 @@ test_halos = {
     "him_loz": {"M": 1e15, "c": 4.0, "z": 0.1},
     "lom_hiz": {"M": 1e14, "c": 5.5, "z": 1.0},
 }
-test_overdensities = ["200c", "500c", "nonsense"]
+test_overdensities = [200.0, 500.0]
 test_cosmos = {
     "Planck18": [halox.cosmology.Planck18, "planck18"],
     "70_0.3": [
@@ -43,20 +43,17 @@ G = halox.cosmology.G
 @pytest.mark.parametrize("cosmo_name", test_cosmos.keys())
 def test_density(halo_name, overdensity, cosmo_name):
     halo = test_halos[halo_name]
-    MDelta, cDelta, z = halo["M"], halo["c"], halo["z"]
+    m_delta, c_delta, z = halo["M"], halo["c"], halo["z"]
     cosmo_j, cosmo_c = test_cosmos[cosmo_name]
 
     cosmo_c = cc.setCosmology(cosmo_c)
-    try:
-        nfw_h = halox.NFW(MDelta, cDelta, overdensity, z, cosmo=cosmo_j)
-        nfw_c = profile_nfw.NFWProfile(
-            M=MDelta * cosmo_c.h, c=cDelta, z=z, mdef=overdensity
-        )
-    except ValueError as e:
-        if overdensity not in ["200c", "500c"]:
-            return
-        else:
-            raise e
+    nfw_h = halox.nfw.NFWHalo(m_delta, c_delta, z, overdensity, cosmo=cosmo_j)
+    nfw_c = profile_nfw.NFWProfile(
+        M=m_delta * cosmo_c.h,
+        c=c_delta,
+        z=z,
+        mdef=f"{overdensity:.0f}c",
+    )
 
     rs = jnp.logspace(-2, 1, 6)  # Mpc
     rho_c = nfw_c.density(rs * 1000 * cosmo_c.h) * 1e9 * (cosmo_c.h) ** 2
@@ -71,20 +68,17 @@ def test_density(halo_name, overdensity, cosmo_name):
 @pytest.mark.parametrize("cosmo_name", test_cosmos.keys())
 def test_enclosed_mass(halo_name, overdensity, cosmo_name):
     halo = test_halos[halo_name]
-    MDelta, cDelta, z = halo["M"], halo["c"], halo["z"]
+    m_delta, c_delta, z = halo["M"], halo["c"], halo["z"]
     cosmo_j, cosmo_c = test_cosmos[cosmo_name]
 
     cosmo_c = cc.setCosmology(cosmo_c)
-    try:
-        nfw_h = halox.NFW(MDelta, cDelta, overdensity, z, cosmo=cosmo_j)
-        nfw_c = profile_nfw.NFWProfile(
-            M=MDelta * cosmo_c.h, c=cDelta, z=z, mdef=overdensity
-        )
-    except ValueError as e:
-        if overdensity not in ["200c", "500c"]:
-            return
-        else:
-            raise e
+    nfw_h = halox.nfw.NFWHalo(m_delta, c_delta, z, overdensity, cosmo=cosmo_j)
+    nfw_c = profile_nfw.NFWProfile(
+        M=m_delta * cosmo_c.h,
+        c=c_delta,
+        z=z,
+        mdef=f"{overdensity:.0f}c",
+    )
 
     rs = jnp.logspace(-2, 1, 6)  # Mpc
     mass_c = nfw_c.enclosedMass(rs * 1000 * cosmo_c.h) / cosmo_c.h
@@ -99,20 +93,17 @@ def test_enclosed_mass(halo_name, overdensity, cosmo_name):
 @pytest.mark.parametrize("cosmo_name", test_cosmos.keys())
 def test_potential(halo_name, overdensity, cosmo_name):
     halo = test_halos[halo_name]
-    MDelta, cDelta, z = halo["M"], halo["c"], halo["z"]
+    m_delta, c_delta, z = halo["M"], halo["c"], halo["z"]
     cosmo_j, cosmo_c = test_cosmos[cosmo_name]
 
     cosmo_c = cc.setCosmology(cosmo_c)
-    try:
-        nfw_h = halox.NFW(MDelta, cDelta, overdensity, z, cosmo=cosmo_j)
-        nfw_c = profile_nfw.NFWProfile(
-            M=MDelta * cosmo_c.h, c=cDelta, z=z, mdef=overdensity
-        )
-    except ValueError as e:
-        if overdensity not in ["200c", "500c"]:
-            return
-        else:
-            raise e
+    nfw_h = halox.nfw.NFWHalo(m_delta, c_delta, z, overdensity, cosmo=cosmo_j)
+    nfw_c = profile_nfw.NFWProfile(
+        M=m_delta * cosmo_c.h,
+        c=c_delta,
+        z=z,
+        mdef=f"{overdensity:.0f}c",
+    )
 
     rs = jnp.logspace(-2, 1, 6)  # Mpc
 

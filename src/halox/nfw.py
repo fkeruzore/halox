@@ -6,52 +6,46 @@ from .cosmology import Planck18, G
 from . import cosmology
 
 
-class NFW:
+class NFWHalo:
     """
     Properties of a dark matter halo following a Navarro-Frenk-White
     density profile.
 
     Parameters
     ----------
-    MDelta: float
-        Mass at overdensity `Delta` [Msun]
-    cDelta: float
-        Concentration at overdensity `Delta`
-    Delta: str
-        Density contrast. Supported values are "200c" and "500c".
+    m_delta: float
+        Mass at overdensity `delta` [Msun]
+    c_delta: float
+        Concentration at overdensity `delta`
     z: float
         Redshift
+    delta: float
+        Density contrast in units of critical density at redshift z,
+        defaults to 200.
     cosmo: jc.Cosmology
         Underlying cosmology, defaults to Planck 2018.
     """
 
     def __init__(
         self,
-        MDelta: float,
-        cDelta: float,
-        Delta: str,
+        m_delta: float,
+        c_delta: float,
         z: float,
+        delta: float = 200.0,
         cosmo: jc.Cosmology = Planck18,
     ):
-        self.MDelta = MDelta
-        self.cDelta = cDelta
-        self.Delta = Delta
+        self.m_delta = m_delta
+        self.c_delta = c_delta
+        self.delta = delta
         self.z = z
         self.cosmo = cosmo
 
-        if Delta == "200c":
-            mean_rho = 200 * cosmology.critical_density(z, cosmo)
-        elif Delta == "500c":
-            mean_rho = 500 * cosmology.critical_density(z, cosmo)
-        else:
-            raise ValueError(
-                f"{Delta=} not supported yet, must be either '200c' or '500c'"
-            )
-        self.RDelta = (3 * MDelta / (4 * jnp.pi * mean_rho)) ** (1 / 3)
-        self.Rs = self.RDelta / cDelta
+        mean_rho = delta * cosmology.critical_density(z, cosmo)
+        self.Rdelta = (3 * m_delta / (4 * jnp.pi * mean_rho)) ** (1 / 3)
+        self.Rs = self.Rdelta / c_delta
         rho0_denum = 4 * jnp.pi * self.Rs**3
-        rho0_denum *= jnp.log(1 + cDelta) - cDelta / (1 + cDelta)
-        self.rho0 = MDelta / rho0_denum
+        rho0_denum *= jnp.log(1 + c_delta) - c_delta / (1 + c_delta)
+        self.rho0 = m_delta / rho0_denum
 
     def density(self, r: Array) -> Array:
         """NFW density profile :math:`\\rho(r)`.
