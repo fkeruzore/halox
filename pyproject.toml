@@ -41,6 +41,14 @@ testpaths = ["tests"]
 python_files = ["test_*.py"]
 addopts = "-v --cov=halox --cov-report=term-missing --cov-fail-under=90"
 
+[tool.uv.sources]
+jax-cosmo = { git = "https://github.com/fkeruzore/jax_cosmo.git" }
+
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
+
+[dependency-groups]
+dev = [
+    "ruff>=0.12.3",
+]
