@@ -1,14 +1,12 @@
 import jax
-
-jax.config.update("jax_enable_x64", True)
-
 import pytest
 import jax.numpy as jnp
 import jax_cosmo as jc
-import halox
-
 from colossus.halo import profile_nfw
 import colossus.cosmology.cosmology as cc
+import halox
+
+jax.config.update("jax_enable_x64", True)
 
 rtol = 1e-2
 test_halos = {

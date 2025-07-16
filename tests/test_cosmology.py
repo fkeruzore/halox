@@ -1,12 +1,11 @@
 import jax
-
-jax.config.update("jax_enable_x64", True)
-
 import pytest
 import jax.numpy as jnp
 import jax_cosmo as jc
 import halox.cosmology as hc
 import astropy.cosmology as ac
+
+jax.config.update("jax_enable_x64", True)
 
 test_cosmos = {
     "Planck15": [jc.Planck15(), ac.Planck15],
