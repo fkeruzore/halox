@@ -1,5 +1,6 @@
 from functools import partial
 from jax import Array
+from jax.typing import ArrayLike
 import jax.numpy as jnp
 import jax_cosmo as jc
 import jax_cosmo.background as jcb
@@ -22,7 +23,7 @@ Planck18 = partial(
 )()
 
 
-def hubble_parameter(z: Array, cosmo: jc.Cosmology):
+def hubble_parameter(z: ArrayLike, cosmo: jc.Cosmology) -> Array:
     """Computes the Hubble parameter :math:`H(z)` at a given redshift
     for a given cosmology.
 
@@ -38,11 +39,12 @@ def hubble_parameter(z: Array, cosmo: jc.Cosmology):
     Array
         Hubble parameter at z [km s-1 Mpc-1]
     """
+    z = jnp.asarray(z)
     a = jc.utils.z2a(z)
     return cosmo.h * jcb.H(cosmo, a)
 
 
-def critical_density(z: Array, cosmo: jc.Cosmology):
+def critical_density(z: ArrayLike, cosmo: jc.Cosmology) -> Array:
     """Computes the Universe critical density :math:`\\rho_c(z)` at a
     given redshift for a given cosmology.
 
@@ -58,10 +60,11 @@ def critical_density(z: Array, cosmo: jc.Cosmology):
     Array
         Critical density at z [Msun Mpc-3]
     """
+    z = jnp.asarray(z)
     return (3 * hubble_parameter(z, cosmo) ** 2) / (8 * jnp.pi * G)
 
 
-def differential_comoving_volume(z: Array, cosmo: jc.Cosmology):
+def differential_comoving_volume(z: ArrayLike, cosmo: jc.Cosmology) -> Array:
     """Computes the differential comoving volume element per solid
     angle, :math:`{\\rm d}V_c / {\\rm d}\\Omega {\\rm d}z`, at a given
     redshift for a given cosmology.
@@ -78,6 +81,7 @@ def differential_comoving_volume(z: Array, cosmo: jc.Cosmology):
     Array
         Differential comoving volume element at z [Mpc3 sr-1]
     """
+    z = jnp.asarray(z)
     a = 1.0 / (1.0 + z)
     hubble_dist = c / (cosmo.h * 100)  # Mpc
     ang_dist = jcb.angular_diameter_distance(cosmo, a) / cosmo.h  # Mpc

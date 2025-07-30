@@ -1,4 +1,5 @@
 from jax import Array
+from jax.typing import ArrayLike
 import jax.numpy as jnp
 import jax_cosmo as jc
 
@@ -28,26 +29,28 @@ class NFWHalo:
 
     def __init__(
         self,
-        m_delta: float,
-        c_delta: float,
-        z: float,
+        m_delta: ArrayLike,
+        c_delta: ArrayLike,
+        z: ArrayLike,
         delta: float = 200.0,
         cosmo: jc.Cosmology = Planck18,
     ):
-        self.m_delta = m_delta
-        self.c_delta = c_delta
+        self.m_delta = jnp.asarray(m_delta)
+        self.c_delta = jnp.asarray(c_delta)
+        self.z = jnp.asarray(z)
         self.delta = delta
-        self.z = z
         self.cosmo = cosmo
 
-        mean_rho = delta * cosmology.critical_density(z, cosmo)
-        self.Rdelta = (3 * m_delta / (4 * jnp.pi * mean_rho)) ** (1 / 3)
-        self.Rs = self.Rdelta / c_delta
+        mean_rho = delta * cosmology.critical_density(self.z, cosmo)
+        self.Rdelta = (3 * self.m_delta / (4 * jnp.pi * mean_rho)) ** (1 / 3)
+        self.Rs = self.Rdelta / self.c_delta
         rho0_denum = 4 * jnp.pi * self.Rs**3
-        rho0_denum *= jnp.log(1 + c_delta) - c_delta / (1 + c_delta)
-        self.rho0 = m_delta / rho0_denum
+        rho0_denum *= jnp.log(1 + self.c_delta) - self.c_delta / (
+            1 + self.c_delta
+        )
+        self.rho0 = self.m_delta / rho0_denum
 
-    def density(self, r: Array) -> Array:
+    def density(self, r: ArrayLike) -> Array:
         """NFW density profile :math:`\\rho(r)`.
 
         Parameters
@@ -60,9 +63,10 @@ class NFWHalo:
         Array [Msun Mpc-3]
             Density at radius `r`
         """
+        r = jnp.asarray(r)
         return self.rho0 / (r / self.Rs * (1 + r / self.Rs) ** 2)
 
-    def enclosed_mass(self, r: Array) -> Array:
+    def enclosed_mass(self, r: ArrayLike) -> Array:
         """Enclosed mass profile :math:`M(<r)`.
 
         Parameters
@@ -75,10 +79,11 @@ class NFWHalo:
         Array [Msun]
             Enclosed mass at radius `r`
         """
+        r = jnp.asarray(r)
         prefact = 4 * jnp.pi * self.rho0 * self.Rs**3
         return prefact * (jnp.log(1 + r / self.Rs) - r / (r + self.Rs))
 
-    def potential(self, r: Array) -> Array:
+    def potential(self, r: ArrayLike) -> Array:
         """Potential profile :math:`\\phi(r)`.
 
         Parameters
@@ -91,6 +96,7 @@ class NFWHalo:
         Array [km2 s-2]
             Potential at radius `r`
         """
+        r = jnp.asarray(r)
         # G = G.to("km2 Mpc Msun-1 s-2").value
         prefact = -4 * jnp.pi * G * self.rho0 * self.Rs**3
         return prefact * jnp.log(1 + r / self.Rs) / r
