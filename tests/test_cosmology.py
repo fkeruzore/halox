@@ -22,21 +22,21 @@ test_zs = jnp.linspace(0, 3, 13)
 @pytest.mark.parametrize("cosmo_name", test_cosmos.keys())
 def test_cosmo_params(cosmo_name):
     cosmo_j, cosmo_a = test_cosmos[cosmo_name]
-    assert jnp.isclose(
-        cosmo_j.h, cosmo_a.h, atol=1e-4
-    ), "Cosmologies have different h"
-    assert jnp.isclose(
-        cosmo_j.Omega_b, cosmo_a.Ob0, atol=1e-4
-    ), "Cosmologies have different Ob"
-    assert jnp.isclose(
-        cosmo_j.Omega_c, cosmo_a.Odm0, atol=1e-4
-    ), "Cosmologies have different Ocdm"
-    assert jnp.isclose(
-        cosmo_j.Omega_m, cosmo_a.Om0, atol=1e-4
-    ), "Cosmologies have different Om"
-    assert jnp.isclose(
-        cosmo_j.Omega_k, cosmo_a.Ok0, atol=1e-4
-    ), "Cosmologies have different Om"
+    assert jnp.isclose(cosmo_j.h, cosmo_a.h, atol=1e-4), (
+        "Cosmologies have different h"
+    )
+    assert jnp.isclose(cosmo_j.Omega_b, cosmo_a.Ob0, atol=1e-4), (
+        "Cosmologies have different Ob"
+    )
+    assert jnp.isclose(cosmo_j.Omega_c, cosmo_a.Odm0, atol=1e-4), (
+        "Cosmologies have different Ocdm"
+    )
+    assert jnp.isclose(cosmo_j.Omega_m, cosmo_a.Om0, atol=1e-4), (
+        "Cosmologies have different Om"
+    )
+    assert jnp.isclose(cosmo_j.Omega_k, cosmo_a.Ok0, atol=1e-4), (
+        "Cosmologies have different Om"
+    )
 
 
 @pytest.mark.parametrize("cosmo_name", test_cosmos.keys())
@@ -45,7 +45,7 @@ def test_hubble_parameter(cosmo_name):
     H_j = hc.hubble_parameter(test_zs, cosmo_j)
     H_a = cosmo_a.H(test_zs).to("km s-1 Mpc-1").value
     assert jnp.allclose(H_j, jnp.array(H_a), rtol=5e-3), (
-        f"Different H({test_zs}): {H_j} != {H_a}" f"(ratio: {H_j / H_a})"
+        f"Different H({test_zs}): {H_j} != {H_a}(ratio: {H_j / H_a})"
     )
 
 
@@ -66,5 +66,5 @@ def test_volume_element(cosmo_name):
     dV_j = hc.differential_comoving_volume(test_zs, cosmo_j)
     dV_a = cosmo_a.differential_comoving_volume(test_zs).to("Mpc3 sr-1").value
     assert jnp.allclose(dV_j, jnp.array(dV_a), rtol=1e-2), (
-        f"Different dV({test_zs}): {dV_j} != {dV_a}" f"(ratio: {dV_j / dV_a})"
+        f"Different dV({test_zs}): {dV_j} != {dV_a}(ratio: {dV_j / dV_a})"
     )

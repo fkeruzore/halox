@@ -1,11 +1,12 @@
 import jax
 from jax import Array
+from jax.typing import ArrayLike
 import jax.numpy as jnp
 import jax_cosmo as jc
 from . import cosmology
 
 
-def mass_to_lagrangian_radius(M: Array, cosmo: jc.Cosmology) -> Array:
+def mass_to_lagrangian_radius(M: ArrayLike, cosmo: jc.Cosmology) -> Array:
     """Convert mass to Lagrangian radius.
 
     Computes the radius of a sphere containing mass M at the mean matter
@@ -23,6 +24,7 @@ def mass_to_lagrangian_radius(M: Array, cosmo: jc.Cosmology) -> Array:
     Array
         Lagrangian radius in Mpc (comoving)
     """
+    M = jnp.asarray(M)
     # Critical density at z=0 in Msun/h / (Mpc/h)^3
     rho_crit_0 = 2.775e11  # Msun/h / (Mpc/h)^3
     rho_m0 = cosmo.Omega_m * rho_crit_0
@@ -30,7 +32,10 @@ def mass_to_lagrangian_radius(M: Array, cosmo: jc.Cosmology) -> Array:
     return (3.0 * M / (4.0 * jnp.pi * rho_m0)) ** (1.0 / 3.0)
 
 
-def overdensity_c_to_m(delta_c: float, z: float, cosmo: jc.Cosmology):
+def overdensity_c_to_m(
+    delta_c: float, z: ArrayLike, cosmo: jc.Cosmology
+) -> Array:
+    z = jnp.asarray(z)
     rho_m = (
         cosmo.Omega_m * cosmology.critical_density(0.0, cosmo) * (1 + z) ** 3
     )
@@ -39,8 +44,8 @@ def overdensity_c_to_m(delta_c: float, z: float, cosmo: jc.Cosmology):
 
 
 def sigma_R(
-    R: Array,
-    z: Array,
+    R: ArrayLike,
+    z: ArrayLike,
     cosmo: jc.Cosmology,
     k_min: float = 1e-5,
     k_max: float = 1e2,
@@ -66,12 +71,14 @@ def sigma_R(
     Array
         RMS variance sigma(R,z)
     """
+    R = jnp.asarray(R)
+    z = jnp.asarray(z)
     # Create k array for integration (already in h/Mpc)
     k = jnp.logspace(jnp.log10(k_min), jnp.log10(k_max), 5000)
 
     # Power spectrum at redshift z
     a = 1.0 / (1.0 + z)
-    pk = jc.power.linear_matter_power(cosmo, k, a=a)
+    pk = jc.power.linear_matter_power(cosmo, k, a=a)  # type: ignore
 
     # Window function for spherical top-hat
     # Handle broadcasting for both scalar and array R
@@ -89,7 +96,7 @@ def sigma_R(
     return jnp.sqrt(sigma2)
 
 
-def sigma_M(M: Array, z: Array, cosmo: jc.Cosmology) -> Array:
+def sigma_M(M: ArrayLike, z: ArrayLike, cosmo: jc.Cosmology) -> Array:
     """Compute RMS variance of density fluctuations within the
     Lagrangian radius of a halo with mass M at redshift z.
 
@@ -107,12 +114,14 @@ def sigma_M(M: Array, z: Array, cosmo: jc.Cosmology) -> Array:
     Array
         RMS variance sigma(R,z)
     """
+    M = jnp.asarray(M)
+    z = jnp.asarray(z)
     R = mass_to_lagrangian_radius(M, cosmo)
     return sigma_R(R, z, cosmo)
 
 
 def _tinker08_parameters(
-    z: float,
+    z: ArrayLike,
     cosmo: jc.Cosmology,
     delta_c: float = 200.0,
 ) -> Array:
@@ -141,6 +150,7 @@ def _tinker08_parameters(
     b_vals = jnp.array([2.57, 2.25, 2.05, 1.87, 1.59, 1.51, 1.46, 1.44, 1.41])
     c_vals = jnp.array([1.19, 1.27, 1.34, 1.45, 1.58, 1.80, 1.97, 2.24, 2.44])
 
+    z = jnp.asarray(z)
     # Critical to mean overdensity
     delta_m = overdensity_c_to_m(delta_c, z, cosmo)
 
@@ -160,19 +170,21 @@ def _tinker08_parameters(
 
 
 def tinker08_f_sigma(
-    M: Array,
-    z: Array,
+    M: ArrayLike,
+    z: ArrayLike,
     cosmo: jc.Cosmology,
     delta_c: float = 200.0,
 ) -> Array:
+    M = jnp.asarray(M)
+    z = jnp.asarray(z)
     sigma = sigma_M(M, z, cosmo)
     A, a, b, c = _tinker08_parameters(z, cosmo, delta_c)
     return A * ((b / sigma) ** a + 1.0) * jnp.exp(-c / sigma**2)
 
 
 def tinker08_mass_function(
-    M: Array,
-    z: Array,
+    M: ArrayLike,
+    z: ArrayLike,
     cosmo: jc.Cosmology = cosmology.Planck18,
     delta_c: float = 200.0,
 ) -> Array:
@@ -194,6 +206,8 @@ def tinker08_mass_function(
     Array
         Mass function dn/dlnM in (Mpc/h)^-3
     """
+    M = jnp.asarray(M)
+    z = jnp.asarray(z)
 
     # Background density
     rho_m = (

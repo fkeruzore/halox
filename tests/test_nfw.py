@@ -56,9 +56,9 @@ def test_density(halo_name, overdensity, cosmo_name):
     rs = jnp.logspace(-2, 1, 6)  # Mpc
     rho_c = nfw_c.density(rs * 1000 * cosmo_c.h) * 1e9 * (cosmo_c.h) ** 2
     rho_h = nfw_h.density(rs)
-    assert jnp.allclose(
-        jnp.array(rho_c), rho_h, rtol=rtol
-    ), f"Different rho({rs}): {rho_c} != {rho_h}"
+    assert jnp.allclose(jnp.array(rho_c), rho_h, rtol=rtol), (
+        f"Different rho({rs}): {rho_c} != {rho_h}"
+    )
 
 
 @pytest.mark.parametrize("halo_name", test_halos.keys())
@@ -81,9 +81,9 @@ def test_enclosed_mass(halo_name, overdensity, cosmo_name):
     rs = jnp.logspace(-2, 1, 6)  # Mpc
     mass_c = nfw_c.enclosedMass(rs * 1000 * cosmo_c.h) / cosmo_c.h
     mass_h = nfw_h.enclosed_mass(rs)
-    assert jnp.allclose(
-        jnp.array(mass_c), mass_h, rtol=rtol
-    ), f"Different M(<{rs}): {mass_c} != {mass_h}"
+    assert jnp.allclose(jnp.array(mass_c), mass_h, rtol=rtol), (
+        f"Different M(<{rs}): {mass_c} != {mass_h}"
+    )
 
 
 @pytest.mark.parametrize("halo_name", test_halos.keys())
@@ -110,6 +110,6 @@ def test_potential(halo_name, overdensity, cosmo_name):
 
     phi_c = -4 * jnp.pi * G * _r0 * _rs**3 * jnp.log(1 + rs / _rs) / rs
     phi_h = nfw_h.potential(rs)
-    assert jnp.allclose(
-        jnp.array(phi_c), phi_h, rtol=rtol
-    ), f"Different phi({rs}): {phi_c} != {phi_h}"
+    assert jnp.allclose(jnp.array(phi_c), phi_h, rtol=rtol), (
+        f"Different phi({rs}): {phi_c} != {phi_h}"
+    )
