@@ -8,3 +8,11 @@ wheels/
 
 # Virtual environments
 .venv
+
+# Agents
+CLAUDE.md
+claude_debug/*
+
+# Misc
+**.DS_Store
+.coverage
