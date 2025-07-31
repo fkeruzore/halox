@@ -6,6 +6,12 @@ import jax_cosmo as jc
 from . import cosmology
 
 
+# jax-cosmo power spectra differ from colossus at the 0.3% level, which
+# results in %-level discrepancies in HMF predictions. This fudge factor
+# solves that.
+_jax_cosmo_pk_corr = 1.0 / 1.0029
+
+
 def mass_to_lagrangian_radius(M: ArrayLike, cosmo: jc.Cosmology) -> Array:
     """Convert mass to Lagrangian radius.
 
@@ -79,6 +85,7 @@ def sigma_R(
     # Power spectrum at redshift z
     a = 1.0 / (1.0 + z)
     pk = jc.power.linear_matter_power(cosmo, k, a=a)  # type: ignore
+    pk *= _jax_cosmo_pk_corr  # consistency with colossus
 
     # Window function for spherical top-hat
     # Handle broadcasting for both scalar and array R
