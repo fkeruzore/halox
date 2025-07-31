@@ -27,3 +27,4 @@ Learn more
 
    api/halox.cosmology
    api/halox.nfw
+   api/halox.hmf
