@@ -56,3 +56,9 @@ myst_enable_extensions = [
 nb_execution_mode = "force"
 nb_execution_allow_errors = False
 nb_render_image_options = {}
+
+source_suffix = {
+    ".rst": "restructuredtext",
+    ".ipynb": "myst-nb",
+    ".myst": "myst-nb",
+}
