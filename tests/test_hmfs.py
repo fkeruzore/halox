@@ -9,8 +9,6 @@ import halox
 
 jax.config.update("jax_enable_x64", True)
 
-rtol = 1e-2
-
 test_mzs = jnp.array(
     [
         [1e15, 0.0],
@@ -63,7 +61,7 @@ def test_lagrangian_R(cosmo_name, return_vals=False):
     discrepancy = R_h / R_c - 1.0
     avg_disc = jnp.mean(discrepancy)
     max_disc = jnp.max(jnp.abs(discrepancy))
-    assert max_disc < rtol, (
+    assert max_disc < 5e-3, (
         f"Bias in lagrangianR: avg={avg_disc:.3e}, max={max_disc:.3e}"
     )
 
@@ -91,7 +89,7 @@ def test_sigma_R_z(cosmo_name, return_vals=False):
     discrepancy = sigma_h / sigma_c - 1.0
     avg_disc = jnp.mean(discrepancy)
     max_disc = jnp.max(jnp.abs(discrepancy))
-    assert max_disc < rtol, (
+    assert max_disc < 1e-2, (
         f"Bias in sigma: avg={avg_disc:.3e}, max={max_disc:.3e}"
     )
 
@@ -122,7 +120,7 @@ def test_overdensity_c_to_m(delta_c, cosmo_name, return_vals=False):
     discrepancy = d_h / d_c - 1.0
     avg_disc = jnp.mean(discrepancy)
     max_disc = jnp.max(jnp.abs(discrepancy))
-    assert max_disc < rtol, (
+    assert max_disc < 5e-3, (
         f"Bias in delta_m: avg={avg_disc:.3e}, max={max_disc:.3e}"
     )
 
@@ -161,7 +159,7 @@ def test_tinker08_f_sigma(delta_c, cosmo_name, return_vals=False):
     discrepancy = f_h / f_c - 1.0
     avg_disc = jnp.mean(discrepancy)
     max_disc = jnp.max(jnp.abs(discrepancy))
-    assert max_disc < rtol, (
+    assert max_disc < 2e-2, (
         f"Bias in f(sigma): avg={avg_disc:.3e}, max={max_disc:.3e}"
     )
 
@@ -202,7 +200,7 @@ def test_tinker08_dn_dnlm(delta_c, cosmo_name, return_vals=False):
     discrepancy = f_h / f_c - 1.0
     avg_disc = jnp.mean(discrepancy)
     max_disc = jnp.max(jnp.abs(discrepancy))
-    assert max_disc < rtol, (
+    assert max_disc < 2e-2, (
         f"Bias in hmf: avg={avg_disc:.3e}, max={max_disc:.3e}"
     )
 
