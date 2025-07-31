@@ -23,6 +23,12 @@ Learn more
 
 .. toctree::
    :maxdepth: 1
+   :caption: Examples
+
+   notebooks/gradients.ipynb
+
+.. toctree::
+   :maxdepth: 1
    :caption: Reference
 
    api/halox.cosmology
