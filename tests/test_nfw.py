@@ -47,14 +47,14 @@ def test_density(halo_name, overdensity, cosmo_name):
     cosmo_c = cc.setCosmology(cosmo_c)
     nfw_h = halox.nfw.NFWHalo(m_delta, c_delta, z, overdensity, cosmo=cosmo_j)
     nfw_c = profile_nfw.NFWProfile(
-        M=m_delta * cosmo_c.h,
+        M=m_delta,
         c=c_delta,
         z=z,
         mdef=f"{overdensity:.0f}c",
     )
 
-    rs = jnp.logspace(-2, 1, 6)  # Mpc
-    rho_c = nfw_c.density(rs * 1000 * cosmo_c.h) * 1e9 * (cosmo_c.h) ** 2
+    rs = jnp.logspace(-2, 1, 6)  # h-1 Mpc
+    rho_c = nfw_c.density(rs * 1000) * 1e9
     rho_h = nfw_h.density(rs)
     assert jnp.allclose(jnp.array(rho_c), rho_h, rtol=rtol), (
         f"Different rho({rs}): {rho_c} != {rho_h}"
@@ -72,14 +72,14 @@ def test_enclosed_mass(halo_name, overdensity, cosmo_name):
     cosmo_c = cc.setCosmology(cosmo_c)
     nfw_h = halox.nfw.NFWHalo(m_delta, c_delta, z, overdensity, cosmo=cosmo_j)
     nfw_c = profile_nfw.NFWProfile(
-        M=m_delta * cosmo_c.h,
+        M=m_delta,
         c=c_delta,
         z=z,
         mdef=f"{overdensity:.0f}c",
     )
 
-    rs = jnp.logspace(-2, 1, 6)  # Mpc
-    mass_c = nfw_c.enclosedMass(rs * 1000 * cosmo_c.h) / cosmo_c.h
+    rs = jnp.logspace(-2, 1, 6)  # h-1 Mpc
+    mass_c = nfw_c.enclosedMass(rs * 1000)
     mass_h = nfw_h.enclosed_mass(rs)
     assert jnp.allclose(jnp.array(mass_c), mass_h, rtol=rtol), (
         f"Different M(<{rs}): {mass_c} != {mass_h}"
@@ -97,7 +97,7 @@ def test_potential(halo_name, overdensity, cosmo_name):
     cosmo_c = cc.setCosmology(cosmo_c)
     nfw_h = halox.nfw.NFWHalo(m_delta, c_delta, z, overdensity, cosmo=cosmo_j)
     nfw_c = profile_nfw.NFWProfile(
-        M=m_delta * cosmo_c.h,
+        M=m_delta,
         c=c_delta,
         z=z,
         mdef=f"{overdensity:.0f}c",
@@ -105,8 +105,8 @@ def test_potential(halo_name, overdensity, cosmo_name):
 
     rs = jnp.logspace(-2, 1, 6)  # Mpc
 
-    _r0 = nfw_c.par["rhos"] * 1e9 * cosmo_c.h**2  # Msun Mpc-3
-    _rs = nfw_c.par["rs"] / 1e3 / cosmo_c.h  # Mpc
+    _r0 = nfw_c.par["rhos"] * 1e9  # Msun Mpc-3
+    _rs = nfw_c.par["rs"] / 1e3  # Mpc
 
     phi_c = -4 * jnp.pi * G * _r0 * _rs**3 * jnp.log(1 + rs / _rs) / rs
     phi_h = nfw_h.potential(rs)

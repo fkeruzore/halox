@@ -46,6 +46,7 @@ cc.addCosmology(
 G = halox.cosmology.G
 sigma_R = jax.jit(halox.hmf.sigma_R)
 tinker08_f_sigma = jax.jit(halox.hmf.tinker08_f_sigma)
+tinker08_mass_function = jax.jit(halox.hmf.tinker08_mass_function)
 
 
 @pytest.mark.parametrize("cosmo_name", test_cosmos.keys())
@@ -54,7 +55,7 @@ def test_lagrangian_R(cosmo_name, return_vals=False):
     cosmo_c = cc.setCosmology(cosmo_c)
 
     ms = test_mzs[:, 0]
-    R_c = peaks.lagrangianR(ms)  # mass in Msun -> radius in cMpc
+    R_c = peaks.lagrangianR(ms)
     R_h = halox.hmf.mass_to_lagrangian_radius(ms, cosmo_j)  # cMpc
 
     if return_vals:
@@ -75,7 +76,7 @@ def test_sigma_R_z(cosmo_name, return_vals=False):
     ms = test_mzs[:, 0]
     zs = test_mzs[:, 1]
 
-    R_c = peaks.lagrangianR(ms)  # mass in Msun -> radius in cMpc
+    R_c = peaks.lagrangianR(ms)
     sigma_c = jnp.array(
         [cosmo_c.sigma(R_c[i], z=zs[i]) for i in range(len(test_mzs))]
     )
@@ -150,7 +151,46 @@ def test_tinker08_f_sigma(delta_c, cosmo_name, return_vals=False):
     )
     f_h = jnp.array(
         [
-            halox.hmf.tinker08_f_sigma(
+            tinker08_f_sigma(ms[i], zs[i], cosmo=cosmo_j, delta_c=delta_c)
+            for i in range(len(test_mzs))
+        ]
+    )
+
+    if return_vals:
+        return f_h, f_c
+    discrepancy = f_h / f_c - 1.0
+    avg_disc = jnp.mean(discrepancy)
+    max_disc = jnp.max(jnp.abs(discrepancy))
+    assert max_disc < rtol, (
+        f"Bias in f(sigma): avg={avg_disc:.3e}, max={max_disc:.3e}"
+    )
+
+
+@pytest.mark.parametrize("delta_c", test_deltas)
+@pytest.mark.parametrize("cosmo_name", test_cosmos.keys())
+def test_tinker08_dn_dnlm(delta_c, cosmo_name, return_vals=False):
+    cosmo_j, cosmo_c = test_cosmos[cosmo_name]
+    cosmo_c = cc.setCosmology(cosmo_c)
+
+    ms = test_mzs[:, 0]
+    zs = test_mzs[:, 1]
+
+    f_c = jnp.array(
+        [
+            mass_function.massFunction(
+                ms[i],
+                zs[i],
+                mdef=f"{delta_c:.0f}c",
+                model="tinker08",
+                q_in="M",
+                q_out="dndlnM",
+            )
+            for i in range(len(test_mzs))
+        ]
+    )
+    f_h = jnp.array(
+        [
+            tinker08_mass_function(
                 ms[i], zs[i], cosmo=cosmo_j, delta_c=delta_c
             )
             for i in range(len(test_mzs))
@@ -170,5 +210,5 @@ def test_tinker08_f_sigma(delta_c, cosmo_name, return_vals=False):
 if __name__ == "__main__":
     cosmo_j, cosmo_c = test_cosmos["70_0.3"]
     cosmo_c = cc.setCosmology(cosmo_c)
-    f_h, f_c = test_tinker08_f_sigma(500.0, "70_0.3", return_vals=True)
+    f_h, f_c = test_tinker08_dn_dnlm(200.0, "70_0.3", return_vals=True)
     print(f_h / f_c)

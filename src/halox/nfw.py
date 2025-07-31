@@ -15,7 +15,7 @@ class NFWHalo:
     Parameters
     ----------
     m_delta: float
-        Mass at overdensity `delta` [Msun]
+        Mass at overdensity `delta` [h-1 Msun]
     c_delta: float
         Concentration at overdensity `delta`
     z: float
@@ -55,12 +55,12 @@ class NFWHalo:
 
         Parameters
         ----------
-        r : Array [Mpc]
+        r : Array [h-1 Mpc]
             Radius
 
         Returns
         -------
-        Array [Msun Mpc-3]
+        Array [h2 Msun Mpc-3]
             Density at radius `r`
         """
         r = jnp.asarray(r)
@@ -71,12 +71,12 @@ class NFWHalo:
 
         Parameters
         ----------
-        r : Array [Mpc]
+        r : Array [h-1 Mpc]
             Radius
 
         Returns
         -------
-        Array [Msun]
+        Array [h-1 Msun]
             Enclosed mass at radius `r`
         """
         r = jnp.asarray(r)
@@ -88,7 +88,7 @@ class NFWHalo:
 
         Parameters
         ----------
-        r : Array [Mpc]
+        r : Array [h-1 Mpc]
             Radius
 
         Returns
