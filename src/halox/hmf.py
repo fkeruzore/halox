@@ -227,7 +227,7 @@ def tinker08_f_sigma(
 def tinker08_mass_function(
     M: ArrayLike,
     z: ArrayLike,
-    cosmo: jc.Cosmology = cosmology.Planck18,
+    cosmo: jc.Cosmology,
     delta_c: float = 200.0,
 ) -> Array:
     """Tinker08 halo mass function :math:`dn/d\\ln M`.
