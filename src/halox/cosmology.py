@@ -20,7 +20,7 @@ Planck18 = partial(
     sigma8=0.8102,
     w0=-1.0,
     wa=0.0,
-)()
+)
 
 
 def hubble_parameter(z: ArrayLike, cosmo: jc.Cosmology) -> Array:

@@ -3,7 +3,7 @@ from jax.typing import ArrayLike
 import jax.numpy as jnp
 import jax_cosmo as jc
 
-from .cosmology import Planck18, G
+from .cosmology import G
 from . import cosmology
 
 
@@ -20,11 +20,11 @@ class NFWHalo:
         Concentration at overdensity `delta`
     z: float
         Redshift
+    cosmo: jc.Cosmology
+        Underlying cosmology
     delta: float
         Density contrast in units of critical density at redshift z,
         defaults to 200.
-    cosmo: jc.Cosmology
-        Underlying cosmology, defaults to Planck 2018.
     """
 
     def __init__(
@@ -32,8 +32,8 @@ class NFWHalo:
         m_delta: ArrayLike,
         c_delta: ArrayLike,
         z: ArrayLike,
+        cosmo: jc.Cosmology,
         delta: float = 200.0,
-        cosmo: jc.Cosmology = Planck18,
     ):
         self.m_delta = jnp.asarray(m_delta)
         self.c_delta = jnp.asarray(c_delta)
