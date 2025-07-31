@@ -216,9 +216,7 @@ def tinker08_mass_function(
     z = jnp.asarray(z)
 
     # Background density
-    rho_m = (
-        cosmo.Omega_m * cosmology.critical_density(0.0, cosmo) * (1 + z) ** 3
-    )
+    rho_m = cosmo.Omega_m * cosmology.critical_density(0.0, cosmo)
 
     # Multiplicity function with redshift evolution
     f_sigma = tinker08_f_sigma(M, z, cosmo, delta_c)
