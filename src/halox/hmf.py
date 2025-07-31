@@ -9,7 +9,7 @@ from . import cosmology
 # jax-cosmo power spectra differ from colossus at the 0.3% level, which
 # results in %-level discrepancies in HMF predictions. This fudge factor
 # solves that.
-_jax_cosmo_pk_corr = 1.0 / 1.0029
+_jax_cosmo_pk_corr = 1.0 / 1.0030
 
 
 def mass_to_lagrangian_radius(M: ArrayLike, cosmo: jc.Cosmology) -> Array:
@@ -31,8 +31,7 @@ def mass_to_lagrangian_radius(M: ArrayLike, cosmo: jc.Cosmology) -> Array:
         Lagrangian radius in Mpc (comoving)
     """
     M = jnp.asarray(M)
-    # Critical density at z=0 in Msun/h / (Mpc/h)^3
-    rho_crit_0 = 2.775e11  # Msun/h / (Mpc/h)^3
+    rho_crit_0 = cosmology.critical_density(0.0, cosmo)
     rho_m0 = cosmo.Omega_m * rho_crit_0
 
     return (3.0 * M / (4.0 * jnp.pi * rho_m0)) ** (1.0 / 3.0)
@@ -213,7 +212,7 @@ def tinker08_mass_function(
     Array
         Mass function dn/dlnM in (Mpc/h)^-3
     """
-    M = jnp.asarray(M)
+    M = jnp.atleast_1d(M)
     z = jnp.asarray(z)
 
     # Background density
@@ -229,4 +228,4 @@ def tinker08_mass_function(
 
     dn_dm = f_sigma * (rho_m / M) * jax.vmap(d_ln_sigma_inv)(M)
 
-    return M * dn_dm
+    return jnp.squeeze(M * dn_dm)
