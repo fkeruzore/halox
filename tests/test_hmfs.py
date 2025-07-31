@@ -22,7 +22,7 @@ test_mzs = jnp.array(
 )
 test_deltas = [200.0, 500.0]
 test_cosmos = {
-    "Planck18": [halox.cosmology.Planck18, "planck18"],
+    "Planck18": [halox.cosmology.Planck18(), "planck18"],
     "70_0.3": [
         jc.Cosmology(0.25, 0.05, 0.7, 0.97, 0.8, 0.0, -1.0, 0.0),
         "70_0.3",
