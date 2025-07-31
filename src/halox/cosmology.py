@@ -40,7 +40,7 @@ def hubble_parameter(z: ArrayLike, cosmo: jc.Cosmology) -> Array:
         Hubble parameter at z [km s-1 Mpc-1]
     """
     z = jnp.asarray(z)
-    a = jc.utils.z2a(z)
+    a = 1.0 / (1.0 + z)
     return cosmo.h * jcb.H(cosmo, a)
 
 
@@ -58,10 +58,11 @@ def critical_density(z: ArrayLike, cosmo: jc.Cosmology) -> Array:
     Returns
     -------
     Array
-        Critical density at z [Msun Mpc-3]
+        Critical density at z [h2 Msun Mpc-3]
     """
     z = jnp.asarray(z)
-    return (3 * hubble_parameter(z, cosmo) ** 2) / (8 * jnp.pi * G)
+    rho_c = (3 * hubble_parameter(z, cosmo) ** 2) / (8 * jnp.pi * G)
+    return rho_c / (cosmo.h**2)
 
 
 def differential_comoving_volume(z: ArrayLike, cosmo: jc.Cosmology) -> Array:
@@ -79,15 +80,15 @@ def differential_comoving_volume(z: ArrayLike, cosmo: jc.Cosmology) -> Array:
     Returns
     -------
     Array
-        Differential comoving volume element at z [Mpc3 sr-1]
+        Differential comoving volume element at z [h-3 Mpc3 sr-1]
     """
     z = jnp.asarray(z)
     a = 1.0 / (1.0 + z)
-    hubble_dist = c / (cosmo.h * 100)  # Mpc
-    ang_dist = jcb.angular_diameter_distance(cosmo, a) / cosmo.h  # Mpc
+    hubble_dist = c / 100  # h-1 Mpc
+    ang_dist = jcb.angular_diameter_distance(cosmo, a)  # h-1 Mpc
     return (
         hubble_dist
         * (1.0 + z) ** 2
         * (ang_dist**2)
         / jnp.sqrt(jcb.Esqr(cosmo, a))
-    )  # Mpc3 sr-1
+    )  # h-3 Mpc3 sr-1

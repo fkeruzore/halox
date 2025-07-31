@@ -54,6 +54,7 @@ def test_critical_density(cosmo_name):
     cosmo_j, cosmo_a = test_cosmos[cosmo_name]
     rhoc_j = hc.critical_density(test_zs, cosmo_j)
     rhoc_a = cosmo_a.critical_density(test_zs).to("Msun Mpc-3").value
+    rhoc_a /= cosmo_a.h**2
     assert jnp.allclose(rhoc_j, jnp.array(rhoc_a), rtol=1e-2), (
         f"Different rhoc({test_zs}): {rhoc_j} != {rhoc_a}"
         f"(ratio: {rhoc_j / rhoc_a})"
@@ -65,6 +66,7 @@ def test_volume_element(cosmo_name):
     cosmo_j, cosmo_a = test_cosmos[cosmo_name]
     dV_j = hc.differential_comoving_volume(test_zs, cosmo_j)
     dV_a = cosmo_a.differential_comoving_volume(test_zs).to("Mpc3 sr-1").value
+    dV_a *= cosmo_a.h**3
     assert jnp.allclose(dV_j, jnp.array(dV_a), rtol=1e-2), (
         f"Different dV({test_zs}): {dV_j} != {dV_a}(ratio: {dV_j / dV_a})"
     )
