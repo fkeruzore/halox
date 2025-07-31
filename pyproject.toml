@@ -12,6 +12,10 @@ dependencies = [
     "jax-cosmo>=0.1.0",
 ]
 
+[tool.uv.sources]
+jax-cosmo = { git = "https://github.com/fkeruzore/jax_cosmo.git" }
+
+
 [dependency-groups]
 dev = [
     "ruff>=0.12.3",
@@ -36,9 +40,6 @@ docs = [
     "sphinx-design>=0.6.1",
     "sphinx-remove-toctrees>=1.0.0.post1",
 ]
-
-[tool.uv.sources]
-jax-cosmo = { git = "https://github.com/fkeruzore/jax_cosmo.git" }
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

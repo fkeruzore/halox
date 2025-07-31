@@ -21,14 +21,14 @@ def mass_to_lagrangian_radius(M: ArrayLike, cosmo: jc.Cosmology) -> Array:
     Parameters
     ----------
     M : Array
-        Mass in Msun
+        Mass [h-1 Msun]
     cosmo : jc.Cosmology
-        Cosmology object
+        Underlying cosmology
 
     Returns
     -------
     Array
-        Lagrangian radius in Mpc (comoving)
+        Lagrangian radius [h-1 Mpc]
     """
     M = jnp.asarray(M)
     rho_crit_0 = cosmology.critical_density(0.0, cosmo)
@@ -40,6 +40,22 @@ def mass_to_lagrangian_radius(M: ArrayLike, cosmo: jc.Cosmology) -> Array:
 def overdensity_c_to_m(
     delta_c: float, z: ArrayLike, cosmo: jc.Cosmology
 ) -> Array:
+    """Convert critical overdensity to mean overdensity.
+
+    Parameters
+    ----------
+    delta_c : float
+        Overdensity with respect to critical density
+    z : Array
+        Redshift
+    cosmo : jc.Cosmology
+        Underlying cosmology
+
+    Returns
+    -------
+    Array
+        Overdensity with respect to mean matter density
+    """
     z = jnp.asarray(z)
     rho_m = (
         cosmo.Omega_m * cosmology.critical_density(0.0, cosmo) * (1 + z) ** 3
@@ -61,20 +77,20 @@ def sigma_R(
     Parameters
     ----------
     R : Array
-        Radius in Mpc/h (comoving)
+        Radius [h-1 Mpc]
     z : Array
         Redshift
     cosmo : jc.Cosmology
-        Cosmology object
+        Underlying cosmology
     k_min : float
-        Minimum k for integration [h/Mpc], default 1e-5
+        Minimum k for integration [h Mpc-1], default 1e-5
     k_max : float
-        Maximum k for integration [h/Mpc], default 1e+3
+        Maximum k for integration [h Mpc-1], default 1e2
 
     Returns
     -------
     Array
-        RMS variance sigma(R,z)
+        RMS variance :math:`\\sigma(R,z)`
     """
     R = jnp.asarray(R)
     z = jnp.asarray(z)
@@ -109,16 +125,16 @@ def sigma_M(M: ArrayLike, z: ArrayLike, cosmo: jc.Cosmology) -> Array:
     Parameters
     ----------
     M : Array
-        Mass in Msun/h
+        Mass [h-1 Msun]
     z : Array
         Redshift
     cosmo : jc.Cosmology
-        Cosmology object
+        Underlying cosmology
 
     Returns
     -------
     Array
-        RMS variance sigma(R,z)
+        RMS variance :math:`\\sigma(M,z)`
     """
     M = jnp.asarray(M)
     z = jnp.asarray(z)
@@ -135,10 +151,12 @@ def _tinker08_parameters(
 
     Parameters
     ----------
-    delta : float
+    z : Array
+        Redshift
+    cosmo : jc.Cosmology
+        Underlying cosmology
+    delta_c : float
         Overdensity threshold, default 200.0
-    z : float
-        Redshift, default 0.0
 
     Returns
     -------
@@ -181,6 +199,24 @@ def tinker08_f_sigma(
     cosmo: jc.Cosmology,
     delta_c: float = 200.0,
 ) -> Array:
+    """Tinker08 multiplicity function :math:`f(\\sigma)`.
+
+    Parameters
+    ----------
+    M : Array
+        Halo mass [h-1 Msun]
+    z : Array
+        Redshift
+    cosmo : jc.Cosmology
+        Underlying cosmology
+    delta_c : float
+        Overdensity threshold, default 200.0
+
+    Returns
+    -------
+    Array
+        Mass function multiplicity
+    """
     M = jnp.asarray(M)
     z = jnp.asarray(z)
     sigma = sigma_M(M, z, cosmo)
@@ -194,23 +230,23 @@ def tinker08_mass_function(
     cosmo: jc.Cosmology = cosmology.Planck18,
     delta_c: float = 200.0,
 ) -> Array:
-    """Tinker08 halo mass function dn/dlnM.
+    """Tinker08 halo mass function :math:`dn/d\\ln M`.
 
     Parameters
     ----------
     M : Array
-        Halo mass in Msun/h
+        Halo mass [h-1 Msun]
     z : Array
         Redshift
     cosmo : jc.Cosmology
-        Cosmology object, default Planck18
-    delta : float
+        Underlying cosmology, default Planck18
+    delta_c : float
         Overdensity threshold, default 200.0
 
     Returns
     -------
     Array
-        Mass function dn/dlnM in (Mpc/h)^-3
+        Mass function [h3 Mpc-3]
     """
     M = jnp.atleast_1d(M)
     z = jnp.asarray(z)
