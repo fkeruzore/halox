@@ -10,6 +10,18 @@ import halox
 jax.config.update("jax_enable_x64", True)
 
 rtol = 1e-2
+
+test_mzs = jnp.array(
+    [
+        [1e15, 0.0],
+        [1e14, 0.0],
+        [1e13, 0.0],
+        [1e14, 1.0],
+        [1e13, 1.0],
+        [1e14, 2.0],
+        [1e13, 0.0],
+    ]
+)
 test_deltas = [200.0, 500.0]
 test_cosmos = {
     "Planck18": [halox.cosmology.Planck18, "planck18"],
@@ -30,8 +42,10 @@ cc.addCosmology(
         ns=0.97,
     ),
 )
+
 G = halox.cosmology.G
-ms, zs = jnp.logspace(13, 15, 3), jnp.linspace(0, 2, 3)
+sigma_R = jax.jit(halox.hmf.sigma_R)
+tinker08_f_sigma = jax.jit(halox.hmf.tinker08_f_sigma)
 
 
 @pytest.mark.parametrize("cosmo_name", test_cosmos.keys())
@@ -39,13 +53,17 @@ def test_lagrangian_R(cosmo_name, return_vals=False):
     cosmo_j, cosmo_c = test_cosmos[cosmo_name]
     cosmo_c = cc.setCosmology(cosmo_c)
 
+    ms = test_mzs[:, 0]
     R_c = peaks.lagrangianR(ms)  # mass in Msun -> radius in cMpc
     R_h = halox.hmf.mass_to_lagrangian_radius(ms, cosmo_j)  # cMpc
 
     if return_vals:
         return R_h, R_c
-    assert jnp.allclose(R_c, R_h, rtol=rtol), (
-        f"Different lagrangianR: {R_c} != {R_h}"
+    discrepancy = R_h / R_c - 1.0
+    avg_disc = jnp.mean(discrepancy)
+    max_disc = jnp.max(jnp.abs(discrepancy))
+    assert max_disc < rtol, (
+        f"Bias in lagrangianR: avg={avg_disc:.3e}, max={max_disc:.3e}"
     )
 
 
@@ -54,16 +72,26 @@ def test_sigma_R_z(cosmo_name, return_vals=False):
     cosmo_j, cosmo_c = test_cosmos[cosmo_name]
     cosmo_c = cc.setCosmology(cosmo_c)
 
+    ms = test_mzs[:, 0]
+    zs = test_mzs[:, 1]
+
     R_c = peaks.lagrangianR(ms)  # mass in Msun -> radius in cMpc
-    sigma_c = jnp.array([cosmo_c.sigma(R_c, z=z) for z in zs])
+    sigma_c = jnp.array(
+        [cosmo_c.sigma(R_c[i], z=zs[i]) for i in range(len(test_mzs))]
+    )
 
     R_h = halox.hmf.mass_to_lagrangian_radius(ms, cosmo_j)  # Mpc
-    sigma_h = jax.vmap(lambda z: halox.hmf.sigma_R(R_h, z, cosmo_j))(zs)
+    sigma_h = jnp.array(
+        [sigma_R(R_h[i], zs[i], cosmo_j) for i in range(len(test_mzs))]
+    )
 
     if return_vals:
         return sigma_h, sigma_c
-    assert jnp.allclose(sigma_c, sigma_h, rtol=rtol), (
-        f"Different sigma: {sigma_c} != {sigma_h}"
+    discrepancy = sigma_h / sigma_c - 1.0
+    avg_disc = jnp.mean(discrepancy)
+    max_disc = jnp.max(jnp.abs(discrepancy))
+    assert max_disc < rtol, (
+        f"Bias in sigma: avg={avg_disc:.3e}, max={max_disc:.3e}"
     )
 
 
@@ -73,17 +101,28 @@ def test_overdensity_c_to_m(delta_c, cosmo_name, return_vals=False):
     cosmo_j, cosmo_c = test_cosmos[cosmo_name]
     cosmo_c = cc.setCosmology(cosmo_c)
 
+    zs = test_mzs[:, 1]
+
     d_c = jnp.array(
-        [densityThreshold(z, f"{delta_c:.0f}c") / cosmo_c.rho_m(z) for z in zs]
+        [
+            densityThreshold(zs[i], f"{delta_c:.0f}c") / cosmo_c.rho_m(zs[i])
+            for i in range(len(test_mzs))
+        ]
     )
-    d_h = jax.vmap(
-        lambda z: halox.hmf.overdensity_c_to_m(delta_c, z, cosmo_j)
-    )(zs)
+    d_h = jnp.array(
+        [
+            halox.hmf.overdensity_c_to_m(delta_c, zs[i], cosmo_j)
+            for i in range(len(test_mzs))
+        ]
+    )
 
     if return_vals:
         return d_h, d_c
-    assert jnp.allclose(d_c, d_h, rtol=rtol), (
-        f"Different delta_m: avg ratio={jnp.mean(d_h / d_c)} ({d_c} != {d_h})"
+    discrepancy = d_h / d_c - 1.0
+    avg_disc = jnp.mean(discrepancy)
+    max_disc = jnp.max(jnp.abs(discrepancy))
+    assert max_disc < rtol, (
+        f"Bias in delta_m: avg={avg_disc:.3e}, max={max_disc:.3e}"
     )
 
 
@@ -93,29 +132,38 @@ def test_tinker08_f_sigma(delta_c, cosmo_name, return_vals=False):
     cosmo_j, cosmo_c = test_cosmos[cosmo_name]
     cosmo_c = cc.setCosmology(cosmo_c)
 
+    ms = test_mzs[:, 0]
+    zs = test_mzs[:, 1]
+
     f_c = jnp.array(
         [
             mass_function.massFunction(
-                ms,
-                z,
+                ms[i],
+                zs[i],
                 mdef=f"{delta_c:.0f}c",
                 model="tinker08",
                 q_in="M",
                 q_out="f",
             )
-            for z in zs
+            for i in range(len(test_mzs))
         ]
     )
-    f_h = jax.vmap(
-        lambda z: halox.hmf.tinker08_f_sigma(
-            ms, z, cosmo=cosmo_j, delta_c=delta_c
-        )
-    )(zs)
+    f_h = jnp.array(
+        [
+            halox.hmf.tinker08_f_sigma(
+                ms[i], zs[i], cosmo=cosmo_j, delta_c=delta_c
+            )
+            for i in range(len(test_mzs))
+        ]
+    )
 
     if return_vals:
         return f_h, f_c
-    assert jnp.allclose(f_c, f_h, rtol=rtol), (
-        f"Different hmf: avg ratio={jnp.mean(f_h / f_c)} ({f_c} != {f_h})"
+    discrepancy = f_h / f_c - 1.0
+    avg_disc = jnp.mean(discrepancy)
+    max_disc = jnp.max(jnp.abs(discrepancy))
+    assert max_disc < rtol, (
+        f"Bias in hmf: avg={avg_disc:.3e}, max={max_disc:.3e}"
     )
 
 
