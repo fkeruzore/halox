@@ -4,7 +4,7 @@
 
 # halox
 
-`halox` provides utility functions to compute the physical properties of dark matter halos using [JAX](https://jax.readthedocs.io/en/latest/).
+JAX-powered Python library for differentiable dark matter halo property and mass function calculations.
 
 ## Installation
 
