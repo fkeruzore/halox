@@ -8,6 +8,8 @@ For cosmology calculations, ``halox`` relies on `jax-cosmo <https://github.com/D
 .. autosummary::
     hubble_parameter
     critical_density
+    differential_comoving_volume
 
 .. autofunction:: hubble_parameter
 .. autofunction:: critical_density
+.. autofunction:: differential_comoving_volume
