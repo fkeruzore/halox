@@ -1,4 +1,4 @@
-``halox.nfw``: The NFW profile
+halox.nfw: The NFW profile
 ==============================
 
 ``halox`` provides utility functions to compute properties of halos with a Navarro-Frenk-White (NFW) profile.

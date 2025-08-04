@@ -1,4 +1,4 @@
-``halox.hmf``: Halo mass functions calculations
+halox.hmf: Halo mass functions calculations
 ===============================================
 
 ``halox`` provides a JAX implementation of the `Tinker08 <https://ui.adsabs.harvard.edu/abs/2008ApJ...688..709T/abstract>`_ halo mass function.
