@@ -23,8 +23,9 @@ Learn more
 
 .. toctree::
    :maxdepth: 1
-   :caption: Examples
+   :caption: Getting started
 
+   notebooks/nfw.ipynb
    notebooks/gradients.ipynb
 
 .. toctree::
