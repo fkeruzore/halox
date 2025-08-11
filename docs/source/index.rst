@@ -26,6 +26,7 @@ Learn more
    :caption: Getting started
 
    notebooks/nfw.ipynb
+   notebooks/hmf.ipynb
    notebooks/gradients.ipynb
 
 .. toctree::
