@@ -2,7 +2,6 @@ import jax
 import pytest
 import jax.numpy as jnp
 import jax_cosmo as jc
-from colossus.halo.mass_so import densityThreshold
 from colossus.lss import bias
 import colossus.cosmology.cosmology as cc
 import halox
