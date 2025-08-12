@@ -27,6 +27,7 @@ Learn more
 
    notebooks/nfw.ipynb
    notebooks/hmf.ipynb
+   notebooks/bias.ipynb
    notebooks/gradients.ipynb
 
 .. toctree::
