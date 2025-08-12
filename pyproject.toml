@@ -1,6 +1,6 @@
 [project]
 name = "halox"
-version = "0.2.0"
+version = "0.3.0"
 description = "Dark matter halo properties and halo mass functions using JAX"
 readme = "README.md"
 authors = [
