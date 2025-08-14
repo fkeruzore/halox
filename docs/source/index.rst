@@ -28,6 +28,7 @@ Learn more
    notebooks/nfw.ipynb
    notebooks/hmf.ipynb
    notebooks/bias.ipynb
+   notebooks/halox_vs_colossus.ipynb
    notebooks/gradients.ipynb
 
 .. toctree::
