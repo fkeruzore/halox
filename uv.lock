@@ -910,6 +910,7 @@ dependencies = [
 
 [package.optional-dependencies]
 docs = [
+    { name = "colossus" },
     { name = "matplotlib", version = "3.9.4", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.10'" },
     { name = "matplotlib", version = "3.10.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.10'" },
     { name = "myst-nb" },
@@ -939,15 +940,13 @@ tests = [
 dev = [
     { name = "ruff" },
 ]
-docs = [
-    { name = "colossus" },
-]
 
 [package.metadata]
 requires-dist = [
     { name = "astropy", marker = "extra == 'tests'", specifier = ">=6.0.1" },
+    { name = "colossus", specifier = ">=1.3.8" },
+    { name = "colossus", marker = "extra == 'docs'", specifier = ">=1.3.8" },
     { name = "colossus", marker = "extra == 'tests'", specifier = ">=1.3.8" },
-    { name = "colossus", extras = ["docs"], specifier = ">=1.3.8" },
     { name = "jax", specifier = ">=0.4.30" },
     { name = "jax-cosmo", git = "https://github.com/fkeruzore/jax_cosmo.git" },
     { name = "matplotlib", marker = "extra == 'docs'", specifier = ">=3.9.4" },
@@ -967,7 +966,6 @@ provides-extras = ["tests", "docs"]
 
 [package.metadata.requires-dev]
 dev = [{ name = "ruff", specifier = ">=0.12.3" }]
-docs = [{ name = "colossus", specifier = ">=1.3.8" }]
 
 [[package]]
 name = "idna"
