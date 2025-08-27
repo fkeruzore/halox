@@ -53,7 +53,7 @@ myst_enable_extensions = [
     "amsmath",
     "dollarmath",
 ]
-nb_execution_mode = "force"
+nb_execution_mode = "off"  # don't run anything, use rendered notebooks
 nb_execution_allow_errors = False
 nb_render_image_options = {}
 
