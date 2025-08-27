@@ -23,11 +23,10 @@ Learn more
 
 .. toctree::
    :maxdepth: 1
-   :caption: Getting started
+   :caption: Tutorials
 
-   notebooks/nfw.ipynb
-   notebooks/hmf.ipynb
-   notebooks/bias.ipynb
+   install
+   physics_modules
    notebooks/halox_vs_colossus.ipynb
    notebooks/gradients.ipynb
 
