@@ -23,7 +23,7 @@ jobs:
       run: uv python install ${{ matrix.python-version }}
     
     - name: Install the project
-      run: uv sync --locked --dev --extra tests
+      run: uv sync --dev --extra tests
 
     - name: Run tests
       run: uv run pytest -v --cov=halox
