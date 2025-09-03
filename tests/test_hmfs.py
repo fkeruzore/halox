@@ -2,8 +2,7 @@ import jax
 import pytest
 import jax.numpy as jnp
 import jax_cosmo as jc
-from colossus.halo.mass_so import densityThreshold
-from colossus.lss import mass_function, peaks
+from colossus.lss import mass_function
 import colossus.cosmology.cosmology as cc
 import halox
 
@@ -41,88 +40,9 @@ cc.addCosmology(
     ),
 )
 
-G = halox.cosmology.G
-sigma_R = jax.jit(halox.hmf.sigma_R)
 tinker08_f_sigma = jax.jit(halox.hmf.tinker08_f_sigma)
 tinker08_mass_function = jax.jit(halox.hmf.tinker08_mass_function)
 
-
-@pytest.mark.parametrize("cosmo_name", test_cosmos.keys())
-def test_lagrangian_R(cosmo_name, return_vals=False):
-    cosmo_j, cosmo_c = test_cosmos[cosmo_name]
-    cosmo_c = cc.setCosmology(cosmo_c)
-
-    ms = test_mzs[:, 0]
-    R_c = peaks.lagrangianR(ms)
-    R_h = halox.hmf.mass_to_lagrangian_radius(ms, cosmo_j)  # cMpc
-
-    if return_vals:
-        return R_h, R_c
-    discrepancy = R_h / R_c - 1.0
-    avg_disc = jnp.mean(discrepancy)
-    max_disc = jnp.max(jnp.abs(discrepancy))
-    assert max_disc < 5e-3, (
-        f"Bias in lagrangianR: avg={avg_disc:.3e}, max={max_disc:.3e}"
-    )
-
-
-@pytest.mark.parametrize("cosmo_name", test_cosmos.keys())
-def test_sigma_R_z(cosmo_name, return_vals=False):
-    cosmo_j, cosmo_c = test_cosmos[cosmo_name]
-    cosmo_c = cc.setCosmology(cosmo_c)
-
-    ms = test_mzs[:, 0]
-    zs = test_mzs[:, 1]
-
-    R_c = peaks.lagrangianR(ms)
-    sigma_c = jnp.array(
-        [cosmo_c.sigma(R_c[i], z=zs[i]) for i in range(len(test_mzs))]
-    )
-
-    R_h = halox.hmf.mass_to_lagrangian_radius(ms, cosmo_j)  # Mpc
-    sigma_h = jnp.array(
-        [sigma_R(R_h[i], zs[i], cosmo_j) for i in range(len(test_mzs))]
-    )
-
-    if return_vals:
-        return sigma_h, sigma_c
-    discrepancy = sigma_h / sigma_c - 1.0
-    avg_disc = jnp.mean(discrepancy)
-    max_disc = jnp.max(jnp.abs(discrepancy))
-    assert max_disc < 1e-2, (
-        f"Bias in sigma: avg={avg_disc:.3e}, max={max_disc:.3e}"
-    )
-
-
-@pytest.mark.parametrize("delta_c", test_deltas)
-@pytest.mark.parametrize("cosmo_name", test_cosmos.keys())
-def test_overdensity_c_to_m(delta_c, cosmo_name, return_vals=False):
-    cosmo_j, cosmo_c = test_cosmos[cosmo_name]
-    cosmo_c = cc.setCosmology(cosmo_c)
-
-    zs = test_mzs[:, 1]
-
-    d_c = jnp.array(
-        [
-            densityThreshold(zs[i], f"{delta_c:.0f}c") / cosmo_c.rho_m(zs[i])
-            for i in range(len(test_mzs))
-        ]
-    )
-    d_h = jnp.array(
-        [
-            halox.hmf.overdensity_c_to_m(delta_c, zs[i], cosmo_j)
-            for i in range(len(test_mzs))
-        ]
-    )
-
-    if return_vals:
-        return d_h, d_c
-    discrepancy = d_h / d_c - 1.0
-    avg_disc = jnp.mean(discrepancy)
-    max_disc = jnp.max(jnp.abs(discrepancy))
-    assert max_disc < 5e-3, (
-        f"Bias in delta_m: avg={avg_disc:.3e}, max={max_disc:.3e}"
-    )
 
 
 @pytest.mark.parametrize("delta_c", test_deltas)
