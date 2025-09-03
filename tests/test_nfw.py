@@ -113,3 +113,28 @@ def test_potential(halo_name, delta, cosmo_name):
     assert jnp.allclose(jnp.array(phi_c), phi_h, rtol=rtol), (
         f"Different phi({rs}): {phi_c} != {phi_h}"
     )
+
+
+@pytest.mark.parametrize("halo_name", test_halos.keys())
+@pytest.mark.parametrize("delta", test_deltas)
+@pytest.mark.parametrize("cosmo_name", test_cosmos.keys())
+def test_circular_velocity(halo_name, delta, cosmo_name):
+    halo = test_halos[halo_name]
+    m_delta, c_delta, z = halo["M"], halo["c"], halo["z"]
+    cosmo_j, cosmo_c = test_cosmos[cosmo_name]
+
+    cosmo_c = cc.setCosmology(cosmo_c)
+    nfw_h = halox.nfw.NFWHalo(m_delta, c_delta, z, cosmo_j, delta=delta)
+    nfw_c = profile_nfw.NFWProfile(
+        M=m_delta,
+        c=c_delta,
+        z=z,
+        mdef=f"{delta:.0f}c",
+    )
+
+    rs = jnp.logspace(-2, 1, 6)  # h-1 Mpc
+    vc_c = nfw_c.circularVelocity(rs * 1000)
+    vc_h = nfw_h.circular_velocity(rs)
+    assert jnp.allclose(jnp.array(vc_c), vc_h, rtol=rtol), (
+        f"Different v_circ({rs}): {vc_c} != {vc_h}"
+    )
