@@ -122,7 +122,9 @@ def tinker08_mass_function(
     f_sigma = tinker08_f_sigma(M, z, cosmo, delta_c)
 
     # Use autodiff to compute d ln sigma / dM
-    d_ln_sigma_inv = jax.grad(lambda M: jnp.log(1.0 / lss.sigma_M(M, z, cosmo)))
+    d_ln_sigma_inv = jax.grad(
+        lambda M: jnp.log(1.0 / lss.sigma_M(M, z, cosmo))
+    )
 
     dn_dm = f_sigma * (rho_m / M) * jax.vmap(d_ln_sigma_inv)(M)
 

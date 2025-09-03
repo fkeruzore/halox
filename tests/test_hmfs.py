@@ -44,7 +44,6 @@ tinker08_f_sigma = jax.jit(halox.hmf.tinker08_f_sigma)
 tinker08_mass_function = jax.jit(halox.hmf.tinker08_mass_function)
 
 
-
 @pytest.mark.parametrize("delta_c", test_deltas)
 @pytest.mark.parametrize("cosmo_name", test_cosmos.keys())
 def test_tinker08_f_sigma(delta_c, cosmo_name, return_vals=False):

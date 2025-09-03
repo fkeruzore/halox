@@ -179,24 +179,36 @@ class NFWHalo:
         """
         r = jnp.asarray(r)
         x = r / self.Rs
-        
+
         # Analytical solution for NFW surface density
         # From Bartelmann 1996, Eq. 13
         prefact = 2 * self.rho0 * self.Rs
-        
+
         # Handle different regimes for numerical stability
         def f(x):
             return jnp.where(
                 x < 1.0,
                 # x < 1 case
-                (1 - 2 * jnp.arctanh(jnp.sqrt((1-x)/(1+x))) / jnp.sqrt(1-x**2)) / (x**2 - 1),
+                (
+                    1
+                    - 2
+                    * jnp.arctanh(jnp.sqrt((1 - x) / (1 + x)))
+                    / jnp.sqrt(1 - x**2)
+                )
+                / (x**2 - 1),
                 jnp.where(
                     x > 1.0,
-                    # x > 1 case  
-                    (1 - 2 * jnp.arctan(jnp.sqrt((x-1)/(1+x))) / jnp.sqrt(x**2-1)) / (x**2 - 1),
+                    # x > 1 case
+                    (
+                        1
+                        - 2
+                        * jnp.arctan(jnp.sqrt((x - 1) / (1 + x)))
+                        / jnp.sqrt(x**2 - 1)
+                    )
+                    / (x**2 - 1),
                     # x = 1 case
-                    1.0/3.0
-                )
+                    1.0 / 3.0,
+                ),
             )
-        
+
         return prefact * f(x)
