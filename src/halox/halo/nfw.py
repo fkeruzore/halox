@@ -3,8 +3,8 @@ from jax.typing import ArrayLike
 import jax.numpy as jnp
 import jax_cosmo as jc
 
-from .cosmology import G
-from . import cosmology
+from ..cosmology import G
+from .. import cosmology
 
 
 class NFWHalo:
