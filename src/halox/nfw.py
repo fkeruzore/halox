@@ -100,3 +100,60 @@ class NFWHalo:
         # G = G.to("km2 Mpc Msun-1 s-2").value
         prefact = -4 * jnp.pi * G * self.rho0 * self.Rs**3
         return prefact * jnp.log(1 + r / self.Rs) / r
+
+    def circular_velocity(self, r: ArrayLike) -> Array:
+        """Circular velocity profile :math:`v_c(r)`.
+
+        The circular velocity is related to the enclosed mass by:
+        :math:`v_c^2(r) = GM(<r)/r`
+
+        Parameters
+        ----------
+        r : Array [h-1 Mpc]
+            Radius
+
+        Returns
+        -------
+        Array [km s-1]
+            Circular velocity at radius `r`
+        """
+        r = jnp.asarray(r)
+        m_enc = self.enclosed_mass(r)
+        return jnp.sqrt(G * m_enc / r)
+
+    def velocity_dispersion(self, r: ArrayLike) -> Array:
+        """Radial velocity dispersion profile :math:`\\sigma_r(r)`.
+
+        Uses the Jeans equation assuming isotropic orbits:
+        :math:`\\sigma_r^2(r) = \\frac{1}{\\rho(r)} \\int_r^{\\infty}
+        \\rho(s) \\frac{GM(<s)}{s^2} ds`
+
+        For NFW halos, this has an analytical solution.
+
+        Parameters
+        ----------
+        r : Array [h-1 Mpc]
+            Radius
+
+        Returns
+        -------
+        Array [km s-1]
+            Radial velocity dispersion at radius `r`
+        """
+        r = jnp.asarray(r)
+        x = r / self.Rs
+
+        # Analytical solution for NFW velocity dispersion
+        # From Lokas & Mamon 2001, Eq. 16
+        g_x = (jnp.log(1 + x) - x / (1 + x)) / x**2
+
+        # Factor involving concentration
+        c = self.c_delta
+        gc = jnp.log(1 + c) - c / (1 + c)
+
+        # Velocity dispersion squared
+        sigma_r2 = (
+            G * self.m_delta * gc * g_x / (self.Rdelta * x * (1 + x) ** 2)
+        )
+
+        return jnp.sqrt(sigma_r2)
