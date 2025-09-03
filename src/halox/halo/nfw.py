@@ -163,7 +163,8 @@ class NFWHalo:
 
         The projected surface density is obtained by integrating the 3D
         density profile along the line of sight:
-        :math:`\\Sigma(r) = 2 \\int_r^{\\infty} \\frac{\\rho(s) s ds}{\\sqrt{s^2 - r^2}}`
+        :math:`\\Sigma(r) = 2 \\int_r^{\\infty} \\frac{\\rho(s) s ds}
+        {\\sqrt{s^2 - r^2}}`
 
         For NFW halos, this has an analytical solution.
 
