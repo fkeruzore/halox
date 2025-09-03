@@ -143,6 +143,42 @@ def test_circular_velocity(halo_name, delta, cosmo_name):
 @pytest.mark.parametrize("halo_name", test_halos.keys())
 @pytest.mark.parametrize("delta", test_deltas)
 @pytest.mark.parametrize("cosmo_name", test_cosmos.keys())
+def test_velocity_dispersion(halo_name, delta, cosmo_name):
+    halo = test_halos[halo_name]
+    m_delta, c_delta, z = halo["M"], halo["c"], halo["z"]
+    cosmo_j, cosmo_c = test_cosmos[cosmo_name]
+
+    cosmo_c = cc.setCosmology(cosmo_c)
+    nfw_h = halox.nfw.NFWHalo(m_delta, c_delta, z, cosmo_j, delta=delta)
+    nfw_c = profile_nfw.NFWProfile(
+        M=m_delta,
+        c=c_delta,
+        z=z,
+        mdef=f"{delta:.0f}c",
+    )
+
+    rs = jnp.logspace(-2, 1, 6)  # h-1 Mpc
+
+    x = rs / (nfw_c.par["rs"] * 1e-3)
+    g_x = (jnp.log(1 + x) - x / (1 + x)) / x**2
+    gc = jnp.log(1 + c_delta) - c_delta / (1 + c_delta)
+    sv_c = jnp.sqrt(
+        G
+        * m_delta
+        * gc
+        * g_x
+        / (nfw_c.RDelta(z, f"{delta:.0f}c") * 1e-3 * x * (1 + x) ** 2)
+    )
+
+    sv_h = nfw_h.velocity_dispersion(rs)
+    assert jnp.allclose(jnp.array(sv_c), sv_h, rtol=rtol), (
+        f"Different sigma_v({rs}): {sv_c} != {sv_h}"
+    )
+
+
+@pytest.mark.parametrize("halo_name", test_halos.keys())
+@pytest.mark.parametrize("delta", test_deltas)
+@pytest.mark.parametrize("cosmo_name", test_cosmos.keys())
 def test_surface_density(halo_name, delta, cosmo_name):
     halo = test_halos[halo_name]
     m_delta, c_delta, z = halo["M"], halo["c"], halo["z"]
