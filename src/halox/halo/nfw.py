@@ -3,8 +3,8 @@ from jax.typing import ArrayLike
 import jax.numpy as jnp
 import jax_cosmo as jc
 
-from .cosmology import G
-from . import cosmology
+from ..cosmology import G
+from .. import cosmology
 
 
 class NFWHalo:
@@ -163,7 +163,8 @@ class NFWHalo:
 
         The projected surface density is obtained by integrating the 3D
         density profile along the line of sight:
-        :math:`\\Sigma(r) = 2 \\int_r^{\\infty} \\frac{\\rho(s) s ds}{\\sqrt{s^2 - r^2}}`
+        :math:`\\Sigma(r) = 2 \\int_r^{\\infty} \\frac{\\rho(s) s ds}
+        {\\sqrt{s^2 - r^2}}`
 
         For NFW halos, this has an analytical solution.
 
