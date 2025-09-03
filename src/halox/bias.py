@@ -2,7 +2,7 @@ from jax import Array
 from jax.typing import ArrayLike
 import jax.numpy as jnp
 import jax_cosmo as jc
-from . import hmf
+from . import lss
 
 
 def _tinker10_parameters(
@@ -29,7 +29,7 @@ def _tinker10_parameters(
     z = jnp.asarray(z)
 
     # Convert critical to mean overdensity
-    delta_m = hmf.overdensity_c_to_m(delta_c, z, cosmo)
+    delta_m = lss.overdensity_c_to_m(delta_c, z, cosmo)
 
     # y parameter from log10(Delta_halo)
     y = jnp.log10(delta_m)
@@ -76,7 +76,7 @@ def tinker10_bias(
     z = jnp.asarray(z)
 
     # Calculate peak height nu = delta_sc / sigma(M,z)
-    sigma = hmf.sigma_M(M, z, cosmo)
+    sigma = lss.sigma_M(M, z, cosmo)
     nu = delta_sc / sigma
 
     # Get parameters
