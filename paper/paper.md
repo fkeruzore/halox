@@ -24,7 +24,7 @@ Lorem ipsum
 # Statement of need
 
 Lorem Ipsum
-[@2018ApJS..239...35D]
+[@Diemer:2018]
 
 # Acknowledgements
 
