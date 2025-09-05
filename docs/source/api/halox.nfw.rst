@@ -10,4 +10,4 @@ halox.nfw: The NFW profile
 
 .. autoclass:: NFWHalo
     :member-order: bysource
-    :members: density, enclosed_mass, potential, circular_velocity, velocity_dispersion, surface_density
+    :members: density, enclosed_mass, potential, circular_velocity, velocity_dispersion, surface_density, to_delta

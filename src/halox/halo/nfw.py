@@ -225,9 +225,12 @@ class NFWHalo:
 
         Returns
         -------
-        tuple[Array, Array, Array]
-            Mass, radius, and concentration at the new overdensity
-            [h-1 Msun], [h-1 Mpc], []
+        Array [h-1 Msun]
+            Mass at new overdensity
+        Array [h-1 Mpc]
+            Radius at new overdensity
+        Array
+            Concentration at new overdensity
         """
         from scipy.optimize import minimize
 
