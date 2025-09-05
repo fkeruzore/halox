@@ -1,5 +1,6 @@
 from jax import Array
 from jax.typing import ArrayLike
+import jax
 import jax.numpy as jnp
 import jax_cosmo as jc
 
@@ -213,3 +214,53 @@ class NFWHalo:
             )
 
         return prefact * f(x)
+
+    def to_delta(self, delta_new: float) -> tuple[Array, Array, Array]:
+        """Convert halo properties to a different overdensity definition.
+
+        Parameters
+        ----------
+        delta_new : float
+            New density contrast in units of critical density at redshift z
+
+        Returns
+        -------
+        tuple[Array, Array, Array]
+            Mass, radius, and concentration at the new overdensity
+            [h-1 Msun], [h-1 Mpc], []
+        """
+        from scipy.optimize import minimize
+
+        # Target density for the new overdensity definition
+        rho_c = cosmology.critical_density(self.z, self.cosmo)
+        target_density = delta_new * rho_c
+
+        # Objective function to minimize: |mean_density - target_density|^2
+        def lsq(r_new):
+            m_enc = self.enclosed_mass(r_new)
+            mean_density = m_enc / (4.0 * jnp.pi * r_new**3 / 3.0)
+            return jnp.squeeze(mean_density - target_density) ** 2
+
+        # Initial guess based on scaling relation
+        r0 = float(self.Rdelta * (self.delta / delta_new) ** (1 / 3))
+
+        # Bounds for the optimization
+        bounds = [(0.01 * float(self.Rdelta), 10.0 * float(self.Rdelta))]
+
+        # Use L-BFGS-B with JAX gradients
+        result = minimize(
+            jax.jit(lsq),
+            r0,
+            method="L-BFGS-B",
+            jac=jax.jit(jax.grad(lsq)),
+            bounds=bounds,
+            options={"ftol": 1e-12, "gtol": 1e-12},
+        )
+
+        r_new = jnp.array(result.x)
+
+        # Calculate new mass and concentration
+        m_new = self.enclosed_mass(r_new)
+        c_new = r_new / self.Rs
+
+        return m_new, r_new, c_new
