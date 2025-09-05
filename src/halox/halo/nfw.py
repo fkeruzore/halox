@@ -43,8 +43,8 @@ class NFWHalo:
         self.cosmo = cosmo
 
         mean_rho = delta * cosmology.critical_density(self.z, cosmo)
-        self.Rdelta = (3 * self.m_delta / (4 * jnp.pi * mean_rho)) ** (1 / 3)
-        self.Rs = self.Rdelta / self.c_delta
+        self.r_delta = (3 * self.m_delta / (4 * jnp.pi * mean_rho)) ** (1 / 3)
+        self.Rs = self.r_delta / self.c_delta
         rho0_denum = 4 * jnp.pi * self.Rs**3
         rho0_denum *= jnp.log(1 + self.c_delta) - self.c_delta / (
             1 + self.c_delta
@@ -154,7 +154,7 @@ class NFWHalo:
 
         # Velocity dispersion squared
         sigma_r2 = (
-            G * self.m_delta * gc * g_x / (self.Rdelta * x * (1 + x) ** 2)
+            G * self.m_delta * gc * g_x / (self.r_delta * x * (1 + x) ** 2)
         )
 
         return jnp.sqrt(sigma_r2)
@@ -242,10 +242,10 @@ class NFWHalo:
             return jnp.squeeze(mean_density - target_density) ** 2
 
         # Initial guess based on scaling relation
-        r0 = float(self.Rdelta * (self.delta / delta_new) ** (1 / 3))
+        r0 = float(self.r_delta * (self.delta / delta_new) ** (1 / 3))
 
         # Bounds for the optimization
-        bounds = [(0.01 * float(self.Rdelta), 10.0 * float(self.Rdelta))]
+        bounds = [(0.01 * float(self.r_delta), 10.0 * float(self.r_delta))]
 
         # Use L-BFGS-B with JAX gradients
         result = minimize(
@@ -257,7 +257,7 @@ class NFWHalo:
             options={"ftol": 1e-12, "gtol": 1e-12},
         )
 
-        r_new = jnp.array(result.x)
+        r_new = result.x[0]
 
         # Calculate new mass and concentration
         m_new = self.enclosed_mass(r_new)
