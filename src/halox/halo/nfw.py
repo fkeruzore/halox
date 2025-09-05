@@ -1,5 +1,6 @@
 from jax import Array
 from jax.typing import ArrayLike
+import jax
 import jax.numpy as jnp
 import jax_cosmo as jc
 
@@ -42,8 +43,8 @@ class NFWHalo:
         self.cosmo = cosmo
 
         mean_rho = delta * cosmology.critical_density(self.z, cosmo)
-        self.Rdelta = (3 * self.m_delta / (4 * jnp.pi * mean_rho)) ** (1 / 3)
-        self.Rs = self.Rdelta / self.c_delta
+        self.r_delta = (3 * self.m_delta / (4 * jnp.pi * mean_rho)) ** (1 / 3)
+        self.Rs = self.r_delta / self.c_delta
         rho0_denum = 4 * jnp.pi * self.Rs**3
         rho0_denum *= jnp.log(1 + self.c_delta) - self.c_delta / (
             1 + self.c_delta
@@ -153,7 +154,7 @@ class NFWHalo:
 
         # Velocity dispersion squared
         sigma_r2 = (
-            G * self.m_delta * gc * g_x / (self.Rdelta * x * (1 + x) ** 2)
+            G * self.m_delta * gc * g_x / (self.r_delta * x * (1 + x) ** 2)
         )
 
         return jnp.sqrt(sigma_r2)
@@ -213,3 +214,56 @@ class NFWHalo:
             )
 
         return prefact * f(x)
+
+    def to_delta(self, delta_new: float) -> tuple[Array, Array, Array]:
+        """Convert halo properties to a different overdensity definition.
+
+        Parameters
+        ----------
+        delta_new : float
+            New density contrast in units of critical density at redshift z
+
+        Returns
+        -------
+        Array [h-1 Msun]
+            Mass at new overdensity
+        Array [h-1 Mpc]
+            Radius at new overdensity
+        Array
+            Concentration at new overdensity
+        """
+        from scipy.optimize import minimize
+
+        # Target density for the new overdensity definition
+        rho_c = cosmology.critical_density(self.z, self.cosmo)
+        target_density = delta_new * rho_c
+
+        # Objective function to minimize: |mean_density - target_density|^2
+        def lsq(r_new):
+            m_enc = self.enclosed_mass(r_new)
+            mean_density = m_enc / (4.0 * jnp.pi * r_new**3 / 3.0)
+            return jnp.squeeze(mean_density - target_density) ** 2
+
+        # Initial guess based on scaling relation
+        r0 = float(self.r_delta * (self.delta / delta_new) ** (1 / 3))
+
+        # Bounds for the optimization
+        bounds = [(0.01 * float(self.r_delta), 10.0 * float(self.r_delta))]
+
+        # Use L-BFGS-B with JAX gradients
+        result = minimize(
+            jax.jit(lsq),
+            r0,
+            method="L-BFGS-B",
+            jac=jax.jit(jax.grad(lsq)),
+            bounds=bounds,
+            options={"ftol": 1e-12, "gtol": 1e-12},
+        )
+
+        r_new = result.x[0]
+
+        # Calculate new mass and concentration
+        m_new = self.enclosed_mass(r_new)
+        c_new = r_new / self.Rs
+
+        return m_new, r_new, c_new
