@@ -1,5 +1,5 @@
 ---
-title: 'halox: Dark matter halo properties and large scale structure calculations using JAX'
+title: 'halox: Dark matter halo properties and large-scale structure calculations using JAX'
 tags:
   - Python
   - astronomy
@@ -11,7 +11,7 @@ authors:
 affiliations:
  - name: High Energy Physics Division, Argonne National Laboratory, Lemont, IL 60439, USA
    index: 1
-date: 4 September 2025
+date: 8 September 2025
 bibliography: paper.bib
 
 ---
@@ -20,7 +20,8 @@ bibliography: paper.bib
 
 Dark matter halos are fundamental structures in cosmology, forming the gravitational potential wells hosting galaxies and clusters of galaxies.
 Their properties and statistical distribution (the halo mass function) are invaluable tools to infer the fundamental properties of the Universe.
-The `halox` package is a JAX-powered Python library enabling differentiable and accelerated computations of key iproperties of dark matter halos, and of the halo mass function.
+The `halox` package is a JAX-powered Python library enabling differentiable and accelerated computations of key properties of dark matter halos, and of the halo mass function.
+The automatic differentiation capabilities of `halox` enable its usage in gradient-based workflows, *e.g.* in efficient Hamiltonian Monte Carlo sampling or machine learning applications.
 
 # Statement of need
 
@@ -29,22 +30,22 @@ This has motivated the development of many toolkits focused on halo modeling, su
 Recently, the increasing complexity of cosmological data and astrophysical models, along with the AI-driven advent of novel computational frameworks such as JAX [@Bradbury:2018], have led to the development of differentiable and hardware-accelerated software.
 Such software has been published to model fundamental cosmological quantities--*e.g.*, @Campagne:2023, @Piras:2023; as well as various models of dark matter halos physical properties--*e.g.*, @Hearin:2021, @Hearin:2022, @Alarcon:2023, @Stevanovich:2023, @Keruzore:2024.
 
-The `halox` package offers a JAX implementation of some widely used properties which, while existing in other libraries focused on halo modeling, do not currently have a publicly available, differentiable and GPU-accelerated implementation, namely:
+The `halox` library offers a JAX implementation of some widely used properties which, while existing in other libraries focused on halo modeling, do not currently have a publicly available, differentiable and GPU-accelerated implementation, namely:
 
 * Radial profiles of dark matter halos following a Navarro-Frenk-White [NFW, @Navarro:1997] distribution;
 * The halo mass function, quantifying the abundance of dark matter halos in mass and redshift, including its dependence on cosmological parameters;
 * The halo bias.
 
-The use of JAX as a backend allows these functions to be compilable and GPU-accelerated, enabling high-performance computations; and automatically differentiable, enabling their efficient use in gradient-based workflows, such as sensitivity analyses, Hamiltonian Monte-Carlo sampling for Bayesian inference, or machine learning-based methods.
+The use of JAX as a backend allows these functions to be compiled and GPU-accelerated, enabling high-performance computations; and automatically differentiable, enabling their efficient use in gradient-based workflows, such as sensitivity analyses, Hamiltonian Monte-Carlo sampling for Bayesian inference, or machine learning-based methods.
 
 # Features
 
 ## Available physical quantities
 
-`halox` seels to provide JAX-based implementations of common models of dark matter halo properties and of large-scale structure.
+The `halox` library seeks to provide JAX-based implementations of common models of dark matter halo properties and of large-scale structure.
 At the time of writing (software version 1.1.0), this includes the following properties:
 
-* Cosmological quantities: `halox` relies on JAX-cosmo [@Campagne:2023] for cosmology-dependent calculations, and includes wrapper functions to compute some additional properties, such as critical density $\rho_{\rm c}$ and differential comoving volume elemend ${\rm d}V_{c} / {\rm d}\Omega {\rm d}z$.
+* Cosmological quantities: `halox` relies on JAX-cosmo [@Campagne:2023] for cosmology-dependent calculations, and includes wrapper functions to compute some additional properties, such as critical density $\rho_{\rm c}$ and differential comoving volume element ${\rm d}V_{c} / {\rm d}\Omega {\rm d}z$.
 * Radially-dependent physical properties of NFW dark matter halos. Our implementations are based on the analytical derivations of @Lokas:2001, and include the following quantities:
   * Matter density $\rho(r)$;
   * Enclosed mass $M(\leq r)$;
@@ -62,9 +63,17 @@ At the time of writing (software version 1.1.0), this includes the following pro
 All calculations available in `halox` are written using JAX and JAX-cosmo.
 As a result, all functions can be compiled just-in-time using `jax.jit`, hardware-accelerated, and are automatically differentiable with respect to their input parameters, including halo mass, redshift, and cosmological parameters.
 
+# Validation
+
+All functions available in `halox` are validated against existing, non-JAX-based software.
+Cosmology calculations are validated against Astropy [@Astropy:2022] for varying cosmological parameters and redshifts.
+Other quantities are validated against `colossus` [@Diemer:2018] for varying halo masses, redshifts, critical overdensities, and cosmological parameters.
+These tests are included in an automatic CI/CD pipeline on the GitHub repository, and presented graphically in the online documentation.
+
 # Acknowledgments
 
-I would like to thank Andrew Hearin and Lindsey Bleem for useful discussions, and acknowledges the use of Anthropic's Claude Code in the development of `halox`.
+I would like to thank Andrew Hearin and Lindsey Bleem for useful discussions.
+I acknowledge the use of Anthropic's Claude Code in the development of `halox`.
 Argonne National Laboratory’s work was supported by the U.S. Department of Energy, Office of Science, Office of High Energy Physics, under contract DE-AC02-06CH11357.
 
 # References
