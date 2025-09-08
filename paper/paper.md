@@ -32,8 +32,8 @@ Such software has been published to model fundamental cosmological quantities--*
 The `halox` package offers a JAX implementation of some widely used properties which, while existing in other libraries focused on halo modeling, do not currently have a publicly available, differentiable and GPU-accelerated implementation, namely:
 
 * Radial profiles of dark matter halos following a Navarro-Frenk-White [NFW, @Navarro:1997] distribution;
-* The halo mass function of @Tinker:2008, quantifying the abundance of dark matter halos in mass and redshift, including its dependence on cosmological parameters;
-* The halo bias of @Tinker:2010.
+* The halo mass function, quantifying the abundance of dark matter halos in mass and redshift, including its dependence on cosmological parameters;
+* The halo bias.
 
 The use of JAX as a backend allows these functions to be compilable and GPU-accelerated, enabling high-performance computations; and automatically differentiable, enabling their efficient use in gradient-based workflows, such as sensitivity analyses, Hamiltonian Monte-Carlo sampling for Bayesian inference, or machine learning-based methods.
 
@@ -44,6 +44,7 @@ The use of JAX as a backend allows these functions to be compilable and GPU-acce
 `halox` seels to provide JAX-based implementations of common models of dark matter halo properties and of large-scale structure.
 At the time of writing (software version 1.1.0), this includes the following properties:
 
+* Cosmological quantities: `halox` relies on JAX-cosmo [@Campagne:2023] for cosmology-dependent calculations, and includes wrapper functions to compute some additional properties, such as critical density $\rho_{\rm c}$ and differential comoving volume elemend ${\rm d}V_{c} / {\rm d}\Omega {\rm d}z$.
 * Radially-dependent physical properties of NFW dark matter halos. Our implementations are based on the analytical derivations of @Lokas:2001, and include the following quantities:
   * Matter density $\rho(r)$;
   * Enclosed mass $M(\leq r)$;
@@ -51,15 +52,19 @@ At the time of writing (software version 1.1.0), this includes the following pro
   * Circular velocity $v_{\rm circ}(r)$;
   * Velocity dispersion $\sigma_{v}(r)$;
   * Projected surface density $\Sigma(r)$.
-
+* Large-scale structure: Building upon the power spectra computations implemented in JAX-cosmo, `halox` provides implementations of the RMS variance of the matter distribution in spheres of radius $R$, $\sigma(R)$. It also includes a wrapper function to perform the computation within the Lagrangian radius of a halo of mass $M$, $\sigma(M)$.
+* Halo mass function (HMF): The HMF model of @Tinker:2008, predicting ${\rm d}N / {\rm d} \ln M$ as a function of halo mass $M$, redshift $z$, and cosmology.
+* Halo bias: The linear bias model of @Tinker:2010 as a function of halo mass $M$, redshift $z$, and cosmology.
+* Overdensities: All properties in `halox` can be computed for spherical overdensity (SO) halo masses defined for any critical overdensity value. Convenience functions are provided to convert halo properties from one critical overdensity to another, or to convert critical overdensities to mean matter overdensities.
 
 ## Automatic differentiation and hardware acceleration
 
-JAX
+All calculations available in `halox` are written using JAX and JAX-cosmo.
+As a result, all functions can be compiled just-in-time using `jax.jit`, hardware-accelerated, and are automatically differentiable with respect to their input parameters, including halo mass, redshift, and cosmological parameters.
 
 # Acknowledgments
 
-FK thanks Andrew Hearin and Lindsey Bleem for useful discussions, and acknowledges the use of Anthropic's Claude Code in the development of `halox`.
+I would like to thank Andrew Hearin and Lindsey Bleem for useful discussions, and acknowledges the use of Anthropic's Claude Code in the development of `halox`.
 Argonne National Laboratory’s work was supported by the U.S. Department of Energy, Office of Science, Office of High Energy Physics, under contract DE-AC02-06CH11357.
 
 # References
