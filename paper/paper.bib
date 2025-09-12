@@ -1,3 +1,5 @@
+% ==========  Halo toolikt codes  ============================================
+
 @ARTICLE{Diemer:2018,
        author = {{Diemer}, Benedikt},
         title = "{COLOSSUS: A Python Toolkit for Cosmology, Large-scale Structure, and Dark Matter Halos}",
@@ -65,21 +67,9 @@ archivePrefix = {arXiv},
  primaryClass = {astro-ph.IM},
 }
 
-@ARTICLE{Keruzore:2024,
-       author = {{K{\'e}ruzor{\'e}}, Florian and {Bleem}, L.~E. and {Frontiere}, N. and {Krishnan}, N. and {Buehlmann}, M. and {Emberson}, J.~D. and {Habib}, S. and {Larsen}, P.},
-        title = "{The picasso gas model: Painting intracluster gas on gravity-only simulations}",
-      journal = {The Open Journal of Astrophysics},
-     keywords = {Astrophysics - Cosmology and Nongalactic Astrophysics},
-         year = 2024,
-        month = dec,
-       volume = {7},
-          eid = {116},
-        pages = {116},
-          doi = {10.33232/001c.127486},
-archivePrefix = {arXiv},
-       eprint = {2408.17445},
- primaryClass = {astro-ph.CO},
-}
+% ==========  Differentiable physics references  =============================
+
+% -----  Cosmo toolkits  -----------------------------------------------------
 
 @ARTICLE{Campagne:2023,
        author = {{Campagne}, Jean-Eric and {Lanusse}, Fran{\c{c}}ois and {Zuntz}, Joe and {Boucaud}, Alexandre and {Casas}, Santiago and {Karamanis}, Minas and {Kirkby}, David and {Lanzieri}, Denise and {Peel}, Austin and {Li}, Yin},
@@ -113,19 +103,111 @@ archivePrefix = {arXiv},
  primaryClass = {astro-ph.CO},
 }
 
-@ARTICLE{Stevanovich:2023,
-       author = {{Stevanovich}, Dash and {Hearin}, Andrew P. and {Nagai}, Daisuke},
-        title = "{A differentiable model of the evolution of dark matter halo concentration}",
-      journal = {\mnras},
-     keywords = {software: simulations, large-scale structure of Universe, Astrophysics - Cosmology and Nongalactic Astrophysics, Astrophysics - Astrophysics of Galaxies},
-         year = 2023,
-        month = nov,
-       volume = {526},
-       number = {1},
-        pages = {1528-1544},
-          doi = {10.1093/mnras/stad2854},
+@ARTICLE{Giovanetti:2024,
+       author = {{Giovanetti}, Cara and {Lisanti}, Mariangela and {Liu}, Hongwan and {Mishra-Sharma}, Siddharth and {Ruderman}, Joshua T.},
+        title = "{LINX: A Fast, Differentiable, and Extensible Big Bang Nucleosynthesis Package}",
+      journal = {arXiv e-prints},
+     keywords = {Astrophysics - Cosmology and Nongalactic Astrophysics, High Energy Physics - Phenomenology},
+         year = 2024,
+        month = aug,
+          eid = {arXiv:2408.14538},
+        pages = {arXiv:2408.14538},
+          doi = {10.48550/arXiv.2408.14538},
 archivePrefix = {arXiv},
-       eprint = {2309.07854},
+       eprint = {2408.14538},
+ primaryClass = {astro-ph.CO},
+       adsurl = {https://ui.adsabs.harvard.edu/abs/2024arXiv240814538G},
+      adsnote = {Provided by the SAO/NASA Astrophysics Data System}
+}
+
+% -----  Likelihoods  --------------------------------------------------------
+
+@ARTICLE{Balkenhol:2024,
+       author = {{Balkenhol}, L. and {Trendafilova}, C. and {Benabed}, K. and {Galli}, S.},
+        title = "{candl: cosmic microwave background analysis with a differentiable likelihood}",
+      journal = {\aap},
+     keywords = {methods: data analysis, methods: statistical, cosmic background radiation, Astrophysics - Cosmology and Nongalactic Astrophysics},
+         year = 2024,
+        month = jun,
+       volume = {686},
+          eid = {A10},
+        pages = {A10},
+          doi = {10.1051/0004-6361/202449432},
+archivePrefix = {arXiv},
+       eprint = {2401.13433},
+ primaryClass = {astro-ph.CO},
+       adsurl = {https://ui.adsabs.harvard.edu/abs/2024A&A...686A..10B},
+      adsnote = {Provided by the SAO/NASA Astrophysics Data System}
+}
+
+
+% -----  Simulations  --------------------------------------------------------
+
+@ARTICLE{Hearin:2022,
+       author = {{Hearin}, Andrew P. and {Ramachandra}, Nesar and {Becker}, Matthew R. and {DeRose}, Joseph},
+        title = "{Differentiable Predictions for Large Scale Structure with SHAMNet}",
+      journal = {The Open Journal of Astrophysics},
+     keywords = {cosmology, large-scale structure of the Universe, galaxy clustering, N-body simulations, Astrophysics - Cosmology and Nongalactic Astrophysics, Astrophysics - Astrophysics of Galaxies},
+         year = 2022,
+        month = feb,
+       volume = {5},
+          eid = {3},
+        pages = {3},
+          doi = {10.21105/astro.2112.08423},
+archivePrefix = {arXiv},
+       eprint = {2112.08423},
+ primaryClass = {astro-ph.CO},
+}
+
+@ARTICLE{Hahn:2024,,
+       author = {{Hahn}, Oliver and {List}, Florian and {Porqueres}, Natalia},
+        title = "{DISCO-DJ I: a differentiable Einstein-Boltzmann solver for cosmology}",
+      journal = {\jcap},
+     keywords = {cosmological parameters from LSS, cosmological perturbation theory, baryon acoustic oscillations, power spectrum, Astrophysics - Cosmology and Nongalactic Astrophysics, 83F05 (Primary), 85A40, 85-10 (Secondary)},
+         year = 2024,
+        month = jun,
+       volume = {2024},
+       number = {6},
+          eid = {063},
+        pages = {063},
+          doi = {10.1088/1475-7516/2024/06/063},
+archivePrefix = {arXiv},
+       eprint = {2311.03291},
+ primaryClass = {astro-ph.CO},
+}
+
+@software{JaxGalSim:2025,
+  author = {JAX-GalSim developpers},
+  title = {JAX-GalSim: JAX port of GalSim, for parallelized, GPU accelerated, and differentiable galaxy image simulations},
+  url = {https://github.com/GalSim-developers/JAX-GalSim},
+  version = {0.0.1rc1},
+  year = {2025},
+}
+
+@software{Jaxpm:2025,
+  author = {Differentiable Universe Initiative},
+  title = {JaxPM: JAX-powered Cosmological Particle-Mesh N-body Solver},
+  url = {https://github.com/DifferentiableUniverseInitiative/JaxPM?tab=readme-ov-file},
+  version = {0.1.6},
+  year = {2025},
+}
+
+% -----  Models  -------------------------------------------------------------
+
+@ARTICLE{Hearin:2021,
+       author = {{Hearin}, Andrew P. and {Chaves-Montero}, Jon{\'a}s and {Becker}, Mathew R. and {Alarcon}, Alex},
+        title = "{A Differentiable Model of the Assembly of Individual and Populations of Dark Matter Halos}",
+      journal = {The Open Journal of Astrophysics},
+     keywords = {Astrophysics - Cosmology and Nongalactic Astrophysics, Astrophysics - Astrophysics of Galaxies},
+         year = 2021,
+        month = jul,
+       volume = {4},
+       number = {1},
+          eid = {7},
+        pages = {7},
+          doi = {10.21105/astro.2105.05859},
+archivePrefix = {arXiv},
+       eprint = {2105.05859},
  primaryClass = {astro-ph.CO},
 }
 
@@ -145,38 +227,74 @@ archivePrefix = {arXiv},
  primaryClass = {astro-ph.GA},
 }
 
-@ARTICLE{Hearin:2022,
-       author = {{Hearin}, Andrew P. and {Ramachandra}, Nesar and {Becker}, Matthew R. and {DeRose}, Joseph},
-        title = "{Differentiable Predictions for Large Scale Structure with SHAMNet}",
-      journal = {The Open Journal of Astrophysics},
-     keywords = {cosmology, large-scale structure of the Universe, galaxy clustering, N-body simulations, Astrophysics - Cosmology and Nongalactic Astrophysics, Astrophysics - Astrophysics of Galaxies},
-         year = 2022,
-        month = feb,
-       volume = {5},
-          eid = {3},
-        pages = {3},
-          doi = {10.21105/astro.2112.08423},
+@ARTICLE{Stevanovich:2023,
+       author = {{Stevanovich}, Dash and {Hearin}, Andrew P. and {Nagai}, Daisuke},
+        title = "{A differentiable model of the evolution of dark matter halo concentration}",
+      journal = {\mnras},
+     keywords = {software: simulations, large-scale structure of Universe, Astrophysics - Cosmology and Nongalactic Astrophysics, Astrophysics - Astrophysics of Galaxies},
+         year = 2023,
+        month = nov,
+       volume = {526},
+       number = {1},
+        pages = {1528-1544},
+          doi = {10.1093/mnras/stad2854},
 archivePrefix = {arXiv},
-       eprint = {2112.08423},
+       eprint = {2309.07854},
  primaryClass = {astro-ph.CO},
 }
 
-@ARTICLE{Hearin:2021,
-       author = {{Hearin}, Andrew P. and {Chaves-Montero}, Jon{\'a}s and {Becker}, Mathew R. and {Alarcon}, Alex},
-        title = "{A Differentiable Model of the Assembly of Individual and Populations of Dark Matter Halos}",
+@ARTICLE{Keruzore:2024,
+       author = {{K{\'e}ruzor{\'e}}, Florian and {Bleem}, L.~E. and {Frontiere}, N. and {Krishnan}, N. and {Buehlmann}, M. and {Emberson}, J.~D. and {Habib}, S. and {Larsen}, P.},
+        title = "{The picasso gas model: Painting intracluster gas on gravity-only simulations}",
       journal = {The Open Journal of Astrophysics},
-     keywords = {Astrophysics - Cosmology and Nongalactic Astrophysics, Astrophysics - Astrophysics of Galaxies},
-         year = 2021,
-        month = jul,
-       volume = {4},
-       number = {1},
-          eid = {7},
-        pages = {7},
-          doi = {10.21105/astro.2105.05859},
+     keywords = {Astrophysics - Cosmology and Nongalactic Astrophysics},
+         year = 2024,
+        month = dec,
+       volume = {7},
+          eid = {116},
+        pages = {116},
+          doi = {10.33232/001c.127486},
 archivePrefix = {arXiv},
-       eprint = {2105.05859},
+       eprint = {2408.17445},
  primaryClass = {astro-ph.CO},
 }
+
+@ARTICLE{Buisman:2025,
+       author = {{Buisman}, Jim and {List}, Florian and {Hahn}, Oliver},
+        title = "{Differentiable Halo Mass Prediction and the Cosmology-Dependence of Halo Mass Functions}",
+      journal = {arXiv e-prints},
+     keywords = {Cosmology and Nongalactic Astrophysics, Astrophysics of Galaxies},
+         year = 2025,
+        month = jul,
+          eid = {arXiv:2507.03074},
+        pages = {arXiv:2507.03074},
+          doi = {10.48550/arXiv.2507.03074},
+archivePrefix = {arXiv},
+       eprint = {2507.03074},
+ primaryClass = {astro-ph.CO},
+}
+
+% -----  Non-cosmo physics  --------------------------------------------------
+
+@software{Brax:2021,
+  author = {C. Daniel Freeman and Erik Frey and Anton Raichuk and Sertan Girgin and Igor Mordatch and Olivier Bachem},
+  title = {Brax - A Differentiable Physics Engine for Large Scale Rigid Body Simulation},
+  url = {http://github.com/google/brax},
+  version = {0.13.0},
+  year = {2021},
+}
+
+@inproceedings{Jaxmd:2020,
+ author = {Schoenholz, Samuel S. and Cubuk, Ekin D.},
+ booktitle = {Advances in Neural Information Processing Systems},
+ publisher = {Curran Associates, Inc.},
+ title = {JAX M.D. A Framework for Differentiable Physics},
+ url = {https://papers.nips.cc/paper/2020/file/83d3d4b6c9579515e1679aca8cbc8033-Paper.pdf},
+ volume = {33},
+ year = {2020}
+}
+
+% ==========  halox science references  ======================================
 
 @ARTICLE{Navarro:1997,
        author = {{Navarro}, Julio F. and {Frenk}, Carlos S. and {White}, Simon D.~M.},
@@ -242,6 +360,7 @@ archivePrefix = {arXiv},
  primaryClass = {astro-ph.CO},
 }
 
+% ==========  Other software  ================================================
 
 @ARTICLE{Astropy:2022,
        author = {{Astropy Collaboration} and {Price-Whelan}, Adrian M. and {Lim}, Pey Lian and {Earl}, Nicholas and {Starkman}, Nathaniel and {Bradley}, Larry and {Shupe}, David L. and {Patil}, Aarya A. and {Corrales}, Lia and {Brasseur}, C.~E. and {N{\"o}the}, Maximilian and {Donath}, Axel and {Tollerud}, Erik and {Morris}, Brett M. and {Ginsburg}, Adam and {Vaher}, Eero and {Weaver}, Benjamin A. and {Tocknell}, James and {Jamieson}, William and {van Kerkwijk}, Marten H. and {Robitaille}, Thomas P. and {Merry}, Bruce and {Bachetti}, Matteo and {G{\"u}nther}, H. Moritz and {Aldcroft}, Thomas L. and {Alvarado-Montes}, Jaime A. and {Archibald}, Anne M. and {B{\'o}di}, Attila and {Bapat}, Shreyas and {Barentsen}, Geert and {Baz{\'a}n}, Juanjo and {Biswas}, Manish and {Boquien}, M{\'e}d{\'e}ric and {Burke}, D.~J. and {Cara}, Daria and {Cara}, Mihai and {Conroy}, Kyle E. and {Conseil}, Simon and {Craig}, Matthew W. and {Cross}, Robert M. and {Cruz}, Kelle L. and {D'Eugenio}, Francesco and {Dencheva}, Nadia and {Devillepoix}, Hadrien A.~R. and {Dietrich}, J{\"o}rg P. and {Eigenbrot}, Arthur Davis and {Erben}, Thomas and {Ferreira}, Leonardo and {Foreman-Mackey}, Daniel and {Fox}, Ryan and {Freij}, Nabil and {Garg}, Suyog and {Geda}, Robel and {Glattly}, Lauren and {Gondhalekar}, Yash and {Gordon}, Karl D. and {Grant}, David and {Greenfield}, Perry and {Groener}, Austen M. and {Guest}, Steve and {Gurovich}, Sebastian and {Handberg}, Rasmus and {Hart}, Akeem and {Hatfield-Dodds}, Zac and {Homeier}, Derek and {Hosseinzadeh}, Griffin and {Jenness}, Tim and {Jones}, Craig K. and {Joseph}, Prajwel and {Kalmbach}, J. Bryce and {Karamehmetoglu}, Emir and {Ka{\l}uszy{\'n}ski}, Miko{\l}aj and {Kelley}, Michael S.~P. and {Kern}, Nicholas and {Kerzendorf}, Wolfgang E. and {Koch}, Eric W. and {Kulumani}, Shankar and {Lee}, Antony and {Ly}, Chun and {Ma}, Zhiyuan and {MacBride}, Conor and {Maljaars}, Jakob M. and {Muna}, Demitri and {Murphy}, N.~A. and {Norman}, Henrik and {O'Steen}, Richard and {Oman}, Kyle A. and {Pacifici}, Camilla and {Pascual}, Sergio and {Pascual-Granado}, J. and {Patil}, Rohit R. and {Perren}, Gabriel I. and {Pickering}, Timothy E. and {Rastogi}, Tanuj and {Roulston}, Benjamin R. and {Ryan}, Daniel F. and {Rykoff}, Eli S. and {Sabater}, Jose and {Sakurikar}, Parikshit and {Salgado}, Jes{\'u}s and {Sanghi}, Aniket and {Saunders}, Nicholas and {Savchenko}, Volodymyr and {Schwardt}, Ludwig and {Seifert-Eckert}, Michael and {Shih}, Albert Y. and {Jain}, Anany Shrey and {Shukla}, Gyanendra and {Sick}, Jonathan and {Simpson}, Chris and {Singanamalla}, Sudheesh and {Singer}, Leo P. and {Singhal}, Jaladh and {Sinha}, Manodeep and {Sip{\H{o}}cz}, Brigitta M. and {Spitler}, Lee R. and {Stansby}, David and {Streicher}, Ole and {{\v{S}}umak}, Jani and {Swinbank}, John D. and {Taranu}, Dan S. and {Tewary}, Nikita and {Tremblay}, Grant R. and {de Val-Borro}, Miguel and {Van Kooten}, Samuel J. and {Vasovi{\'c}}, Zlatan and {Verma}, Shresth and {de Miranda Cardoso}, Jos{\'e} Vin{\'\i}cius and {Williams}, Peter K.~G. and {Wilson}, Tom J. and {Winkel}, Benjamin and {Wood-Vasey}, W.~M. and {Xue}, Rui and {Yoachim}, Peter and {Zhang}, Chen and {Zonca}, Andrea and {Astropy Project Contributors}},
