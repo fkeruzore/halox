@@ -19,7 +19,7 @@ bibliography: paper.bib
 # Summary
 
 Dark matter halos are fundamental structures in cosmology, forming the gravitational potential wells hosting galaxies and clusters of galaxies.
-Their properties and statistical distribution (the halo mass function) are invaluable tools to infer the fundamental properties of the Universe.
+Their properties and statistical distribution (including the halo mass function) are invaluable tools to infer the fundamental properties of the Universe.
 The `halox` package is a JAX-powered Python library enabling differentiable and accelerated computations of key properties of dark matter halos, and of the halo mass function.
 The automatic differentiation capabilities of `halox` enable its usage in gradient-based workflows, *e.g.* in efficient Hamiltonian Monte Carlo sampling or machine learning applications.
 
