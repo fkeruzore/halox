@@ -5,15 +5,12 @@ Thank you for your interest in contributing to halox! This guide will help you g
 ## Development Setup
 
 ### Step 0: Install uv
-
 This project uses [uv](https://docs.astral.sh/uv/) for dependency management. If you don't have uv installed:
-
 ```bash
 curl -LsSf https://astral.sh/uv/install.sh | sh
 ```
 
 ### Step 1: Clone and Install Dependencies
-
 ```bash
 git clone https://github.com/fkeruzore/halox.git
 cd halox
@@ -22,30 +19,33 @@ uv pip install .
 ```
 
 ### Step 2: Verify Installation
-
-Run the quality checks listed in [Tests and linting](#tests-and-linting) to confirm your environment is ready before you start coding.
+Run tests to confirm your environment is ready before you start coding:
+```bash
+uv run pytest
+```
+(For more information, see [Tests and linting / Running tests](#running-tests))
 
 ## Tests and linting
 
 ### Running Tests
 - `uv run pytest` executes the full suite and enforces 100% coverage.
 - Target modules with `uv run pytest tests/test_hmfs.py` or add `-k <keyword>` for finer selection.
-- All quality gates must pass before you open a pull request.
-
-### Linting & Formatting
-- `uv run ruff check` runs the lint rules configured in `pyproject.toml`.
-- `uv run ruff format` applies the project formatter.
-- Follow PEP 8 with 79-character lines; Ruff enforces the `E`, `F`, and `B` rule sets.
+- All tests must pass before you open a pull request.
 
 ### Unit Test Conventions
 - Place tests under `tests/` with descriptive module names.
 - Prefer comparisons against trusted references (e.g., astropy, colossus) when validating scientific results.
 - Never modify or delete existing tests.
 
+### Linting & Formatting
+We recommend using [ruff](https://docs.astral.sh/uv/) for linting and formatting.
+The configuration in `pyproject.toml` will allow you to run:
+- `uv run ruff check` to run the linter with the `E` (pycodestyles), `F` (Pyflakes), and `B` (flake8-bugbear) rulesets;
+- `uv run ruff format` to apply code formatting (PEP 8 with 79 character lines).
+
 ## Implementing New Features
 
 ### Code Structure
-
 The halox library is organized into five main modules:
 
 - **`cosmology`**: Cosmology utility functions (Hubble parameter, critical density) extending jax-cosmo
@@ -57,46 +57,37 @@ The halox library is organized into five main modules:
 Make sure your features are added to the right module, or to a new submodule if none of them fit.
 
 ### JAX Best Practices
-
 - Support vectorization using `jax.vmap` where applicable
 - Leverage JAX's autodifferentiation capabilities
 - Use `jax.numpy` instead of `numpy`
 - Enable 64-bit precision in examples: `jax.config.update("jax_enable_x64", True)`
 
 ### Cosmology Dependencies
-
 Always use `jax_cosmo.Cosmology` objects for cosmological calculations:
-
 ```python
 import jax_cosmo as jc
+import halox.cosmology as hc
 
-def compute_something(M: ArrayLike, z: ArrayLike, cosmo: jc.Cosmology) -> Array:
+def compute_something(z: ArrayLike, cosmo: jc.Cosmology) -> Array:
     """Compute something cosmology-dependent."""
     # Use cosmo.h, cosmo.Omega_m, etc.
-    H_z = jc.hubble(z, cosmo)
-    rho_c = jc.critical_density(z, cosmo)
+    Om = cosmo.Omega_m
+    rho_c = hc.critical_density(z, cosmo)
+    rho_m = Om * rho_c
     # Your implementation
 ```
-
 Feel free to extend functionality through the `halox.cosmology` module when jax-cosmo doesn't provide needed functions.
 
 ### Docstring Format
-
 Use NumPy-style docstrings with clear units:
-
 ```python
-def sigma_M(M: ArrayLike, z: ArrayLike, cosmo: jc.Cosmology) -> Array:
-    """Compute RMS variance of density fluctuations on mass scale M.
-    
-    The variance is computed by converting mass M to its corresponding
-    Lagrangian radius and integrating the power spectrum with a top-hat
-    window function.
+def some_function(M: ArrayLike, z: ArrayLike, cosmo: jc.Cosmology) -> Array:
+    """[description]
     
     Parameters
     ----------
     M : ArrayLike
-        Halo mass
-        [h^-1 M_sun]
+        Halo mass [h-1 Msun]
     z : ArrayLike
         Redshift
     cosmo : jc.Cosmology
@@ -105,25 +96,17 @@ def sigma_M(M: ArrayLike, z: ArrayLike, cosmo: jc.Cosmology) -> Array:
     Returns
     -------
     Array
-        RMS variance σ(M,z)
-        [dimensionless]
-        
-    References
-    ----------
-    .. [1] Tinker et al. 2008, ApJ, 688, 709
+        Some result [h2 Msun Mpc-3]
     """
 ```
-
 Key conventions:
 - Document the `cosmo` parameter as "Underlying cosmology"
-- Specify units in square brackets on separate lines
-- Use `h^-1` notation for little h factors (e.g., `[h^-1 M_sun]`, `[h^2 M_sun Mpc^-3]`)
+- Specify units in square brackets
+- Use `h-1` notation for little h factors (e.g., `[h-1 Msun]`, `[h2 Msun Mpc-3]`)
 - Include mathematical context and references to original papers
 
 ### Type Hints
-
 Use proper type hints throughout your code:
-
 ```python
 from jax import Array
 from jax.typing import ArrayLike
@@ -133,7 +116,6 @@ def my_function(M: ArrayLike, z: ArrayLike, cosmo: jc.Cosmology) -> Array:
     """Function description."""
     # Implementation
 ```
-
 - Use `ArrayLike` for input parameters that accept arrays or scalars
 - Use `Array` for return values and internal JAX arrays
 - Use `jax_cosmo.Cosmology` for cosmology objects
@@ -141,23 +123,19 @@ def my_function(M: ArrayLike, z: ArrayLike, cosmo: jc.Cosmology) -> Array:
 ## Writing Documentation
 
 ### API Documentation
-
 All public functions require comprehensive docstrings as shown above. Include:
 
 - Clear description of functionality
-- Mathematical background when relevant
 - Parameter descriptions with units
 - Return value descriptions
-- References to original papers
+- References to original papers when relevant
 
 ### Example Notebooks
-
 When adding new functionality, provide an example notebook in `notebooks/` that covers typical usage and highlights JAX-based benefits.
 If relevant, also add a comparison against a trusted reference like colossus to the `notebooks/halox_vs_colossus.ipynb` notebook.
 New notebooks should reuse the import/style pattern from existing notebooks instead of redefining it.
 
 ### Building Documentation
-
 Build the Sphinx documentation locally:
 
 ```bash
@@ -169,7 +147,6 @@ Documentation will be built in `docs/build/html/`.
 ## Pull Requests and CI/CD
 
 ### Before Submitting
-
 Ensure your contribution meets these requirements:
 
 - [ ] Code is properly formatted (`uv run ruff format`)
@@ -180,25 +157,20 @@ Ensure your contribution meets these requirements:
 - [ ] Documentation is updated if needed
 
 ### Pull Request Process
-
 1. **Create a feature branch**:
    ```bash
    git checkout -b feature/descriptive-name
    ```
-
 2. **Make your changes** following the guidelines above
-
 3. **Commit with clear messages**:
    ```bash
    git add .
    git commit -m "Add: Brief description of changes"
    ```
-
 4. **Push and create PR**:
    ```bash
    git push origin feature/descriptive-name
    ```
-
 5. **Submit pull request** on GitHub with:
    - Clear description of changes
    - Motivation for the feature/fix
@@ -206,7 +178,6 @@ Ensure your contribution meets these requirements:
    - Any breaking changes
 
 ### CI/CD Pipeline
-
 Our CI system automatically:
 
 - Runs the full test suite on multiple Python versions
@@ -216,17 +187,15 @@ Our CI system automatically:
 All checks must pass before a PR can be merged.
 
 ## Getting Help
-
 - **Issues**: Report bugs or request features via GitHub Issues
 - **Discussions**: Ask questions in GitHub Discussions
 - **Documentation**: Refer to the built documentation and example notebooks
 
 ## Development Best Practices
-
 - Write clear code
-- Comment often
+- Comment a lot
 - Test thoroughly
-- Follow the existing code patterns and conventions
-- Please avoid having AI agents implement unit tests for new features; they are meant to be a human-maintained safety net.
+- Follow existing code patterns and conventions
+- Please avoid having AI agents implement unit tests for new features; they are meant to be a human-maintained safety net ensuring accuracy.
 
 Thank you for your help!
