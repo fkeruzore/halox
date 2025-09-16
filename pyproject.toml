@@ -46,7 +46,7 @@ docs = [
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 python_files = ["test_*.py"]
-addopts = "-v --cov=halox --cov-report=term-missing --cov-fail-under=90"
+addopts = "-v --cov=halox --cov-report=term-missing --cov-fail-under=100"
 
 [build-system]
 requires = ["hatchling"]
