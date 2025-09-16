@@ -11,8 +11,13 @@ docs/jupyter_execute
 .venv
 
 # Agents
+AGENTS.md
 CLAUDE.md
 claude_debug/*
+GEMINI.md
+
+# Heavy logo files
+logo/*.key
 
 # Misc
 **.DS_Store
