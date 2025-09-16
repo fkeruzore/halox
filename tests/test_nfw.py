@@ -229,7 +229,7 @@ def test_surface_density(
 
     assert jnp.allclose(jnp.array(res_c), res_h, rtol=rtol), (
         f"Different sigma({rs}): {res_c} != {res_h}"
-    )
+    )  # E501: ignore
 
 
 @pytest.mark.parametrize("halo_name", test_halos.keys())
@@ -262,7 +262,6 @@ def test_convert_delta(
     if return_vals:
         return res_h, res_c
 
-    return res_h, res_c
     assert jnp.allclose(res_c, res_h, rtol=rtol), (
         f"Different results: {res_c} != {res_h}"
     )
