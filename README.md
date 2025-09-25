@@ -2,6 +2,8 @@
 <img src="https://raw.githubusercontent.com/fkeruzore/halox/main/logo/logo_text.png" alt="logo"></img>
 </div>
 
+[![status](https://joss.theoj.org/papers/0dbdd503f7c6c2377555c74eb64913f2/status.svg)](https://joss.theoj.org/papers/0dbdd503f7c6c2377555c74eb64913f2)
+
 # halox
 
 JAX-powered Python library for differentiable dark matter halo property and mass function calculations.
