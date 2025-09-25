@@ -29,6 +29,7 @@ tests = [
     "pytest>=8.4.0",
     "pytest-cov>=6.2.1",
     "pytest-xdist>=3.7.0",
+    "coverage-badge>=1.1.0",
 ]
 docs = [
     "matplotlib>=3.9.4",
@@ -46,7 +47,7 @@ docs = [
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 python_files = ["test_*.py"]
-addopts = "-v --cov=halox --cov-report=term-missing --cov-fail-under=100"
+addopts = "-v --cov=halox --cov-report=term-missing --cov-report=json --cov-fail-under=100"
 
 [build-system]
 requires = ["hatchling"]
