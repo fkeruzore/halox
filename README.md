@@ -1,5 +1,5 @@
 <div align="center">
-<img src="https://raw.githubusercontent.com/fkeruzore/halox/main/logo/logo_text.png" alt="logo"></img>
+<img src="https://raw.githubusercontent.com/fkeruzore/halox/main/imgs/logo_text.png" alt="logo"></img>
 </div>
 
 [![PyPi version](https://img.shields.io/pypi/v/halox)](https://pypi.org/project/halox)
