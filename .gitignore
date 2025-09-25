@@ -17,7 +17,7 @@ claude_debug/*
 GEMINI.md
 
 # Heavy logo files
-logo/*.key
+imgs/*.key
 
 # Misc
 **.DS_Store
