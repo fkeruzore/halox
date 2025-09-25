@@ -40,5 +40,5 @@ jobs:
         git config --local user.email "action@github.com"
         git config --local user.name "GitHub Action"
         git add imgs/coverage.svg
-        git diff --staged --quiet || git commit -m "Update coverage badge"
+        git diff --staged --quiet || git commit -m "Update coverage badge [skip ci]"
         git push
