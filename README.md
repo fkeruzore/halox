@@ -5,7 +5,6 @@
 [![PyPi version](https://img.shields.io/pypi/v/halox)](https://pypi.org/project/halox)
 ![tests](https://github.com/fkeruzore/halox/actions/workflows/tests.yml/badge.svg)
 ![coverage](https://raw.githubusercontent.com/fkeruzore/halox/main/imgs/coverage.svg)
-[![status](https://joss.theoj.org/papers/0dbdd503f7c6c2377555c74eb64913f2/status.svg)](https://joss.theoj.org/papers/0dbdd503f7c6c2377555c74eb64913f2)
 
 # halox
 
