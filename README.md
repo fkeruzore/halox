@@ -31,6 +31,7 @@ For a manual installation, see the [documentation pages](https://halox.readthedo
 * [`halox.hmf`](https://halox.readthedocs.io/en/latest/notebooks/hmf.html): The halo mass function, quantifying the abundance of dark matter halos in mass and redshift, including its dependence on cosmological parameters;
 * [`halox.bias`](https://halox.readthedocs.io/en/latest/notebooks/bias.html): The halo bias.
 
+All properties support cosmology dependence using [jax-cosmo](https://github.com/DifferentiableUniverseInitiative/jax_cosmo).
 More information on the modules available can be found in the [documentation pages](https://halox.readthedocs.io/en/latest/physics_modules.html).
 
 ## Testing
