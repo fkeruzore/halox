@@ -69,6 +69,7 @@ def sigma_R(
     cosmo: jc.Cosmology,
     k_min: float = 1e-5,
     k_max: float = 1e2,
+    n_k_int: int = 5000,
 ) -> Array:
     """Compute RMS variance of density fluctuations in spheres
     of radius R at redshift z.
@@ -85,6 +86,9 @@ def sigma_R(
         Minimum k for integration [h Mpc-1], default 1e-5
     k_max : float
         Maximum k for integration [h Mpc-1], default 1e2
+    n_k_int : int
+        Number of k-space integration points for :math:`\\sigma(R,z)`,
+        default 5000
 
     Returns
     -------
@@ -93,8 +97,15 @@ def sigma_R(
     """
     R = jnp.asarray(R)
     z = jnp.asarray(z)
-    # Create k array for integration (already in h/Mpc)
-    k = jnp.logspace(jnp.log10(k_min), jnp.log10(k_max), 5000)
+
+    # Following is needed to be able to JIT this function for different values
+    # of n_k_int. We need to ensure n_k_int is a concrete Python int (required
+    # for static array shape) and to clear jax_cosmo's workspace cache to avoid
+    # tracer leaks across different JITs
+    n_k_int = int(n_k_int)
+    cosmo._workspace.clear()
+    # Create k array for integration (h/Mpc)
+    k = jnp.logspace(jnp.log10(k_min), jnp.log10(k_max), n_k_int)
 
     # Power spectrum at redshift z
     a = 1.0 / (1.0 + z)
@@ -117,7 +128,9 @@ def sigma_R(
     return jnp.sqrt(sigma2)
 
 
-def sigma_M(M: ArrayLike, z: ArrayLike, cosmo: jc.Cosmology) -> Array:
+def sigma_M(
+    M: ArrayLike, z: ArrayLike, cosmo: jc.Cosmology, n_k_int: int = 5000
+) -> Array:
     """Compute RMS variance of density fluctuations within the
     Lagrangian radius of a halo with mass M at redshift z.
 
@@ -129,6 +142,9 @@ def sigma_M(M: ArrayLike, z: ArrayLike, cosmo: jc.Cosmology) -> Array:
         Redshift
     cosmo : jc.Cosmology
         Underlying cosmology
+    n_k_int : int
+        Number of k-space integration points for :math:`\\sigma(R,z)`,
+        default 5000
 
     Returns
     -------
@@ -138,4 +154,4 @@ def sigma_M(M: ArrayLike, z: ArrayLike, cosmo: jc.Cosmology) -> Array:
     M = jnp.asarray(M)
     z = jnp.asarray(z)
     R = mass_to_lagrangian_radius(M, cosmo)
-    return sigma_R(R, z, cosmo)
+    return sigma_R(R, z, cosmo, n_k_int=n_k_int)
