@@ -62,6 +62,7 @@ def tinker08_f_sigma(
     z: ArrayLike,
     cosmo: jc.Cosmology,
     delta_c: float = 200.0,
+    n_k_int: int = 5000,
 ) -> Array:
     """Tinker08 multiplicity function :math:`f(\\sigma)`.
 
@@ -75,6 +76,9 @@ def tinker08_f_sigma(
         Underlying cosmology
     delta_c : float
         Overdensity threshold, default 200.0
+    n_k_int : int
+        Number of k-space integration points for :math:`\\sigma(R,z)`,
+        default 5000
 
     Returns
     -------
@@ -83,7 +87,7 @@ def tinker08_f_sigma(
     """
     M = jnp.asarray(M)
     z = jnp.asarray(z)
-    sigma = lss.sigma_M(M, z, cosmo)
+    sigma = lss.sigma_M(M, z, cosmo, n_k_int=n_k_int)
     A, a, b, c = _tinker08_parameters(z, cosmo, delta_c)
     return A * ((b / sigma) ** a + 1.0) * jnp.exp(-c / sigma**2)
 
@@ -93,6 +97,7 @@ def tinker08_mass_function(
     z: ArrayLike,
     cosmo: jc.Cosmology,
     delta_c: float = 200.0,
+    n_k_int: int = 5000,
 ) -> Array:
     """Tinker08 halo mass function :math:`dn/d\\ln M`.
 
@@ -106,6 +111,9 @@ def tinker08_mass_function(
         Underlying cosmology, default Planck18
     delta_c : float
         Overdensity threshold, default 200.0
+    n_k_int : int
+        Number of k-space integration points for :math:`\\sigma(R,z)`,
+        default 5000
 
     Returns
     -------
@@ -119,11 +127,11 @@ def tinker08_mass_function(
     rho_m = cosmo.Omega_m * cosmology.critical_density(0.0, cosmo)
 
     # Multiplicity function with redshift evolution
-    f_sigma = tinker08_f_sigma(M, z, cosmo, delta_c)
+    f_sigma = tinker08_f_sigma(M, z, cosmo, delta_c, n_k_int=n_k_int)
 
     # Use autodiff to compute d ln sigma / dM
     d_ln_sigma_inv = jax.grad(
-        lambda M: jnp.log(1.0 / lss.sigma_M(M, z, cosmo))
+        lambda M: jnp.log(1.0 / lss.sigma_M(M, z, cosmo, n_k_int=n_k_int))
     )
 
     dn_dm = f_sigma * (rho_m / M) * jax.vmap(d_ln_sigma_inv)(M)

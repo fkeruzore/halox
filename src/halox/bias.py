@@ -49,6 +49,7 @@ def tinker10_bias(
     cosmo: jc.Cosmology,
     delta_c: float = 200.0,
     delta_sc: float = 1.686,
+    n_k_int: int = 5000,
 ) -> Array:
     """Tinker10 halo bias function.
 
@@ -66,6 +67,9 @@ def tinker10_bias(
         Overdensity threshold, default 200.0
     delta_sc : float
         Spherical collapse threshold, default 1.686
+    n_k_int : int
+        Number of k-space integration points for :math:`\\sigma(R,z)`,
+        default 5000
 
     Returns
     -------
@@ -76,7 +80,7 @@ def tinker10_bias(
     z = jnp.asarray(z)
 
     # Calculate peak height nu = delta_sc / sigma(M,z)
-    sigma = lss.sigma_M(M, z, cosmo)
+    sigma = lss.sigma_M(M, z, cosmo, n_k_int=n_k_int)
     nu = delta_sc / sigma
 
     # Get parameters
