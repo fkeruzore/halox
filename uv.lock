@@ -1097,7 +1097,7 @@ requires-dist = [
     { name = "colossus", marker = "extra == 'tests'", specifier = ">=1.3.8" },
     { name = "coverage-badge", marker = "extra == 'tests'", specifier = ">=1.1.0" },
     { name = "jax", specifier = ">=0.4.30" },
-    { name = "jax-cosmo", git = "https://github.com/fkeruzore/jax_cosmo.git" },
+    { name = "jax-cosmo", specifier = ">=0.1.0" },
     { name = "jaxopt", specifier = ">=0.8.0" },
     { name = "matplotlib", marker = "extra == 'docs'", specifier = ">=3.9.4" },
     { name = "myst-nb", marker = "extra == 'docs'", specifier = ">=1.2.0" },
@@ -1347,12 +1347,16 @@ wheels = [
 [[package]]
 name = "jax-cosmo"
 version = "0.1.0"
-source = { git = "https://github.com/fkeruzore/jax_cosmo.git#ba12b19623ef1d5cb4526e079f48a4a1f4c2e84c" }
+source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "jax", version = "0.4.30", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.10'" },
     { name = "jax", version = "0.6.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version == '3.10.*'" },
     { name = "jax", version = "0.7.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
+    { name = "jaxlib", version = "0.4.30", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.10'" },
+    { name = "jaxlib", version = "0.6.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version == '3.10.*'" },
+    { name = "jaxlib", version = "0.7.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
 ]
+sdist = { url = "https://files.pythonhosted.org/packages/b1/ff/3d1c8d348ce2eb07cc990142cbd4dd2e72070dfd30e2dbe3660f1b392cd2/jax-cosmo-0.1.0.tar.gz", hash = "sha256:a44003ff38381347059327b88e3fd820499150195acbf341b463db52bb461372", size = 287446, upload-time = "2023-02-05T14:04:06.937Z" }
 
 [[package]]
 name = "jaxlib"

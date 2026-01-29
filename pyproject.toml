@@ -14,10 +14,6 @@ dependencies = [
     "scipy>=1.13.1",
 ]
 
-[tool.uv.sources]
-jax-cosmo = { git = "https://github.com/fkeruzore/jax_cosmo.git" }
-
-
 [dependency-groups]
 dev = [
     "ruff>=0.12.3",
