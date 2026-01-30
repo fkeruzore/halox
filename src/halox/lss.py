@@ -165,6 +165,7 @@ def peakheight(
     Returns the peak height (nu) of a dark matter halo defined by 
     the spherical collapse overdensity and the RMS variance of the
     density fluctuations within the Lagrangian raidus
+    
     Parameters
     ----------
     M : Array

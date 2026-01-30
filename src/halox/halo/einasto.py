@@ -4,6 +4,7 @@ import jax.numpy as jnp
 import jax_cosmo as jc
 import jax.scipy as jsp
 from jaxopt import LBFGSB
+from halox import lss
 
 from ..cosmology import G
 from .. import cosmology
@@ -37,15 +38,15 @@ class EinastoHalo:
         self,
         m_delta: ArrayLike,
         c_delta: ArrayLike,
-        alpha: ArrayLike,
         z: ArrayLike,
+        alpha: ArrayLike,
         cosmo: jc.Cosmology,
         delta: float = 200,
     ):
         self.m_delta = jnp.asarray(m_delta)
         self.c_delta = jnp.asarray(c_delta)
-        self.alpha = jnp.asarray(alpha)
         self.z = jnp.asarray(z)
+        self.alpha = jnp.asarray(alpha)
         self.delta = delta
         self.cosmo = cosmo
 
@@ -122,7 +123,7 @@ class EinastoHalo:
         r = jnp.asarray(r)
         return jnp.sqrt(G * self.enclosed_mass(r) / r)
     
-    def potential(self, r: ArrayLike) -> Array: #currently not checked, probably need a way to verify this
+    def potential(self, r: ArrayLike) -> Array: #need tests for validity, autodiff compatability with incomplete gamma function
         """Potential profile :math:`\\phi(r)`.
 
         Parameters
@@ -141,6 +142,86 @@ class EinastoHalo:
         int_denom = (2/self.alpha/self.Rs**self.alpha)**(2/self.alpha) * self.alpha
         return prefact * (  jsp.special.gamma(2/self.alpha) / int_denom  )\
               - (  jsp.special.gammainc(2/self.alpha,2/self.alpha * (r/self.Rs)**self.alpha) / int_denom  )  * jsp.special.gamma(3/self.alpha)
+    
+    def to_delta(self, delta_new: float) -> tuple[Array, Array, Array]:
+        """Convert halo properties to a different overdensity definition.
+
+        Parameters
+        ----------
+        delta_new : float
+            New density contrast in units of critical density at redshift z
+
+        Returns
+        -------
+        Array [h-1 Msun]
+            Mass at new overdensity
+        Array [h-1 Mpc]
+            Radius at new overdensity
+        Array
+            Concentration at new overdensity
+        """
+
+        # Target density for the new overdensity definition
+        rho_c = cosmology.critical_density(self.z, self.cosmo)
+        target_density = delta_new * rho_c
+
+        # Normalized objective function (critical for numerical stability)
+        def lsq(r_new):
+            m_enc = self.enclosed_mass(r_new[0])
+            mean_density = m_enc / (4.0 * jnp.pi * r_new[0] ** 3 / 3.0)
+            # Normalize by target_density to get dimensionless objective
+            return ((mean_density - target_density) / target_density) ** 2
+
+        # Initial guess based on scaling relation
+        r0 = jnp.array([self.r_delta * (self.delta / delta_new) ** (1 / 3)])
+
+        # Bounds for the optimization
+        lower = jnp.array([0.01 * self.r_delta])
+        upper = jnp.array([10.0 * self.r_delta])
+        bounds = (lower, upper)
+
+        # Use jaxopt LBFGSB optimizer
+        optimizer = LBFGSB(fun=lsq, tol=1e-12)
+        result = optimizer.run(r0, bounds=bounds)
+
+        r_new = result.params[0]
+
+        # Calculate new mass and concentration
+        m_new = self.enclosed_mass(r_new)
+        c_new = r_new / self.Rs
+
+        return m_new, r_new, c_new
+
 
 # TODO
 # Need to add velocity dispersion, surface density, to_delta, and lsq
+
+def a_from_nu(M:ArrayLike, #this should be the virial mass
+              z:ArrayLike, 
+              cosmo: jc.Cosmology, 
+              n_k_int: int=5000, 
+              delta_sc: float=1.686,) -> Array:
+    """
+    
+    Returns the alpha parameter from the peak height value of the halo
+
+    Parameters
+    ----------
+    M : Array
+        Mass [h-1 Msun]
+    z : Array
+        Redshift
+    cosmo : jc.Cosmology
+        Underlying cosmology
+    n_k_int : int
+        Number of k-space integration points for :math:`\\sigma(R,z)`,
+        default 5000
+    delta_sc: float
+        Required overdensity for spherical collapse, usually 1.686 (tophat)
+    :return: Array
+        Returns alpha for halos
+    """
+    nu = lss.peakheight(M, z, cosmo, n_k_int, delta_sc)
+    alpha = 0.155 + 0.0095 * nu**2
+    return alpha
+
