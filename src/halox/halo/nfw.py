@@ -291,6 +291,9 @@ def delta_delta(M:ArrayLike, #current solution for other halos, probably not the
         Desired overdensity factor
         
     """  
+    M = jnp.atleast_1d(M)
+    c = jnp.atleast_1d(c)
+    z = jnp.atleast_1d(z)
     def single_halo(Mi, ci, zi):
         halo = NFWHalo(Mi, ci, zi, cosmo, delta_old)
         return halo.to_delta(delta_new)
@@ -298,4 +301,8 @@ def delta_delta(M:ArrayLike, #current solution for other halos, probably not the
     # Vectorize over halo index
     M_new, R_new, c_new = jax.vmap(single_halo)(M, c, z)
 
-    return M_new, R_new, c_new
+    return (
+        jnp.squeeze(M_new), 
+        jnp.squeeze(R_new), 
+        jnp.squeeze(c_new)
+        )

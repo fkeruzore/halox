@@ -124,25 +124,25 @@ class EinastoHalo:
         r = jnp.asarray(r)
         return jnp.sqrt(G * self.enclosed_mass(r) / r)
     
-    def potential(self, r: ArrayLike) -> Array: #need tests for validity, autodiff compatability with incomplete gamma function
-        """Potential profile :math:`\\phi(r)`.
+    # def potential(self, r: ArrayLike) -> Array: #need tests for validity, autodiff compatability with incomplete gamma function
+    #     """Potential profile :math:`\\phi(r)`.
 
-        Parameters
-        ----------
-        r : Array [h-1 Mpc]
-            Radius
+    #     Parameters
+    #     ----------
+    #     r : Array [h-1 Mpc]
+    #         Radius
 
-        Returns
-        -------
-        Array [km2 s-2]
-            Potential at radius `r`
-        """
-        r = jnp.asarray(r)
-        # G = G.to("km2 Mpc Msun-1 s-2").value
-        prefact = -4 * jnp.pi * G * self.rho0 * jnp.exp(2/self.alpha)
-        int_denom = (2/self.alpha/self.Rs**self.alpha)**(2/self.alpha) * self.alpha
-        return prefact * (  jsp.special.gamma(2/self.alpha) / int_denom  )\
-              - (  jsp.special.gammainc(2/self.alpha,2/self.alpha * (r/self.Rs)**self.alpha) / int_denom  )  * jsp.special.gamma(3/self.alpha)
+    #     Returns
+    #     -------
+    #     Array [km2 s-2]
+    #         Potential at radius `r`
+    #     """
+    #     r = jnp.asarray(r)
+    #     # G = G.to("km2 Mpc Msun-1 s-2").value
+    #     prefact = -4 * jnp.pi * G * self.rho0 * jnp.exp(2/self.alpha)
+    #     int_denom = (2/self.alpha/self.Rs**self.alpha)**(2/self.alpha) * self.alpha
+    #     return prefact * (  jsp.special.gamma(2/self.alpha) / int_denom  )\
+    #           - (  jsp.special.gammainc(2/self.alpha,2/self.alpha * (r/self.Rs)**self.alpha) / int_denom  )  * jsp.special.gamma(3/self.alpha)
     
     def to_delta(self, delta_new: float) -> tuple[Array, Array, Array]:
         """Convert halo properties to a different overdensity definition.
@@ -173,7 +173,7 @@ class EinastoHalo:
 # TODO
 # Need to add velocity dispersion, surface density, to_delta, and lsq
 
-def a_from_nu(M:ArrayLike, #this should be the virial mass
+def a_from_nu(M:ArrayLike, #this should be the virial mass, currently not, will need to change, see profile_einasto for more details
               z:ArrayLike, 
               cosmo: jc.Cosmology, 
               n_k_int: int=5000, 
