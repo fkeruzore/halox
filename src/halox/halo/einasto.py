@@ -5,6 +5,7 @@ import jax_cosmo as jc
 import jax.scipy as jsp
 from jaxopt import LBFGSB
 from halox import lss
+from . import nfw
 
 from ..cosmology import G
 from .. import cosmology
@@ -160,37 +161,13 @@ class EinastoHalo:
         Array
             Concentration at new overdensity
         """
+        output = nfw.delta_delta(self.m_delta, self.c_delta, self.z, self.cosmo, self.delta, delta_new)
+        self.m_delta = output[0]
+        self.r_delta = output[1]
+        self.c_delta = output[2]
+        self.delta = delta_new
+        return output
 
-        # Target density for the new overdensity definition
-        rho_c = cosmology.critical_density(self.z, self.cosmo)
-        target_density = delta_new * rho_c
-
-        # Normalized objective function (critical for numerical stability)
-        def lsq(r_new):
-            m_enc = self.enclosed_mass(r_new[0])
-            mean_density = m_enc / (4.0 * jnp.pi * r_new[0] ** 3 / 3.0)
-            # Normalize by target_density to get dimensionless objective
-            return ((mean_density - target_density) / target_density) ** 2
-
-        # Initial guess based on scaling relation
-        r0 = jnp.array([self.r_delta * (self.delta / delta_new) ** (1 / 3)])
-
-        # Bounds for the optimization
-        lower = jnp.array([0.01 * self.r_delta])
-        upper = jnp.array([10.0 * self.r_delta])
-        bounds = (lower, upper)
-
-        # Use jaxopt LBFGSB optimizer
-        optimizer = LBFGSB(fun=lsq, tol=1e-12)
-        result = optimizer.run(r0, bounds=bounds)
-
-        r_new = result.params[0]
-
-        # Calculate new mass and concentration
-        m_new = self.enclosed_mass(r_new)
-        c_new = r_new / self.Rs
-
-        return m_new, r_new, c_new
 
 
 # TODO
