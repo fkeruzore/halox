@@ -1,10 +1,15 @@
 import jax
 import pytest
 import jax.numpy as jnp
+import jax.scipy.integrate as integral
 import jax_cosmo as jc
 from colossus.halo import profile_einasto, mass_defs
 import colossus.cosmology.cosmology as cc
 import halox
+
+# Note, current alpha is calculated relying on a virial mass input,
+# currently this is still implemented for coverage, but it must be 
+# understood that this current test is not necessarily physical
 
 jax.config.update("jax_enable_x64", True)
 
@@ -57,7 +62,7 @@ def test_density(halo_name, delta, cosmo_name, return_vals: bool = False):
     )
 
     rs = jnp.logspace(-2, 1, 6)  # h-1 Mpc
-    res_c = ein_c.density(rs * 1000) * 1e9
+    res_c = ein_c.density(rs * 1000) * 1e9 # I have failed at test writing right here!!!
     res_h = ein_h.density(rs)
 
     if return_vals:
@@ -101,40 +106,39 @@ def test_enclosed_mass(
     )
 
 
-# profiley to get this to work
-# @pytest.mark.parametrize("halo_name", test_halos.keys())
-# @pytest.mark.parametrize("delta", test_deltas)
-# @pytest.mark.parametrize("cosmo_name", test_cosmos.keys())
-# def test_potential(halo_name, delta, cosmo_name, return_vals: bool = False):
-#     halo = test_halos[halo_name]
-#     m_delta, c_delta, z = halo["M"], halo["c"], halo["z"]
-#     cosmo_j, cosmo_c = test_cosmos[cosmo_name]
+@pytest.mark.parametrize("halo_name", test_halos.keys())
+@pytest.mark.parametrize("delta", test_deltas)
+@pytest.mark.parametrize("cosmo_name", test_cosmos.keys())
+def test_potential(halo_name, delta, cosmo_name, return_vals: bool = False):
+    halo = test_halos[halo_name]
+    m_delta, c_delta, z = halo["M"], halo["c"], halo["z"]
+    cosmo_j, cosmo_c = test_cosmos[cosmo_name]
 
-#     cosmo_c = cc.setCosmology(cosmo_c)
-#     alpha = halox.einasto.a_from_nu(m_delta, z, cosmo_j)
-#     ein_h = halox.einasto.EinastoHalo(m_delta, c_delta, z, alpha = alpha, cosmo = cosmo_j, delta=delta)
-#     ein_c = profile_einasto.EinastoProfile(
-#         M=m_delta,
-#         c=c_delta,
-#         z=z,
-#         mdef=f"{delta:.0f}c",
-#         alpha = alpha
-#     )
+    cosmo_c = cc.setCosmology(cosmo_c)
+    alpha = halox.einasto.a_from_nu(m_delta, z, cosmo_j)
+    ein_h = halox.einasto.EinastoHalo(m_delta, c_delta, z, alpha = alpha, cosmo = cosmo_j, delta=delta)
+    ein_c = profile_einasto.EinastoProfile(
+        M=m_delta,
+        c=c_delta,
+        z=z,
+        mdef=f"{delta:.0f}c",
+        alpha = alpha
+    )
 
-#     rs = jnp.logspace(-2, 1, 6)  # Mpc
+    rs = jnp.logspace(-2, 1, 6)  # Mpc
 
-#     _r0 = ein_c.par["rhos"] * 1e9  # Msun Mpc-3
-#     _rs = ein_c.par["rs"] / 1e3  # Mpc
+    _r0 = ein_c.par["rhos"] * 1e9  # Msun Mpc-3
+    _rs = ein_c.par["rs"] / 1e3  # Mpc
 
-#     res_c = -4 * jnp.pi * G * _r0 * _rs**3 * jnp.log(1 + rs / _rs) / rs
-#     res_h = ein_h.potential(rs)
+    res_c = -4 * jnp.pi * G * _r0 * _rs**3 * jnp.log(1 + rs / _rs) / rs
+    res_h = ein_h.potential(rs)
 
-#     if return_vals:
-#         return res_h, res_c
+    if return_vals:
+        return res_h, res_c
 
-#     assert jnp.allclose(jnp.array(res_c), res_h, rtol=rtol), (
-#         f"Different phi({rs}): {res_c} != {res_h}"
-#     )
+    assert jnp.allclose(jnp.array(res_c), res_h, rtol=rtol), (
+        f"Different phi({rs}): {res_c} != {res_h}"
+    )
 
 
 @pytest.mark.parametrize("halo_name", test_halos.keys())

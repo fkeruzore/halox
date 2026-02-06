@@ -42,7 +42,7 @@ class EinastoHalo:
         z: ArrayLike,
         alpha: ArrayLike,
         cosmo: jc.Cosmology,
-        delta: float = 200,
+        delta: float = 178,
     ):
         self.m_delta = jnp.asarray(m_delta)
         self.c_delta = jnp.asarray(c_delta)
@@ -61,16 +61,12 @@ class EinastoHalo:
         self.Rs = self.r_delta / self.c_delta #final point of certainty
         rho0_denum = 4 * jnp.pi * self.Rs**3 * jnp.exp(2/self.alpha) / self.alpha * (2/self.alpha)**(-3/self.alpha)\
               * jsp.special.gammainc(3/self.alpha, 2/self.alpha * (self.r_delta/self.Rs)**self.alpha) * jsp.special.gamma(3/self.alpha)
-        # Passing alpha is optional since it can also be estimated from the
-        # Gao et al. 2008 relation between alpha and peak height. This relation was calibrated for
-        # nu_vir, so if the given mass definition is not 'vir' we convert the given mass to Mvir
-        # assuming an NFW profile with the given mass and concentration. This leads to a negligible
-        # inconsistency, but solving for the correct alpha iteratively would be much slower.
+    
 
         # big question, do we want to pass in some extra parameter here? 
         # Do we want to assume a virial mass? Or do we want options? 
         # Force it to be the normal overdensity from NFW?
-        self.rho0 = self.m_delta / rho0_denum #output is rho_-2
+        self.rho0 = self.m_delta / rho0_denum #output is rho_-2, in units of 
 
     def density(self, r: ArrayLike) -> Array:
         """Einasto density profile :math:`\\rho(r)`.
@@ -87,6 +83,7 @@ class EinastoHalo:
         """
         r = jnp.asarray(r)
         return self.rho0 * jnp.exp(- 2/self.alpha * ((r/self.Rs)**self.alpha - 1))
+    
     def enclosed_mass(self, r: ArrayLike) -> Array:
         """Enclosed mass profile :math:`M(<r)`.
 
@@ -124,6 +121,44 @@ class EinastoHalo:
         r = jnp.asarray(r)
         return jnp.sqrt(G * self.enclosed_mass(r) / r)
     
+    def potential(self, r: ArrayLike) -> Array: #NO TEST YET, autodiff compatability with incomplete gamma function
+        """Potential profile :math:`\\phi(r)`.
+
+        Parameters
+        ----------
+        r : Array [h-1 Mpc]
+            Radius
+
+        Returns
+        -------
+        Array [km2 s-2]
+            Potential at radius `r`
+        """
+        r = jnp.asarray(r)
+        prefact = -4 * jnp.pi * G * self.rho0 * jnp.exp(2/self.alpha)
+        a2 = 2.0 / self.alpha
+        a3 = 3.0 / self.alpha
+
+        s = (2.0 / self.alpha)**(1.0 / self.alpha) * r / self.Rs
+        x = s**self.alpha
+
+        gamma2 = jsp.special.gamma(a2)
+        gamma3 = jsp.special.gamma(a3)
+
+        lower3 = jsp.special.gammainc(a3, x) * gamma3 / (s/r)**2 /self.alpha
+        upper2 = gamma2 * (1.0 - jsp.special.gammainc(a2, x))/(s/r)**2 /self.alpha
+
+        phi = prefact * (
+            lower3 / s + upper2
+        )
+        return phi
+        # # G = G.to("km2 Mpc Msun-1 s-2").value
+        # prefact = -4 * jnp.pi * G * self.rho0 * jnp.exp(2/self.alpha)
+        # int_denom = (2/self.alpha/self.Rs**self.alpha)**(2/self.alpha) * self.alpha
+        # return prefact * (  jsp.special.gamma(2/self.alpha) / int_denom  )\
+        #       - (  jsp.special.gammainc(2/self.alpha,2/self.alpha * (r/self.Rs)**self.alpha) / int_denom  )  * jsp.special.gamma(3/self.alpha)
+
+
     # def potential(self, r: ArrayLike) -> Array: #need tests for validity, autodiff compatability with incomplete gamma function
     #     """Potential profile :math:`\\phi(r)`.
 
@@ -135,17 +170,29 @@ class EinastoHalo:
     #     Returns
     #     -------
     #     Array [km2 s-2]
-    #         Potential at radius `r`
+    #         Potential at radius `r`, this should be <0
     #     """
     #     r = jnp.asarray(r)
-    #     # G = G.to("km2 Mpc Msun-1 s-2").value
-    #     prefact = -4 * jnp.pi * G * self.rho0 * jnp.exp(2/self.alpha)
-    #     int_denom = (2/self.alpha/self.Rs**self.alpha)**(2/self.alpha) * self.alpha
-    #     return prefact * (  jsp.special.gamma(2/self.alpha) / int_denom  )\
-    #           - (  jsp.special.gammainc(2/self.alpha,2/self.alpha * (r/self.Rs)**self.alpha) / int_denom  )  * jsp.special.gamma(3/self.alpha)
+    #     # G = G.to("km2 Mpc Msun-1 s-2").value'
+    #     a2 = 2.0 / self.alpha
+    #     a3 = 3.0 / self.alpha
+
+    #     s = (2.0 / self.alpha)**(1.0 / self.alpha) * r / self.Rs
+    #     x = s**self.alpha
+
+    #     gamma2 = jsp.special.gamma(a2)
+    #     gamma3 = jsp.special.gamma(a3)
+
+    #     lower3 = jsp.special.gammainc(a3, x) * gamma3
+    #     upper2 = gamma2 * (1.0 - jsp.special.gammainc(a2, x))
+
+    #     phi = -4 * jnp.pi * G * self.rho0 * self.Rs**2 * jnp.exp(2/self.alpha) / self.alpha * (
+    #         lower3 / s + upper2
+    #     )
+    #     return phi
     
     def to_delta(self, delta_new: float) -> tuple[Array, Array, Array]:
-        """Convert halo properties to a different overdensity definition.
+        """Convert halo properties to a different overdensity definition, ASSUMES AN NFW PROFILE!!!
 
         Parameters
         ----------
@@ -162,10 +209,10 @@ class EinastoHalo:
             Concentration at new overdensity
         """
         output = nfw.delta_delta(self.m_delta, self.c_delta, self.z, self.cosmo, self.delta, delta_new)
-        self.m_delta = output[0]
-        self.r_delta = output[1]
-        self.c_delta = output[2]
-        self.delta = delta_new
+        # self.m_delta = output[0] #removed, must instantiate new halo after using this function if you want all the properties of the new halo
+        # self.r_delta = output[1]
+        # self.c_delta = output[2]
+        # self.delta = delta_new
         return output
 
 
@@ -173,6 +220,11 @@ class EinastoHalo:
 # TODO
 # Need to add velocity dispersion, surface density, to_delta, and lsq
 
+# Passing alpha is optional since it can also be estimated from the
+# Gao et al. 2008 relation between alpha and peak height. This relation was calibrated for
+# nu_vir, so if the given mass definition is not 'vir' we convert the given mass to Mvir
+# assuming an NFW profile with the given mass and concentration. This leads to a negligible
+# inconsistency, but solving for the correct alpha iteratively would be much slower.
 def a_from_nu(M:ArrayLike, #this should be the virial mass, currently not, will need to change, see profile_einasto for more details
               z:ArrayLike, 
               cosmo: jc.Cosmology, 
@@ -180,7 +232,8 @@ def a_from_nu(M:ArrayLike, #this should be the virial mass, currently not, will 
               delta_sc: float=1.686,) -> Array:
     """
     
-    Returns the alpha parameter from the peak height value of the halo
+    Returns the alpha parameter from the peak height value of the halo.
+    ASSUMES YOU GIVE IT THE VIRIAL MASS!!!!!!!
 
     Parameters
     ----------
