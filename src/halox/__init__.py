@@ -6,5 +6,6 @@ from . import halo
 
 # Backward compatibility
 from .halo import nfw, einasto
+from .halo import cMrelation
 
-__all__ = ["nfw", "einasto", "cosmology", "hmf", "lss", "bias", "halo"]
+__all__ = ["nfw", "einasto", "cosmology", "hmf", "lss", "bias", "halo", "cMrelation"]
