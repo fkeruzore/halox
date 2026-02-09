@@ -102,7 +102,9 @@ def test_enclosed_mass(
 @pytest.mark.parametrize("halo_name", test_halos.keys())
 @pytest.mark.parametrize("delta", test_deltas)
 @pytest.mark.parametrize("cosmo_name", test_cosmos.keys())
-def test_potential(halo_name, delta, cosmo_name, return_vals: bool = False): #can I remove need for astropy.units???
+def test_potential(
+    halo_name, delta, cosmo_name, return_vals: bool = False
+):  # can I remove need for astropy.units???
     kmperkpc = 30856775999999956
     secpermyr = 3.15576e13
     confactor = kmperkpc**2 / secpermyr**2
@@ -112,10 +114,10 @@ def test_potential(halo_name, delta, cosmo_name, return_vals: bool = False): #ca
 
     cosmo_c = cc.setCosmology(cosmo_c)
     nfw_h = halox.nfw.NFWHalo(m_delta, c_delta, z, cosmo_j, delta=delta)
-    m = (m_delta / (jnp.log(1+c_delta)-c_delta/(1+c_delta))) * u.Msun
-    r_s = nfw_h.r_delta * 1000 / c_delta * u.kpc #converting r_delta to kpc
-    nfw_g = gp.NFWPotential(m=m, r_s=r_s, units = galactic)
-    
+    m = (m_delta / (jnp.log(1 + c_delta) - c_delta / (1 + c_delta))) * u.Msun
+    r_s = nfw_h.r_delta * 1000 / c_delta * u.kpc  # converting r_delta to kpc
+    nfw_g = gp.NFWPotential(m=m, r_s=r_s, units=galactic)
+
     r = jnp.logspace(-2, 1, 6)
 
     r_kpc = r * 1000 * u.kpc  # if r was in Mpc

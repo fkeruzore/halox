@@ -9,7 +9,7 @@ from scipy.integrate import quad
 import halox
 
 # Note, current alpha is calculated relying on a virial mass input,
-# currently this is still implemented for coverage, but it must be 
+# currently this is still implemented for coverage, but it must be
 # understood that this current test is not necessarily physical
 
 jax.config.update("jax_enable_x64", True)
@@ -53,17 +53,17 @@ def test_density(halo_name, delta, cosmo_name, return_vals: bool = False):
 
     cosmo_c = cc.setCosmology(cosmo_c)
     alpha = halox.einasto.a_from_nu(m_delta, z, cosmo_j)
-    ein_h = halox.einasto.EinastoHalo(m_delta, c_delta, z, alpha = alpha, cosmo = cosmo_j, delta=delta)
+    ein_h = halox.einasto.EinastoHalo(
+        m_delta, c_delta, z, alpha=alpha, cosmo=cosmo_j, delta=delta
+    )
     ein_c = profile_einasto.EinastoProfile(
-        M=m_delta,
-        c=c_delta,
-        z=z,
-        mdef=f"{delta:.0f}c",
-        alpha = alpha
+        M=m_delta, c=c_delta, z=z, mdef=f"{delta:.0f}c", alpha=alpha
     )
 
     rs = jnp.logspace(-2, 1, 6)  # h-1 Mpc
-    res_c = ein_c.density(rs * 1000) * 1e9 # 1e9 is a valid unit conversion from kpc to Mpc
+    res_c = (
+        ein_c.density(rs * 1000) * 1e9
+    )  # 1e9 is a valid unit conversion from kpc to Mpc
     res_h = ein_h.density(rs)
 
     if return_vals:
@@ -86,13 +86,11 @@ def test_enclosed_mass(
 
     cosmo_c = cc.setCosmology(cosmo_c)
     alpha = halox.einasto.a_from_nu(m_delta, z, cosmo_j)
-    ein_h = halox.einasto.EinastoHalo(m_delta, c_delta, z, alpha = alpha, cosmo = cosmo_j, delta=delta)
+    ein_h = halox.einasto.EinastoHalo(
+        m_delta, c_delta, z, alpha=alpha, cosmo=cosmo_j, delta=delta
+    )
     ein_c = profile_einasto.EinastoProfile(
-        M=m_delta,
-        c=c_delta,
-        z=z,
-        mdef=f"{delta:.0f}c",
-        alpha = alpha
+        M=m_delta, c=c_delta, z=z, mdef=f"{delta:.0f}c", alpha=alpha
     )
 
     rs = jnp.logspace(-2, 1, 6)  # h-1 Mpc
@@ -114,6 +112,7 @@ def test_potential(halo_name, delta, cosmo_name, return_vals: bool = False):
     halo = test_halos[halo_name]
     m_delta, c_delta, z = halo["M"], halo["c"], halo["z"]
     cosmo_j, cosmo_c = test_cosmos[cosmo_name]
+
     def einasto_potential_numeric(r, halo, r_max):
         """
         halo: a colossus halo
@@ -125,24 +124,24 @@ def test_potential(halo_name, delta, cosmo_name, return_vals: bool = False):
             integrand = lambda rp: halo.enclosedMass(rp) / rp**2
             return np.array([quad(integrand, ri, r_max)[0] for ri in r])
 
-        #phi = -G * (halo.enclosedMass(r) / r + outer_term(r))
+        # phi = -G * (halo.enclosedMass(r) / r + outer_term(r))
         phi = -G * outer_term(r)
         return phi
-    
+
     cosmo_c = cc.setCosmology(cosmo_c)
     alpha = halox.einasto.a_from_nu(m_delta, z, cosmo_j)
-    ein_h = halox.einasto.EinastoHalo(m_delta, c_delta, z, alpha = alpha, cosmo = cosmo_j, delta=delta)
+    ein_h = halox.einasto.EinastoHalo(
+        m_delta, c_delta, z, alpha=alpha, cosmo=cosmo_j, delta=delta
+    )
     ein_c = profile_einasto.EinastoProfile(
-        M=m_delta,
-        c=c_delta,
-        z=z,
-        mdef=f"{delta:.0f}c",
-        alpha = alpha
+        M=m_delta, c=c_delta, z=z, mdef=f"{delta:.0f}c", alpha=alpha
     )
 
     rs = jnp.logspace(-2, 1, 6)  # Mpc
     f = 1e4
-    res_c = einasto_potential_numeric(rs*1000, ein_c, r_max = f * ein_c.RDelta(z, mdef=f"{delta:.0f}c"))
+    res_c = einasto_potential_numeric(
+        rs * 1000, ein_c, r_max=f * ein_c.RDelta(z, mdef=f"{delta:.0f}c")
+    )
     res_h = ein_h.potential(rs)
 
     if return_vals:
@@ -165,13 +164,11 @@ def test_circular_velocity(
 
     cosmo_c = cc.setCosmology(cosmo_c)
     alpha = halox.einasto.a_from_nu(m_delta, z, cosmo_j)
-    ein_h = halox.einasto.EinastoHalo(m_delta, c_delta, z, alpha = alpha, cosmo = cosmo_j, delta=delta)
+    ein_h = halox.einasto.EinastoHalo(
+        m_delta, c_delta, z, alpha=alpha, cosmo=cosmo_j, delta=delta
+    )
     ein_c = profile_einasto.EinastoProfile(
-        M=m_delta,
-        c=c_delta,
-        z=z,
-        mdef=f"{delta:.0f}c",
-        alpha = alpha
+        M=m_delta, c=c_delta, z=z, mdef=f"{delta:.0f}c", alpha=alpha
     )
 
     rs = jnp.logspace(-2, 1, 6)  # h-1 Mpc
@@ -270,7 +267,9 @@ def test_convert_delta(
 
     cosmo_c = cc.setCosmology(cosmo_c)
     alpha = halox.einasto.a_from_nu(m_delta, z, cosmo_j)
-    ein_h = halox.einasto.EinastoHalo(m_delta, c_delta, z, alpha = alpha, cosmo = cosmo_j, delta=delta_in)
+    ein_h = halox.einasto.EinastoHalo(
+        m_delta, c_delta, z, alpha=alpha, cosmo=cosmo_j, delta=delta_in
+    )
 
     delta_out = 500.0 if delta_in == 200.0 else 200.0
     res_h = jnp.squeeze(jnp.array(ein_h.to_delta(delta_out)))
