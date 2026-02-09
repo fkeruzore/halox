@@ -42,7 +42,7 @@ class EinastoHalo:
         z: ArrayLike,
         alpha: ArrayLike,
         cosmo: jc.Cosmology,
-        delta: float = 178,
+        delta: float = 200,
     ):
         self.m_delta = jnp.asarray(m_delta)
         self.c_delta = jnp.asarray(c_delta)
