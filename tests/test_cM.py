@@ -6,9 +6,10 @@ import colossus.halo.concentration as ccon
 import colossus.cosmology.cosmology as cc
 import halox
 from halox.halo.cMrelation import duffy08, klypin11, prada12, child18all, child18relaxed
-
-
 jax.config.update("jax_enable_x64", True)
+
+# TODO: Check prada12 for small calculation error on the percent level, 
+# see if we can change this to get it in allignment
 
 rtol = 1e-2
 
@@ -66,6 +67,20 @@ def test_klypin11(m_delta, z, return_vals=False):
     
     assert jnp.isclose(jnp.atleast_1d(c_h),jnp.atleast_1d(c_c[0])), (
         f"klypin11 c-M relation not consistent, colossus to halox; {c_c[0]} != {c_h}"
+    )
+
+@pytest.mark.parametrize("m_delta, z", test_mzs)
+@pytest.mark.parametrize("cosmo", test_cosmos)
+def test_prada12(m_delta, z, cosmo, return_vals=False):
+    c_h = prada12()(M=m_delta, z = z, cosmo=test_cosmos[cosmo][0])
+    cc.setCosmology(test_cosmos[cosmo][1])
+    c_c = ccon.modelPrada12(m_delta, z)
+
+    if return_vals:
+        return  c_h, c_c
+    
+    assert jnp.isclose(jnp.atleast_1d(c_h),jnp.atleast_1d(c_c)), (
+        f"prada12 c-M relation not consistent, colossus to halox; {c_c} != {c_h}"
     )
 
 @pytest.mark.parametrize("m_delta, z", test_mzs)
