@@ -188,7 +188,7 @@ class NFWHalo:
         prefact = 2 * self.rho0 * self.Rs
 
         # Handle different regimes for numerical stability
-        def f(x):  # what is this error
+        def f(x):
             return jnp.where(
                 x < 1.0,
                 # x < 1 case

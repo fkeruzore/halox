@@ -157,7 +157,7 @@ def sigma_M(
     return sigma_R(R, z, cosmo, n_k_int=n_k_int)
 
 
-def peakheight(
+def peak_height(
     M: ArrayLike,
     z: ArrayLike,
     cosmo: jc.Cosmology,
@@ -165,8 +165,6 @@ def peakheight(
     delta_sc: float = 1.686,
 ) -> Array:
     """
-    Docstring for peakheight
-
     Returns the peak height (nu) of a dark matter halo defined by
     the spherical collapse overdensity and the RMS variance of the
     density fluctuations within the Lagrangian raidus

@@ -9,10 +9,14 @@ from . import nfw
 from ..cosmology import G
 from .. import cosmology
 
+# TODO: 
+# Add velocity dispersion and surface density (allign capabilities with NFW)
+# Add potential function to the jax friendlieness test (see how gamma funcs behave)
 
 class EinastoHalo:
     """
     Properties of a dark matter halo following an Einsanto profile.
+    Units in Mpc and solar masses
 
     Parameters
     ----------
@@ -26,13 +30,8 @@ class EinastoHalo:
         Underlying cosmology
     delta: float
         Density contrast in units of critical density at redshift z,
-        defaults to 178.
+        defaults to 200.
     """
-
-    # Lance Questions
-    # What do we want to assume about the mass value being input, if anything(M_200? M_vir?) Any conversions?
-    # Should we revamp and add a mdef like quantity?
-    # Colossus does not like z parameter to be array like, are we the same? Is ArrayLike z meant to be single value
     # Reference: https://ui.adsabs.harvard.edu/abs/2012A%26A...540A..70R/abstract
 
     def __init__(
@@ -72,10 +71,6 @@ class EinastoHalo:
             )
             * jsp.special.gamma(3 / self.alpha)
         )
-
-        # big question, do we want to pass in some extra parameter here?
-        # Do we want to assume a virial mass? Or do we want options?
-        # Force it to be the normal overdensity from NFW?
         self.rho0 = self.m_delta / rho0_denum  # output is rho_-2, in units of
 
     def density(self, r: ArrayLike) -> Array:
@@ -143,7 +138,7 @@ class EinastoHalo:
         return jnp.sqrt(G * self.enclosed_mass(r) / r)
 
     def potential(self, r: ArrayLike) -> Array:
-        # NO TEST YET, autodiff compatability with incomplete gamma function
+        # Working test: Possible addition to JAX friendlieness test
         """Potential profile :math:`\\phi(r)`.
 
         Parameters
@@ -179,43 +174,6 @@ class EinastoHalo:
 
         phi = prefact * (lower3 / s + upper2)
         return phi
-        # # G = G.to("km2 Mpc Msun-1 s-2").value
-        # prefact = -4 * jnp.pi * G * self.rho0 * jnp.exp(2/self.alpha)
-        # int_denom = (2/self.alpha/self.Rs**self.alpha)**(2/self.alpha) * self.alpha
-        # return prefact * (  jsp.special.gamma(2/self.alpha) / int_denom  )\
-        #       - (  jsp.special.gammainc(2/self.alpha,2/self.alpha * (r/self.Rs)**self.alpha) / int_denom  )  * jsp.special.gamma(3/self.alpha)
-
-    # def potential(self, r: ArrayLike) -> Array: #need tests for validity, autodiff compatability with incomplete gamma function
-    #     """Potential profile :math:`\\phi(r)`.
-
-    #     Parameters
-    #     ----------
-    #     r : Array [h-1 Mpc]
-    #         Radius
-
-    #     Returns
-    #     -------
-    #     Array [km2 s-2]
-    #         Potential at radius `r`, this should be <0
-    #     """
-    #     r = jnp.asarray(r)
-    #     # G = G.to("km2 Mpc Msun-1 s-2").value'
-    #     a2 = 2.0 / self.alpha
-    #     a3 = 3.0 / self.alpha
-
-    #     s = (2.0 / self.alpha)**(1.0 / self.alpha) * r / self.Rs
-    #     x = s**self.alpha
-
-    #     gamma2 = jsp.special.gamma(a2)
-    #     gamma3 = jsp.special.gamma(a3)
-
-    #     lower3 = jsp.special.gammainc(a3, x) * gamma3
-    #     upper2 = gamma2 * (1.0 - jsp.special.gammainc(a2, x))
-
-    #     phi = -4 * jnp.pi * G * self.rho0 * self.Rs**2 * jnp.exp(2/self.alpha) / self.alpha * (
-    #         lower3 / s + upper2
-    #     )
-    #     return phi
 
     def to_delta(self, delta_new: float) -> tuple[Array, Array, Array]:
         """Convert halo properties to a different overdensity definition.
@@ -271,7 +229,6 @@ def a_from_nu(
 ) -> Array:
     """
     Returns the alpha parameter from the peak height value of the halo.
-    ASSUMES YOU GIVE IT THE VIRIAL MASS!!!!!!!
 
     Parameters
     ----------
@@ -296,6 +253,6 @@ def a_from_nu(
     -----
     This assumes that the input mass is the virial mass.
     """
-    nu = lss.peakheight(M, z, cosmo, n_k_int, delta_sc)
+    nu = lss.peak_height(M, z, cosmo, n_k_int, delta_sc)
     alpha = 0.155 + 0.0095 * nu**2
     return alpha
