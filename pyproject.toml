@@ -4,7 +4,8 @@ version = "1.1.2"
 description = "Dark matter halo properties and halo mass functions using JAX"
 readme = "README.md"
 authors = [
-    { name = "Florian Kéruzoré", email = "florian.keruzore@gmail.com" }
+    { name = "Florian Kéruzoré", email = "florian.keruzore@gmail.com" },
+    { name = "Lance Moreau", email = "lance.moreau@gmail.com" }
 ]
 requires-python = ">=3.9"
 dependencies = [
