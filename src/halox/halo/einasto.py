@@ -15,7 +15,7 @@ from .. import cosmology
 
 class EinastoHalo:
     """
-    Properties of a dark matter halo following an Einsanto profile.
+    Properties of a dark matter halo following an Einasto profile.
     Units in Mpc and solar masses
 
     Parameters
