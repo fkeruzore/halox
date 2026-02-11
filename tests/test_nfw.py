@@ -4,6 +4,9 @@ import jax.numpy as jnp
 import jax_cosmo as jc
 from colossus.halo import profile_nfw, mass_defs
 import colossus.cosmology.cosmology as cc
+import gala.potential.potential as gp
+from gala.units import galactic
+import astropy.units as u
 import halox
 
 jax.config.update("jax_enable_x64", True)
@@ -52,9 +55,9 @@ def test_density(halo_name, delta, cosmo_name, return_vals: bool = False):
         z=z,
         mdef=f"{delta:.0f}c",
     )
-
     rs = jnp.logspace(-2, 1, 6)  # h-1 Mpc
-    res_c = nfw_c.density(rs * 1000) * 1e9
+    res_c = nfw_c.density(rs * 1000) * (u.M_sun * u.h**2 / u.kpc**3)
+    res_c = res_c.to(u.M_sun * u.h**2 / u.Mpc**3)
     res_h = nfw_h.density(rs)
 
     if return_vals:
@@ -99,33 +102,32 @@ def test_enclosed_mass(
 @pytest.mark.parametrize("halo_name", test_halos.keys())
 @pytest.mark.parametrize("delta", test_deltas)
 @pytest.mark.parametrize("cosmo_name", test_cosmos.keys())
-def test_potential(halo_name, delta, cosmo_name, return_vals: bool = False):
+def test_potential(
+    halo_name, delta, cosmo_name, return_vals: bool = False
+):  # can I remove need for astropy.units???
     halo = test_halos[halo_name]
     m_delta, c_delta, z = halo["M"], halo["c"], halo["z"]
     cosmo_j, cosmo_c = test_cosmos[cosmo_name]
 
     cosmo_c = cc.setCosmology(cosmo_c)
     nfw_h = halox.nfw.NFWHalo(m_delta, c_delta, z, cosmo_j, delta=delta)
-    nfw_c = profile_nfw.NFWProfile(
-        M=m_delta,
-        c=c_delta,
-        z=z,
-        mdef=f"{delta:.0f}c",
-    )
+    m = (m_delta / (jnp.log(1 + c_delta) - c_delta / (1 + c_delta))) * u.Msun
+    r_s = nfw_h.r_delta * 1000 / c_delta * u.kpc  # converting r_delta to kpc
+    nfw_g = gp.NFWPotential(m=m, r_s=r_s, units=galactic)
 
-    rs = jnp.logspace(-2, 1, 6)  # Mpc
+    r = jnp.logspace(-2, 1, 6)
 
-    _r0 = nfw_c.par["rhos"] * 1e9  # Msun Mpc-3
-    _rs = nfw_c.par["rs"] / 1e3  # Mpc
-
-    res_c = -4 * jnp.pi * G * _r0 * _rs**3 * jnp.log(1 + rs / _rs) / rs
-    res_h = nfw_h.potential(rs)
+    r_kpc = r * 1000 * u.kpc  # if r was in Mpc
+    xyz = jnp.zeros((3, len(r_kpc))) * u.kpc
+    xyz[0] = r_kpc
+    res_h = nfw_h.potential(r)
+    res_g = (nfw_g.energy(xyz)).to(u.km ** 2 / u.s ** 2).value # originally in kpc^2/Myr^2
 
     if return_vals:
-        return res_h, res_c
+        return res_h, res_g
 
-    assert jnp.allclose(jnp.array(res_c), res_h, rtol=rtol), (
-        f"Different phi({rs}): {res_c} != {res_h}"
+    assert jnp.allclose(jnp.array(res_g), res_h, rtol=rtol), (
+        f"Different phi({r}): {res_g} != {res_h}"
     )
 
 

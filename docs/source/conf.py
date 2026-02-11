@@ -7,8 +7,8 @@
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
 project = "halox"
-copyright = "2025, Florian Kéruzoré"
-author = "Florian Kéruzoré"
+copyright = "2026, F. Kéruzoré et al."
+author = "F. Kéruzoré, L. Moreau"
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration

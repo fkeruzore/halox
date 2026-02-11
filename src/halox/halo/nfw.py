@@ -1,4 +1,5 @@
 from jax import Array
+import jax
 from jax.typing import ArrayLike
 import jax.numpy as jnp
 import jax_cosmo as jc
@@ -263,3 +264,48 @@ class NFWHalo:
         c_new = r_new / self.Rs
 
         return m_new, r_new, c_new
+
+
+def delta_delta(
+    M: ArrayLike,
+    # current solution for other halos, probably not the fastest
+    # but we can optimize this later
+    c: ArrayLike,
+    z: ArrayLike,
+    cosmo: jc.Cosmology,
+    delta_old: float,
+    delta_new: float,
+) -> tuple[Array, Array, Array]:
+    """
+    Convert between overdensity masses for an arbitrary halo profile
+    assuming an nfw profile (This is the method used in colossus so
+    familiar and consistent)
+
+    Parameters
+    ----------
+    m_delta: float
+        Mass at overdensity `delta` [h-1 Msun] (changes in output)
+    c_delta: float
+        Concentration at overdensity `delta` (changes in output)
+    z: float
+        Redshift (no change)
+    cosmo: jc.Cosmology
+        Underlying cosmology (no change)
+    delta_old: float
+        Current overdensity factor
+    delta_new: float
+        Desired overdensity factor
+
+    """
+    M = jnp.atleast_1d(M)
+    c = jnp.atleast_1d(c)
+    z = jnp.atleast_1d(z)
+
+    def single_halo(Mi, ci, zi):
+        halo = NFWHalo(Mi, ci, zi, cosmo, delta_old)
+        return halo.to_delta(delta_new)
+
+    # Vectorize over halo index
+    M_new, R_new, c_new = jax.vmap(single_halo)(M, c, z)
+
+    return (jnp.squeeze(M_new), jnp.squeeze(R_new), jnp.squeeze(c_new))

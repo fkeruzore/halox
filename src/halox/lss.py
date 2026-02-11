@@ -155,3 +155,35 @@ def sigma_M(
     z = jnp.asarray(z)
     R = mass_to_lagrangian_radius(M, cosmo)
     return sigma_R(R, z, cosmo, n_k_int=n_k_int)
+
+
+def peak_height(
+    M: ArrayLike,
+    z: ArrayLike,
+    cosmo: jc.Cosmology,
+    n_k_int: int = 5000,
+    delta_sc: float = 1.686,
+) -> Array:
+    """
+    Returns the peak height (nu) of a dark matter halo defined by
+    the spherical collapse overdensity and the RMS variance of the
+    density fluctuations within the Lagrangian raidus
+
+    Parameters
+    ----------
+    M : Array
+        Mass [h-1 Msun]
+    z : Array
+        Redshift
+    cosmo : jc.Cosmology
+        Underlying cosmology
+    n_k_int : int
+        Number of k-space integration points for :math:`\\sigma(R,z)`,
+        default 5000
+    delta_sc: float
+        Required overdensity for spherical collapse, usually 1.686 (tophat)
+    :return: Array
+        Returns peak height (nu) for halos
+    """
+    nu = delta_sc / sigma_M(M, z, cosmo, n_k_int=n_k_int)
+    return nu
