@@ -80,7 +80,7 @@ def tinker10_bias(
     z = jnp.asarray(z)
 
     # Calculate peak height nu = delta_sc / sigma(M,z)
-    nu = lss.peakheight(M, z, cosmo, n_k_int=n_k_int)
+    nu = lss.peak_height(M, z, cosmo, n_k_int=n_k_int)
 
     # Get parameters
     A, a, B, C = _tinker10_parameters(z, cosmo, delta_c)

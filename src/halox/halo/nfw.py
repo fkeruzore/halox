@@ -188,7 +188,7 @@ class NFWHalo:
         prefact = 2 * self.rho0 * self.Rs
 
         # Handle different regimes for numerical stability
-        def f(x): #what is this error
+        def f(x):
             return jnp.where(
                 x < 1.0,
                 # x < 1 case
@@ -265,15 +265,21 @@ class NFWHalo:
 
         return m_new, r_new, c_new
 
-def delta_delta(M:ArrayLike, #current solution for other halos, probably not the fastest but we can optimize this later
-                c:ArrayLike, 
-                z:ArrayLike,
-                cosmo:jc.Cosmology,
-                delta_old:float,
-                delta_new:float) -> tuple[Array, Array, Array]:  
+
+def delta_delta(
+    M: ArrayLike,
+    # current solution for other halos, probably not the fastest
+    # but we can optimize this later
+    c: ArrayLike,
+    z: ArrayLike,
+    cosmo: jc.Cosmology,
+    delta_old: float,
+    delta_new: float,
+) -> tuple[Array, Array, Array]:
     """
-    Convert between overdensity masses for an arbitrary halo profile assuming an nfw profile
-    (This is the method used in colossus so familiar and consistent)
+    Convert between overdensity masses for an arbitrary halo profile
+    assuming an nfw profile (This is the method used in colossus so
+    familiar and consistent)
 
     Parameters
     ----------
@@ -289,11 +295,12 @@ def delta_delta(M:ArrayLike, #current solution for other halos, probably not the
         Current overdensity factor
     delta_new: float
         Desired overdensity factor
-        
-    """  
+
+    """
     M = jnp.atleast_1d(M)
     c = jnp.atleast_1d(c)
     z = jnp.atleast_1d(z)
+
     def single_halo(Mi, ci, zi):
         halo = NFWHalo(Mi, ci, zi, cosmo, delta_old)
         return halo.to_delta(delta_new)
@@ -301,8 +308,4 @@ def delta_delta(M:ArrayLike, #current solution for other halos, probably not the
     # Vectorize over halo index
     M_new, R_new, c_new = jax.vmap(single_halo)(M, c, z)
 
-    return (
-        jnp.squeeze(M_new), 
-        jnp.squeeze(R_new), 
-        jnp.squeeze(c_new)
-        )
+    return (jnp.squeeze(M_new), jnp.squeeze(R_new), jnp.squeeze(c_new))
