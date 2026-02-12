@@ -137,7 +137,45 @@ class EinastoHalo:
         r = jnp.asarray(r)
         return jnp.sqrt(G * self.enclosed_mass(r) / r)
 
-    def potential(self, r: ArrayLike) -> Array:
+    # def potential(self, r: ArrayLike) -> Array:
+    #     # Working test: Possible addition to JAX friendlieness test
+    #     """Potential profile :math:`\\phi(r)`.
+
+    #     Parameters
+    #     ----------
+    #     r : Array [h-1 Mpc]
+    #         Radius
+
+    #     Returns
+    #     -------
+    #     Array [km2 s-2]
+    #         Potential at radius `r`
+    #     """
+    #     r = jnp.asarray(r)
+    #     prefact = -4 * jnp.pi * G * self.rho0 * jnp.exp(2 / self.alpha)
+    #     a2 = 2.0 / self.alpha
+    #     a3 = 3.0 / self.alpha
+
+    #     s = (2.0 / self.alpha) ** (1.0 / self.alpha) * r / self.Rs
+    #     x = s**self.alpha
+
+    #     gamma2 = jsp.special.gamma(a2)
+    #     gamma3 = jsp.special.gamma(a3)
+
+    #     lower3 = (
+    #         jsp.special.gammainc(a3, x) * gamma3 / (s / r) ** 2 / self.alpha
+    #     )
+    #     upper2 = (
+    #         gamma2
+    #         * (1.0 - jsp.special.gammainc(a2, x))
+    #         / (s / r) ** 2
+    #         / self.alpha
+    #     )
+
+    #     phi = prefact * (lower3 / s + upper2)
+    #     return phi
+    
+    def potential(self, r:ArrayLike) -> Array:
         # Working test: Possible addition to JAX friendlieness test
         """Potential profile :math:`\\phi(r)`.
 
@@ -152,24 +190,23 @@ class EinastoHalo:
             Potential at radius `r`
         """
         r = jnp.asarray(r)
-        prefact = -4 * jnp.pi * G * self.rho0 * jnp.exp(2 / self.alpha)
         a2 = 2.0 / self.alpha
         a3 = 3.0 / self.alpha
 
         s = (2.0 / self.alpha) ** (1.0 / self.alpha) * r / self.Rs
         x = s**self.alpha
 
+        prefact = -4 * jnp.pi * G * self.rho0 * jnp.exp(2 / self.alpha) / (s/r)**2 / self.alpha
+
         gamma2 = jsp.special.gamma(a2)
         gamma3 = jsp.special.gamma(a3)
 
         lower3 = (
-            jsp.special.gammainc(a3, x) * gamma3 / (s / r) ** 2 / self.alpha
+            jsp.special.gammainc(a3, x) * gamma3
         )
         upper2 = (
             gamma2
-            * (1.0 - jsp.special.gammainc(a2, x))
-            / (s / r) ** 2
-            / self.alpha
+            * (jsp.special.gammaincc(a2, x))
         )
 
         phi = prefact * (lower3 / s + upper2)
