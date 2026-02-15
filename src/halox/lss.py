@@ -162,7 +162,7 @@ def peak_height(
     z: ArrayLike,
     cosmo: jc.Cosmology,
     n_k_int: int = 5000,
-    delta_sc: float = 1.686,
+    delta_sc: float = 1.68647,
 ) -> Array:
     """
     Returns the peak height (nu) of a dark matter halo defined by

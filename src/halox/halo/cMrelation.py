@@ -1,10 +1,12 @@
 from dataclasses import dataclass
 from jax.typing import ArrayLike
+import jax
 import jax.numpy as jnp
-import jax.scipy as jsp
 import jaxopt as jop
 import jax_cosmo as jc
 from halox import lss, cosmology
+
+jax.config.update("jax_enable_x64", True)
 
 # TODO
 # Add in validity flag, need to do this array wise, no prints, just as a data product
@@ -66,8 +68,8 @@ class prada12:
         def smin(x):
             return 1.047 + (1.646 - 1.047) * (1.0 / jnp.pi * jnp.arctan(7.386 * (x - 0.526)) + 0.5)
         
-        
-        nu = lss.peakheight(M, z, cosmo)
+        nu = lss.peak_height(M, z, cosmo, n_k_int=20000)
+
 
         a = 1 / (1+z)
         x = (cosmo.Omega_de / cosmo.Omega_m) ** (1.0 / 3.0) * a
@@ -106,15 +108,6 @@ class klypin11: #need to verify this is not a halucination
         # (z <= self.z_max)
         # )
         return 9.6 * (M / 1E12)**-0.075
-    
-# For array like z??? need to look into this more
-# Rstr = jax.vmap(lambda zi: jnp.exp(
-#     jop.Bisection(
-#         lambda lr: lss.sigma_R(jnp.exp(lr), zi, cosmo) - deltath,
-#         lower=logRmin,
-#         upper=logRmax,
-#     ).run().params
-# ))(z)
 
 @dataclass(frozen=True) #something is wrong with my implementation
 #solver slows this down, can I get rid of it?
@@ -130,25 +123,31 @@ class child18all: #maybe we need 4 cases of this???
     m_max: float = jnp.inf
     z_min: float = 0
     z_max: float = 4
-
+    
     def __call__(self,
                  M: ArrayLike, 
                  z: ArrayLike,
                  cosmo:jc.Cosmology, ):
         #valid: bool etc.
-        deltath = 1.686
-        def F(logR): #maybe make this external if implementing all four child18 c-Ms
-            """
-            Zero function to optimize to to find the right R
-            """
-            return lss.sigma_R(jnp.exp(logR), z, cosmo) - deltath
-        
-        logRmin = float(jnp.log(1E-2))
-        logRmax = float(jnp.log(50))
-
-        solver = jop.Bisection(F, lower = logRmin, upper = logRmax, maxiter=50)
-        Rstr = jnp.exp(solver.run().params)
-        Mstr:ArrayLike = 4*jnp.pi/3 * cosmology.critical_density(z, cosmo) * cosmo.Omega_m(z) * Rstr**3 
+        deltath = 1.68647
+        logR = jnp.linspace(-3, 5, 2048)   # 1e-2 to 1e2 Mpc/h
+        R_grid = 10**logR
+        sigma_grid = lss.sigma_R(R_grid, z=0, cosmo = cosmo)
+        def R_of_sigma(sigma_val, sigma_grid, R_grid):
+            return jnp.interp(
+                jnp.log10(sigma_val),
+                jnp.log10(sigma_grid[::-1]),
+                jnp.log10(R_grid[::-1])
+            )
+        a = jnp.atleast_1d(1/(1+z))
+        Dz = jc.background.growth_factor(cosmo, a)
+        sigma_target = deltath / Dz
+        Rstr = 10**R_of_sigma(sigma_target, sigma_grid, R_grid)
+        rho_m0 = (
+            cosmology.critical_density(0.0, cosmo)
+            * jc.background.Omega_m_a(cosmo, 1.0)
+            )
+        Mstr:ArrayLike = 4*jnp.pi/3 * rho_m0 * Rstr**3 
 
         mex:float = -0.10
         A:float = 3.44
@@ -156,7 +155,6 @@ class child18all: #maybe we need 4 cases of this???
         c0:float = 3.19
         x = M/Mstr / b
         return c0 + A*(x**mex * (1 + x)**-mex - 1)
-        
 
 @dataclass(frozen=True)
 class child18relaxed: #maybe we need 4 cases of this???
@@ -176,19 +174,25 @@ class child18relaxed: #maybe we need 4 cases of this???
                  z: ArrayLike,
                  cosmo:jc.Cosmology, ):
         #valid: bool etc.
-        deltath = 1.686
-        def F(logR): #maybe make this external if implementing all four child18 c-Ms
-            """
-            Zero function to optimize to to find the right R
-            """
-            return lss.sigma_R(jnp.exp(logR), z, cosmo) - deltath
-        
-        logRmin = float(jnp.log(1E-2))
-        logRmax = float(jnp.log(50))
-
-        solver = jop.Bisection(F, lower = logRmin, upper = logRmax, maxiter=50)
-        Rstr = jnp.exp(solver.run().params)
-        Mstr:ArrayLike = 4*jnp.pi/3 * cosmology.critical_density(z, cosmo) * cosmo.Omega_m(z) * Rstr**3
+        deltath = 1.68647
+        logR = jnp.linspace(-3, 5, 2048)   # 1e-2 to 1e2 Mpc/h
+        R_grid = 10**logR
+        sigma_grid = lss.sigma_R(R_grid, z=0, cosmo = cosmo)
+        def R_of_sigma(sigma_val, sigma_grid, R_grid):
+            return jnp.interp(
+                jnp.log10(sigma_val),
+                jnp.log10(sigma_grid[::-1]),
+                jnp.log10(R_grid[::-1])
+            )
+        a = jnp.atleast_1d(1/(1+z))
+        Dz = jc.background.growth_factor(cosmo, a)
+        sigma_target = deltath / Dz
+        Rstr = 10**R_of_sigma(sigma_target, sigma_grid, R_grid)
+        rho_m0 = (
+            cosmology.critical_density(0.0, cosmo)
+            * jc.background.Omega_m_a(cosmo, 1.0)
+            )
+        Mstr:ArrayLike = 4*jnp.pi/3 * rho_m0 * Rstr**3 
 
         mex:float = -0.09#need to adjust
         A:float = 2.88

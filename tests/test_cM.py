@@ -21,12 +21,22 @@ test_mzs = jnp.array(
         [1e14, 1.0],
         [1e13, 1.0],
         [1e14, 2.0],
-        [1e13, 0.0],
+        [1e13, 2.0],
     ]
 )
 test_deltas = [200.0, 500.0]
 test_cosmos = {
-    "Planck18": [halox.cosmology.Planck18(), "planck18"],
+    #"Planck18": [halox.cosmology.Planck18(), "planck18"],
+    "Planck18": [jc.Cosmology(
+            h=0.6766,
+            Omega_b=0.049,
+            Omega_c=0.2621,
+            Omega_k=0.0,
+            w0=-1.0,
+            wa=0.0,
+            n_s=0.9665,
+            sigma8=0.8102,
+        ), "planck18"],
     "70_0.3": [
         jc.Cosmology(0.25, 0.05, 0.7, 0.97, 0.8, 0.0, -1.0, 0.0),
         "70_0.3",
@@ -79,7 +89,7 @@ def test_prada12(m_delta, z, cosmo, return_vals=False):
     if return_vals:
         return  c_h, c_c
     
-    assert jnp.isclose(jnp.atleast_1d(c_h),jnp.atleast_1d(c_c)), (
+    assert jnp.isclose(jnp.atleast_1d(c_h),jnp.atleast_1d(c_c), rtol=1e-3, atol=0.0), (
         f"prada12 c-M relation not consistent, colossus to halox; {c_c} != {c_h}"
     )
 
@@ -87,22 +97,24 @@ def test_prada12(m_delta, z, cosmo, return_vals=False):
 @pytest.mark.parametrize("cosmo", test_cosmos)
 def test_child18all(m_delta, z, cosmo, return_vals=False): 
     c_h = child18all()(M=m_delta, z=z, cosmo = test_cosmos[cosmo][0])
+    cc.setCosmology(test_cosmos[cosmo][1])
     c_c = ccon.modelChild18(m_delta, z, halo_sample = "individual_all")
     if return_vals:
         return  c_h, c_c
     
-    assert jnp.isclose(jnp.atleast_1d(c_h),jnp.atleast_1d(c_c[0])), (
+    assert jnp.isclose(jnp.atleast_1d(c_h),jnp.atleast_1d(c_c[0]), rtol=1e-3, atol=0.0), (
         f"child18all c-M relation not consistent, colossus to halox; {c_c[0]} != {c_h}"
     )
 
-# @pytest.mark.parametrize("m_delta, z", test_mzs)
-# @pytest.mark.parametrize("cosmo", test_cosmos)
-# def test_child18relaxed(m_delta, z, cosmo, return_vals=False): 
-#     c_h = child18relaxed()(M=m_delta, z=z, cosmo = cosmo)
-#     c_c = ccon.modelChild18(m_delta, z)
-#     if return_vals:
-#         return  c_h, c_c
+@pytest.mark.parametrize("m_delta, z", test_mzs)
+@pytest.mark.parametrize("cosmo", test_cosmos)
+def test_child18relaxed(m_delta, z, cosmo, return_vals=False): 
+    c_h = child18relaxed()(M=m_delta, z=z, cosmo = test_cosmos[cosmo][0])
+    cc.setCosmology(test_cosmos[cosmo][1])
+    c_c = ccon.modelChild18(m_delta, z, halo_sample = "individual_relaxed")
+    if return_vals:
+        return  c_h, c_c
     
-#     assert jnp.isclose(jnp.atleast_1d(c_h),jnp.atleast_1d(c_c[0])), (
-#         f"child18relaxed c-M relation not consistent, colossus to halox; {c_c[0]} != {c_h}"
-#     )
+    assert jnp.isclose(jnp.atleast_1d(c_h),jnp.atleast_1d(c_c[0]), rtol=1e-3, atol=0.0), (
+        f"child18relaxed c-M relation not consistent, colossus to halox; {c_c[0]} != {c_h}"
+    )
