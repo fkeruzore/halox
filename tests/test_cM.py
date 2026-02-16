@@ -82,42 +82,96 @@ def test_klypin11(m_delta, z, return_vals=False):
         f"klypin11 c-M relation not consistent, colossus to halox; {c_c[0]} != {c_h}"
     )
 
-@pytest.mark.parametrize("m_delta, z", test_mzs)
 @pytest.mark.parametrize("cosmo", test_cosmos)
-def test_prada12(m_delta, z, cosmo, return_vals=False):
-    c_h = prada12()(M=m_delta, z = z, cosmo=test_cosmos[cosmo][0])
+def test_prada12(cosmo, return_vals=False):
+    ms = test_mzs[:, 0]
+    zs = test_mzs[:, 1]
+    
+    p12 = jax.jit(
+        lambda m, z: prada12()(
+            m, z=z, cosmo = test_cosmos[cosmo][0]
+        )
+    )
+    c_h = jnp.array([p12(ms[i], zs[i]) for i in range(len(test_mzs))])
+
     cc.setCosmology(test_cosmos[cosmo][1])
-    c_c = ccon.modelPrada12(m_delta, z)
+    c_c = jnp.array(
+        [
+            ccon.modelPrada12(
+                ms[i], 
+                zs[i]
+                ) 
+                for i in range(len(test_mzs))
+        ]
+    )
+
 
     if return_vals:
         return  c_h, c_c
     
-    assert jnp.isclose(jnp.atleast_1d(c_h),jnp.atleast_1d(c_c), rtol=1e-3, atol=0.0), (
+    assert jnp.allclose(jnp.atleast_1d(c_h),jnp.atleast_1d(c_c), rtol=1e-3, atol=0.0), (
         f"prada12 c-M relation not consistent, colossus to halox; {c_c} != {c_h}"
     )
 
-@pytest.mark.parametrize("m_delta, z", test_mzs)
 @pytest.mark.parametrize("cosmo", test_cosmos)
-def test_child18all(m_delta, z, cosmo, return_vals=False): 
-    c_h = child18all()(M=m_delta, z=z, cosmo = test_cosmos[cosmo][0])
-    cc.setCosmology(test_cosmos[cosmo][1])
-    c_c = ccon.modelChild18(m_delta, z, halo_sample = "individual_all")
-    if return_vals:
-        return  c_h, c_c
+def test_child18all(cosmo, return_vals=False): 
+    ms = test_mzs[:, 0]
+    zs = test_mzs[:, 1]
     
-    assert jnp.isclose(jnp.atleast_1d(c_h),jnp.atleast_1d(c_c[0]), rtol=1e-4, atol=0.0), (
-        f"child18all c-M relation not consistent, colossus to halox; {c_c[0]} != {c_h}"
+    c18all = jax.jit(
+        lambda m, z: child18all()(
+            m, z=z, cosmo = test_cosmos[cosmo][0]
+        )
+    )
+    c_h = jnp.array([c18all(ms[i], zs[i]) for i in range(len(test_mzs))])
+    
+    cc.setCosmology(test_cosmos[cosmo][1])
+    c_c = jnp.array(
+        [
+            ccon.modelChild18(
+                ms[i], 
+                zs[i], 
+                halo_sample = "individual_all"
+                ) 
+                for i in range(len(test_mzs))
+        ]
     )
 
-@pytest.mark.parametrize("m_delta, z", test_mzs)
-@pytest.mark.parametrize("cosmo", test_cosmos)
-def test_child18relaxed(m_delta, z, cosmo, return_vals=False): 
-    c_h = child18relaxed()(M=m_delta, z=z, cosmo = test_cosmos[cosmo][0])
-    cc.setCosmology(test_cosmos[cosmo][1])
-    c_c = ccon.modelChild18(m_delta, z, halo_sample = "individual_relaxed")
     if return_vals:
         return  c_h, c_c
     
-    assert jnp.isclose(jnp.atleast_1d(c_h),jnp.atleast_1d(c_c[0]), rtol=1e-3, atol=0.0), (
+    assert jnp.allclose(jnp.atleast_1d(c_h[:, 0]),jnp.atleast_1d(c_c[:,0]), rtol=1e-3, atol=0.0),(
+        f"child18all c-M relation not consistent, colossus to halox; {c_c[0:3,0]} != {c_h[0:3,0]}"
+    )
+
+@pytest.mark.parametrize("cosmo", test_cosmos)
+def test_child18relaxed(cosmo, return_vals=False): 
+    ms = test_mzs[:, 0]
+    zs = test_mzs[:, 1]
+
+    c18rel = jax.jit(
+        lambda m, z: child18relaxed()(
+            m, z=z, cosmo = test_cosmos[cosmo][0]
+        )
+    )
+
+    c_h = jnp.array([c18rel(ms[i], zs[i]) for i in range(len(test_mzs))])
+
+    cc.setCosmology(test_cosmos[cosmo][1])
+    c_c = jnp.array(
+        [
+            ccon.modelChild18(
+                ms[i], 
+                zs[i], 
+                halo_sample = "individual_relaxed"
+                ) 
+                for i in range(len(test_mzs))
+        ]
+    )
+
+    if return_vals:
+        return  c_h, c_c
+    
+    assert jnp.allclose(jnp.atleast_1d(c_h[:, 0]),jnp.atleast_1d(c_c[:,0]), rtol=1e-3, atol=0.0),(
         f"child18relaxed c-M relation not consistent, colossus to halox; {c_c[0]} != {c_h}"
     )

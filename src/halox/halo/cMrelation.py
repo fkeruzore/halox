@@ -7,18 +7,7 @@ from halox import lss, cosmology
 
 jax.config.update("jax_enable_x64", True)
 
-# TODO
-# Add in validity flag, need to do this array wise, no prints, just as a data product
-
 # currently implementing all of these for 200c
-# not sure how we would implement multiple mass defs besidse brute force (so no if statements, need explicit calls)
-# CONCENTRATION_MODELS = {
-#     "duffy08": duffy08(),
-#     "prada12": prada12(),
-#     "klypin11": klypin11(),
-#     "child18all": child18all(),
-#     "child18relaxed": child18relaxed()
-# }
 
 @dataclass(frozen=True)
 class duffy08: #need to verify this is not a halucination
@@ -41,7 +30,7 @@ class duffy08: #need to verify this is not a halucination
 
     def __call__(self, 
                  M: ArrayLike,
-                 z: ArrayLike): #could I need cosmo?
+                 z: ArrayLike) -> float: #could I need cosmo?
         # valid:bool = (
         # (M >= self.m_min) &
         # (M <= self.m_max) &
@@ -62,7 +51,7 @@ class prada12:
     def __call__(self, 
                  M: ArrayLike,
                  z: ArrayLike, 
-                 cosmo: jc.Cosmology, ):
+                 cosmo: jc.Cosmology, ) -> float:
         # valid:bool = (
         # (M >= self.m_min) &
         # (M <= self.m_max) &
@@ -70,9 +59,11 @@ class prada12:
         # (z <= self.z_max)
         # )
         def cmin(x):
-            return 3.681 + (5.033 - 3.681) * (1.0 / jnp.pi * jnp.arctan(6.948 * (x - 0.424)) + 0.5)
+            return 3.681 + (5.033 - 3.681) * \
+                (1.0 / jnp.pi * jnp.arctan(6.948 * (x - 0.424)) + 0.5)
         def smin(x):
-            return 1.047 + (1.646 - 1.047) * (1.0 / jnp.pi * jnp.arctan(7.386 * (x - 0.526)) + 0.5)
+            return 1.047 + (1.646 - 1.047) * \
+                (1.0 / jnp.pi * jnp.arctan(7.386 * (x - 0.526)) + 0.5)
 
         a = (1+z)**-1
         x = (cosmo.Omega_de / cosmo.Omega_m) ** (1.0 / 3.0) * a
@@ -80,9 +71,10 @@ class prada12:
         B0 = cmin(x) / cmin(1.393)
         B1 = smin(x) / smin(1.393)
 
-        temp_sig = lss.sigma_M(M,z,cosmo, k_max = 1e3, n_k_int=20000) #slight differ from colossus here
+        temp_sig = lss.sigma_M(M,z,cosmo, k_max = 1e3, n_k_int=20000)
         temp_sigp = temp_sig * B1
-        temp_C = 2.881 * ((temp_sigp / 1.257) ** 1.022 + 1) * jnp.exp(0.060 / temp_sigp ** 2)
+        temp_C = 2.881 * ((temp_sigp / 1.257) ** 1.022 + 1) * \
+            jnp.exp(0.060 / temp_sigp ** 2)
         c = B0 * temp_C
 
         return c #, valid
@@ -105,7 +97,7 @@ class klypin11: #need to verify this is not a halucination
     z_max: float = 0.0
 
     def __call__(self, 
-                 M: ArrayLike,): #could I need cosmo, no
+                 M: ArrayLike,) -> float: #could I need cosmo, no
         # valid:bool = (
         # (M >= self.m_min) &
         # (M <= self.m_max) &
@@ -131,7 +123,7 @@ class child18all: #maybe we need 4 cases of this???
     def __call__(self,
                  M: ArrayLike, 
                  z: ArrayLike,
-                 cosmo:jc.Cosmology, ):
+                 cosmo:jc.Cosmology, ) -> float:
         #valid: bool etc.
         deltath = 1.68647
         logR = jnp.linspace(-3, 5, 2048)   # 1e-2 to 1e2 Mpc/h
@@ -176,7 +168,7 @@ class child18relaxed: #maybe we need 4 cases of this???
     def __call__(self,
                  M: ArrayLike, 
                  z: ArrayLike,
-                 cosmo:jc.Cosmology, ):
+                 cosmo:jc.Cosmology, ) -> float:
         #valid: bool etc.
         deltath = 1.68647
         logR = jnp.linspace(-3, 5, 2048)   # 1e-2 to 1e2 Mpc/h
