@@ -102,7 +102,7 @@ def test_child18all(m_delta, z, cosmo, return_vals=False):
     if return_vals:
         return  c_h, c_c
     
-    assert jnp.isclose(jnp.atleast_1d(c_h),jnp.atleast_1d(c_c[0]), rtol=1e-3, atol=0.0), (
+    assert jnp.isclose(jnp.atleast_1d(c_h),jnp.atleast_1d(c_c[0]), rtol=1e-4, atol=0.0), (
         f"child18all c-M relation not consistent, colossus to halox; {c_c[0]} != {c_h}"
     )
 

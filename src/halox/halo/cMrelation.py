@@ -2,7 +2,6 @@ from dataclasses import dataclass
 from jax.typing import ArrayLike
 import jax
 import jax.numpy as jnp
-import jaxopt as jop
 import jax_cosmo as jc
 from halox import lss, cosmology
 
@@ -23,6 +22,13 @@ jax.config.update("jax_enable_x64", True)
 
 @dataclass(frozen=True)
 class duffy08: #need to verify this is not a halucination
+    """
+    duffy08 mass concentration relation. 
+    (https://ui.adsabs.harvard.edu/abs/2008MNRAS.390L..64D/abstract)
+    
+    z, ArrayLike: Redshift
+    M, ArrayLike: M200c
+    """
     name:str = "duffy08" # the following are the 200c parameters, there are others
     m_min: float = 1e11
     m_max: float = 1e15
@@ -67,17 +73,16 @@ class prada12:
             return 3.681 + (5.033 - 3.681) * (1.0 / jnp.pi * jnp.arctan(6.948 * (x - 0.424)) + 0.5)
         def smin(x):
             return 1.047 + (1.646 - 1.047) * (1.0 / jnp.pi * jnp.arctan(7.386 * (x - 0.526)) + 0.5)
-        
-        nu = lss.peak_height(M, z, cosmo, n_k_int=20000)
 
-
-        a = 1 / (1+z)
+        a = (1+z)**-1
         x = (cosmo.Omega_de / cosmo.Omega_m) ** (1.0 / 3.0) * a
+
         B0 = cmin(x) / cmin(1.393)
         B1 = smin(x) / smin(1.393)
-        temp_sig = 1.686 / nu # Replace with lss.sigma_M. This bakes in the 1.686 tophat density requirement, but intentionally?
+
+        temp_sig = lss.sigma_M(M,z,cosmo, k_max = 1e3, n_k_int=20000) #slight differ from colossus here
         temp_sigp = temp_sig * B1
-        temp_C = 2.881 * ((temp_sigp / 1.257) ** 1.022 + 1) * jnp.exp(0.06 / temp_sigp ** 2)
+        temp_C = 2.881 * ((temp_sigp / 1.257) ** 1.022 + 1) * jnp.exp(0.060 / temp_sigp ** 2)
         c = B0 * temp_C
 
         return c #, valid
@@ -109,8 +114,7 @@ class klypin11: #need to verify this is not a halucination
         # )
         return 9.6 * (M / 1E12)**-0.075
 
-@dataclass(frozen=True) #something is wrong with my implementation
-#solver slows this down, can I get rid of it?
+@dataclass(frozen=True) 
 class child18all: #maybe we need 4 cases of this???
     """
     child18all
