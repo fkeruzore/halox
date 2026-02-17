@@ -27,6 +27,8 @@ class EinastoHalo:
         Concentration at overdensity `delta`
     z: float
         Redshift
+    alpha: float
+        Einasto profile alpha parameter.
     cosmo: jc.Cosmology
         Underlying cosmology
     delta: float
