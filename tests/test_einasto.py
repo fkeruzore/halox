@@ -45,9 +45,11 @@ cc.addCosmology(
 )
 G = halox.cosmology.G
 
+
 @jax.jit
 def a_from_nu(m_delta, z, cosmo_j):
     return halox.halo.einasto.a_from_nu(m_delta, z, cosmo_j, n_k_int=200)
+
 
 @pytest.mark.parametrize("halo_name", test_halos.keys())
 @pytest.mark.parametrize("delta", test_deltas)
