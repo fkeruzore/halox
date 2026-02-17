@@ -267,7 +267,6 @@ def test_convert_delta(
     )
     res_c = res_c.at[1].divide(1e3)
 
-    delta_out = 500.0 if delta_in == 200.0 else 200.0
     res_h = halox_convert_delta(
         m_delta, c_delta, z, cosmo_j, delta_in, delta_out
     )
