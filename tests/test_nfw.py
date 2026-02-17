@@ -121,7 +121,9 @@ def test_potential(
     xyz = jnp.zeros((3, len(r_kpc))) * u.kpc
     xyz[0] = r_kpc
     res_h = nfw_h.potential(r)
-    res_g = (nfw_g.energy(xyz)).to(u.km ** 2 / u.s ** 2).value # originally in kpc^2/Myr^2
+    res_g = (
+        (nfw_g.energy(xyz)).to(u.km**2 / u.s**2).value
+    )  # originally in kpc^2/Myr^2
 
     if return_vals:
         return res_h, res_g
@@ -234,6 +236,12 @@ def test_surface_density(
     )  # E501: ignore
 
 
+@jax.jit
+def halox_convert_delta(m_delta, c_delta, z, cosmo_j, delta_in, delta_out):
+    nfw_h = halox.nfw.NFWHalo(m_delta, c_delta, z, cosmo_j, delta=delta_in)
+    return jnp.squeeze(jnp.array(nfw_h.to_delta(delta_out)))
+
+
 @pytest.mark.parametrize("halo_name", test_halos.keys())
 @pytest.mark.parametrize("delta_in", test_deltas)
 @pytest.mark.parametrize("cosmo_name", test_cosmos.keys())
@@ -245,10 +253,8 @@ def test_convert_delta(
     cosmo_j, cosmo_c = test_cosmos[cosmo_name]
 
     cosmo_c = cc.setCosmology(cosmo_c)
-    nfw_h = halox.nfw.NFWHalo(m_delta, c_delta, z, cosmo_j, delta=delta_in)
 
     delta_out = 500.0 if delta_in == 200.0 else 200.0
-    res_h = jnp.squeeze(jnp.array(nfw_h.to_delta(delta_out)))
     res_c = jnp.array(
         mass_defs.changeMassDefinition(
             m_delta,
@@ -260,6 +266,10 @@ def test_convert_delta(
         )
     )
     res_c = res_c.at[1].divide(1e3)
+
+    res_h = halox_convert_delta(
+        m_delta, c_delta, z, cosmo_j, delta_in, delta_out
+    )
 
     if return_vals:
         return res_h, res_c

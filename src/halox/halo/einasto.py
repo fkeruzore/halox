@@ -9,9 +9,10 @@ from . import nfw
 from ..cosmology import G
 from .. import cosmology
 
-# TODO: 
+# TODO:
 # Add velocity dispersion and surface density (allign capabilities with NFW)
 # Add potential function to the jax friendlieness test (see how gamma funcs behave)
+
 
 class EinastoHalo:
     """
@@ -26,12 +27,15 @@ class EinastoHalo:
         Concentration at overdensity `delta`
     z: float
         Redshift
+    alpha: float
+        Einasto profile alpha parameter.
     cosmo: jc.Cosmology
         Underlying cosmology
     delta: float
         Density contrast in units of critical density at redshift z,
         defaults to 200.
     """
+
     # Reference: https://ui.adsabs.harvard.edu/abs/2012A%26A...540A..70R/abstract
 
     def __init__(
@@ -191,7 +195,7 @@ class EinastoHalo:
             Radius at new overdensity
         Array
             Concentration at new overdensity
-        
+
         Notes
         -----
         This conversion assumes an NFW profile.

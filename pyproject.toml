@@ -13,6 +13,7 @@ dependencies = [
     "jax-cosmo>=0.1.0",
     "jaxopt>=0.8.0",
     "scipy>=1.13.1",
+    "setuptools<82.0.0",  # for jax_cosmo
 ]
 
 [dependency-groups]
