@@ -149,9 +149,11 @@ def test_child18relaxed(cosmo, return_vals=False):
     ms = test_mzs[:, 0]
     zs = test_mzs[:, 1]
 
+    model = child18relaxed(cosmo = test_cosmos[cosmo][0])
+
     c18rel = jax.jit(
-        lambda m, z: child18relaxed()(
-            m, z=z, cosmo = test_cosmos[cosmo][0]
+        lambda m, z: model(
+            m, z=z
         )
     )
 

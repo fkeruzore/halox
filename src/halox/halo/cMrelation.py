@@ -30,7 +30,7 @@ class duffy08: #need to verify this is not a halucination
 
     def __call__(self, 
                  M: ArrayLike,
-                 z: ArrayLike) -> float: #could I need cosmo?
+                 z: ArrayLike) -> ArrayLike: #could I need cosmo?
         # valid:bool = (
         # (M >= self.m_min) &
         # (M <= self.m_max) &
@@ -51,7 +51,7 @@ class prada12:
     def __call__(self, 
                  M: ArrayLike,
                  z: ArrayLike, 
-                 cosmo: jc.Cosmology, ) -> float:
+                 cosmo: jc.Cosmology, ) -> ArrayLike:
         # valid:bool = (
         # (M >= self.m_min) &
         # (M <= self.m_max) &
@@ -97,7 +97,7 @@ class klypin11: #need to verify this is not a halucination
     z_max: float = 0.0
 
     def __call__(self, 
-                 M: ArrayLike,) -> float: #could I need cosmo, no
+                 M: ArrayLike,) -> ArrayLike: #could I need cosmo, no
         # valid:bool = (
         # (M >= self.m_min) &
         # (M <= self.m_max) &
@@ -106,7 +106,7 @@ class klypin11: #need to verify this is not a halucination
         # )
         return 9.6 * (M / 1E12)**-0.075
 
-@dataclass(frozen=True) 
+@dataclass
 class child18all: #maybe we need 4 cases of this???
     """
     child18all
@@ -123,7 +123,7 @@ class child18all: #maybe we need 4 cases of this???
     def __call__(self,
                  M: ArrayLike, 
                  z: ArrayLike,
-                 cosmo:jc.Cosmology, ) -> float:
+                 cosmo:jc.Cosmology, ) -> ArrayLike:
         #valid: bool etc.
         deltath = 1.68647
         logR = jnp.linspace(-3, 5, 2048)   # 1e-2 to 1e2 Mpc/h
@@ -152,7 +152,7 @@ class child18all: #maybe we need 4 cases of this???
         x = M/Mstr / b
         return c0 + A*(x**mex * (1 + x)**-mex - 1)
 
-@dataclass(frozen=True)
+@dataclass
 class child18relaxed: #maybe we need 4 cases of this???
     """
     child18all
@@ -164,16 +164,19 @@ class child18relaxed: #maybe we need 4 cases of this???
     m_max: float = jnp.inf
     z_min: float = 0
     z_max: float = 4
+    
+    def __init__(self, cosmo:jc.Cosmology):
+        self.cosmo = cosmo
+        logR = jnp.linspace(-3, 5, 2048)   # 1e-2 to 1e2 Mpc/h
+        self.R_grid = 10**logR
+        self.sigma_grid = lss.sigma_R(self.R_grid, z=0, cosmo = cosmo)
 
     def __call__(self,
                  M: ArrayLike, 
-                 z: ArrayLike,
-                 cosmo:jc.Cosmology, ) -> float:
+                 z: ArrayLike,) -> ArrayLike:
         #valid: bool etc.
         deltath = 1.68647
-        logR = jnp.linspace(-3, 5, 2048)   # 1e-2 to 1e2 Mpc/h
-        R_grid = 10**logR
-        sigma_grid = lss.sigma_R(R_grid, z=0, cosmo = cosmo)
+        
         def R_of_sigma(sigma_val, sigma_grid, R_grid):
             return jnp.interp(
                 jnp.log10(sigma_val),
@@ -181,12 +184,12 @@ class child18relaxed: #maybe we need 4 cases of this???
                 jnp.log10(R_grid[::-1])
             )
         a = jnp.atleast_1d(1/(1+z))
-        Dz = jc.background.growth_factor(cosmo, a)
+        Dz = jc.background.growth_factor(self.cosmo, a)
         sigma_target = deltath / Dz
-        Rstr = 10**R_of_sigma(sigma_target, sigma_grid, R_grid)
+        Rstr = 10**R_of_sigma(sigma_target, self.sigma_grid, self.R_grid)
         rho_m0 = (
-            cosmology.critical_density(0.0, cosmo)
-            * jc.background.Omega_m_a(cosmo, 1.0)
+            cosmology.critical_density(0.0, self.cosmo)
+            * jc.background.Omega_m_a(self.cosmo, 1.0)
             )
         Mstr:ArrayLike = 4*jnp.pi/3 * rho_m0 * Rstr**3 
 
