@@ -40,7 +40,7 @@ class duffy08: #need to verify this is not a halucination
         M0 = 2e12 
         return self.A * (M / M0) ** self.B * (1 + z) ** self.C #, valid
 
-@dataclass(frozen=True)
+@dataclass
 class prada12: 
     name:str = "prada12"
     m_min: float = 0
@@ -48,10 +48,12 @@ class prada12:
     z_min: float = 0
     z_max: float = jnp.inf
 
+    def __init__(self, cosmo:jc.Cosmology):
+        self.cosmo = cosmo
+
     def __call__(self, 
                  M: ArrayLike,
-                 z: ArrayLike, 
-                 cosmo: jc.Cosmology, ) -> ArrayLike:
+                 z: ArrayLike,) -> ArrayLike:
         # valid:bool = (
         # (M >= self.m_min) &
         # (M <= self.m_max) &
@@ -66,12 +68,12 @@ class prada12:
                 (1.0 / jnp.pi * jnp.arctan(7.386 * (x - 0.526)) + 0.5)
 
         a = (1+z)**-1
-        x = (cosmo.Omega_de / cosmo.Omega_m) ** (1.0 / 3.0) * a
+        x = (self.cosmo.Omega_de / self.cosmo.Omega_m) ** (1.0 / 3.0) * a
 
         B0 = cmin(x) / cmin(1.393)
         B1 = smin(x) / smin(1.393)
 
-        temp_sig = lss.sigma_M(M,z,cosmo, k_max = 1e3, n_k_int=20000)
+        temp_sig = lss.sigma_M(M,z,self.cosmo, k_max = 1e3, n_k_int=20000)
         temp_sigp = temp_sig * B1
         temp_C = 2.881 * ((temp_sigp / 1.257) ** 1.022 + 1) * \
             jnp.exp(0.060 / temp_sigp ** 2)
@@ -84,13 +86,14 @@ class klypin11: #need to verify this is not a halucination
     """
     Docstring for klypin11
     
-    Klypin et al. 2011 gives values for other redshifts, but no clear redshift dependence is stated.
+    Klypin et al. 2011 gives values for other redshifts, 
+    but no clear redshift dependence is stated.
     Here, we only provide the function at z = 0.
 
     :var M: Description
     :vartype M: Array
     """
-    name:str = "klypin11" # the following are not the only possible parameters, maybe need othe ones too?
+    name:str = "klypin11"
     m_min: float = 3e10
     m_max: float = 5e14
     z_min: float = 0.0
@@ -119,16 +122,18 @@ class child18all: #maybe we need 4 cases of this???
     m_max: float = jnp.inf
     z_min: float = 0
     z_max: float = 4
+
+    def __init__(self, cosmo:jc.Cosmology):
+        self.cosmo = cosmo
+        logR = jnp.linspace(-3, 5, 2048)   # 1e-2 to 1e2 Mpc/h
+        self.R_grid = 10**logR
+        self.sigma_grid = lss.sigma_R(self.R_grid, z=0, cosmo = cosmo)
     
     def __call__(self,
                  M: ArrayLike, 
-                 z: ArrayLike,
-                 cosmo:jc.Cosmology, ) -> ArrayLike:
+                 z: ArrayLike,) -> ArrayLike:
         #valid: bool etc.
         deltath = 1.68647
-        logR = jnp.linspace(-3, 5, 2048)   # 1e-2 to 1e2 Mpc/h
-        R_grid = 10**logR
-        sigma_grid = lss.sigma_R(R_grid, z=0, cosmo = cosmo)
         def R_of_sigma(sigma_val, sigma_grid, R_grid):
             return jnp.interp(
                 jnp.log10(sigma_val),
@@ -136,12 +141,12 @@ class child18all: #maybe we need 4 cases of this???
                 jnp.log10(R_grid[::-1])
             )
         a = jnp.atleast_1d(1/(1+z))
-        Dz = jc.background.growth_factor(cosmo, a)
+        Dz = jc.background.growth_factor(self.cosmo, a)
         sigma_target = deltath / Dz
-        Rstr = 10**R_of_sigma(sigma_target, sigma_grid, R_grid)
+        Rstr = 10**R_of_sigma(sigma_target, self.sigma_grid, self.R_grid)
         rho_m0 = (
-            cosmology.critical_density(0.0, cosmo)
-            * jc.background.Omega_m_a(cosmo, 1.0)
+            cosmology.critical_density(0.0, self.cosmo)
+            * jc.background.Omega_m_a(self.cosmo, 1.0)
             )
         Mstr:ArrayLike = 4*jnp.pi/3 * rho_m0 * Rstr**3 
 

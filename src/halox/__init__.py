@@ -8,4 +8,13 @@ from . import halo
 from .halo import nfw, einasto
 from .halo import cMrelation
 
-__all__ = ["nfw", "einasto", "cosmology", "hmf", "lss", "bias", "halo", "cMrelation"]
+__all__ = [
+    "nfw", 
+    "einasto", 
+    "cosmology", 
+    "hmf", 
+    "lss", 
+    "bias", 
+    "halo", 
+    "cMrelation"
+    ]

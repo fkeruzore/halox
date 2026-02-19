@@ -5,7 +5,13 @@ import jax_cosmo as jc
 import colossus.halo.concentration as ccon
 import colossus.cosmology.cosmology as cc
 import halox
-from halox.halo.cMrelation import duffy08, klypin11, prada12, child18all, child18relaxed
+from halox.halo.cMrelation import (
+    duffy08, 
+    klypin11, 
+    prada12, 
+    child18all, 
+    child18relaxed
+    )
 jax.config.update("jax_enable_x64", True)
 
 # TODO: Check prada12 for small calculation error on the percent level, 
@@ -63,12 +69,13 @@ G = halox.cosmology.G
 @pytest.mark.parametrize("m_delta, z", test_mzs)
 def test_duffy08(m_delta, z, return_vals=False): 
     c_h = duffy08()(M=m_delta, z=z)
-    c_c = ccon.modelDuffy08(m_delta,z,mdef=f"200c")
+    c_c = ccon.modelDuffy08(m_delta,z,mdef="200c")
     if return_vals:
         return  c_h, c_c
     
     assert jnp.isclose(jnp.atleast_1d(c_h),jnp.atleast_1d(c_c[0])), (
-        f"duffy08 c-M relation not consistent, colossus to halox; {c_c[0]} != {c_h}"
+        f"duffy08 c-M relation not consistent, colossus to halox; \
+            {c_c[0]} != {c_h}"
     )
 
 @pytest.mark.parametrize("m_delta, z", test_mzs)
@@ -79,7 +86,8 @@ def test_klypin11(m_delta, z, return_vals=False):
         return  c_h, c_c
     
     assert jnp.isclose(jnp.atleast_1d(c_h),jnp.atleast_1d(c_c[0])), (
-        f"klypin11 c-M relation not consistent, colossus to halox; {c_c[0]} != {c_h}"
+        f"klypin11 c-M relation not consistent, colossus to halox; \
+            {c_c[0]} != {c_h}"
     )
 
 @pytest.mark.parametrize("cosmo", test_cosmos)
@@ -87,9 +95,10 @@ def test_prada12(cosmo, return_vals=False):
     ms = test_mzs[:, 0]
     zs = test_mzs[:, 1]
     
+    model = prada12(cosmo = test_cosmos[cosmo][0])
     p12 = jax.jit(
-        lambda m, z: prada12()(
-            m, z=z, cosmo = test_cosmos[cosmo][0]
+        lambda m, z: model(
+            m, z=z
         )
     )
     c_h = jnp.array([p12(ms[i], zs[i]) for i in range(len(test_mzs))])
@@ -109,18 +118,23 @@ def test_prada12(cosmo, return_vals=False):
     if return_vals:
         return  c_h, c_c
     
-    assert jnp.allclose(jnp.atleast_1d(c_h),jnp.atleast_1d(c_c), rtol=1e-3, atol=0.0), (
-        f"prada12 c-M relation not consistent, colossus to halox; {c_c} != {c_h}"
+    assert jnp.allclose(
+        jnp.atleast_1d(c_h),
+        jnp.atleast_1d(c_c), 
+        rtol=1e-3, atol=0.0
+        ), (
+        f"prada12 c-M relation not consistent, colossus to halox; \
+            {c_c} != {c_h}"
     )
 
 @pytest.mark.parametrize("cosmo", test_cosmos)
 def test_child18all(cosmo, return_vals=False): 
     ms = test_mzs[:, 0]
     zs = test_mzs[:, 1]
-    
+    model = child18all(cosmo = test_cosmos[cosmo][0])
     c18all = jax.jit(
-        lambda m, z: child18all()(
-            m, z=z, cosmo = test_cosmos[cosmo][0]
+        lambda m, z: model(
+            m, z=z
         )
     )
     c_h = jnp.array([c18all(ms[i], zs[i]) for i in range(len(test_mzs))])
@@ -140,8 +154,13 @@ def test_child18all(cosmo, return_vals=False):
     if return_vals:
         return  c_h, c_c
     
-    assert jnp.allclose(jnp.atleast_1d(c_h[:, 0]),jnp.atleast_1d(c_c[:,0]), rtol=1e-3, atol=0.0),(
-        f"child18all c-M relation not consistent, colossus to halox; {c_c[0:3,0]} != {c_h[0:3,0]}"
+    assert jnp.allclose(
+        jnp.atleast_1d(c_h[:, 0]),
+        jnp.atleast_1d(c_c[:,0]), 
+        rtol=1e-3, atol=0.0
+        ),(
+        f"child18all c-M relation not consistent, colossus to halox; \
+            {c_c[0:3,0]} != {c_h[0:3,0]}"
     )
 
 @pytest.mark.parametrize("cosmo", test_cosmos)
@@ -174,6 +193,11 @@ def test_child18relaxed(cosmo, return_vals=False):
     if return_vals:
         return  c_h, c_c
     
-    assert jnp.allclose(jnp.atleast_1d(c_h[:, 0]),jnp.atleast_1d(c_c[:,0]), rtol=1e-3, atol=0.0),(
-        f"child18relaxed c-M relation not consistent, colossus to halox; {c_c[0]} != {c_h}"
+    assert jnp.allclose(
+        jnp.atleast_1d(c_h[:, 0]),
+        jnp.atleast_1d(c_c[:,0]), 
+        rtol=1e-3, atol=0.0
+        ),(
+        f"child18relaxed c-M relation not consistent, colossus to halox; \
+            {c_c[0]} != {c_h}"
     )

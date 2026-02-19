@@ -253,12 +253,13 @@ class EinastoHalo:
 
 
 # Passing alpha is optional since it can also be estimated from the
-# Gao et al. 2008 relation between alpha and peak height. This relation was calibrated for
-# nu_vir, so if the given mass definition is not 'vir' we convert the given mass to Mvir
-# assuming an NFW profile with the given mass and concentration. This leads to a negligible
-# inconsistency, but solving for the correct alpha iteratively would be much slower.
+# Gao et al. 2008 relation between alpha and peak height. This relation was 
+# calibrated for nu_vir, so if the given mass definition is not 'vir' we 
+# convert the given mass to Mvir assuming an NFW profile with the given mass 
+# and concentration. This leads to a negligible inconsistency, but solving for 
+# the correct alpha iteratively would be much slower.
 def a_from_nu(
-    M: ArrayLike,  # this should be the virial mass, currently not, will need to change, see profile_einasto for more details
+    M: ArrayLike,  
     z: ArrayLike,
     cosmo: jc.Cosmology,
     n_k_int: int = 5000,
@@ -290,6 +291,6 @@ def a_from_nu(
     -----
     This assumes that the input mass is the virial mass.
     """
-    nu = lss.peak_height(M, z, cosmo, n_k_int, delta_sc)
+    nu = lss.peak_height(M, z, cosmo, n_k_int)
     alpha = 0.155 + 0.0095 * nu**2
     return alpha

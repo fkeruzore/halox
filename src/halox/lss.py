@@ -109,7 +109,7 @@ def sigma_R(
 
     # Power spectrum at redshift z
     a = 1.0 / (1.0 + z)
-    pk = jc.power.linear_matter_power(cosmo, k, a=a)  # type: ignore
+    pk = jc.power.linear_matter_power(cosmo, k, a=a) 
     pk *= _jax_cosmo_pk_corr  # consistency with colossus
 
     # Window function for spherical top-hat
@@ -192,5 +192,6 @@ def peak_height(
     :return: Array
         Returns peak height (nu) for halos
     """
-    nu = delta_sc / sigma_M(M, z, cosmo, k_min = k_min, k_max = k_max, n_k_int=n_k_int)
+    nu = delta_sc / \
+        sigma_M(M, z, cosmo, k_min = k_min, k_max = k_max, n_k_int=n_k_int)
     return nu

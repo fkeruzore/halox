@@ -121,7 +121,7 @@ def test_potential(
     xyz = jnp.zeros((3, len(r_kpc))) * u.kpc
     xyz[0] = r_kpc
     res_h = nfw_h.potential(r)
-    res_g = (nfw_g.energy(xyz)).to(u.km ** 2 / u.s ** 2).value # originally in kpc^2/Myr^2
+    res_g = (nfw_g.energy(xyz)).to(u.km ** 2 / u.s ** 2).value 
 
     if return_vals:
         return res_h, res_g
