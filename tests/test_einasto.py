@@ -46,6 +46,7 @@ cc.addCosmology(
 )
 G = halox.cosmology.G
 
+
 @pytest.mark.parametrize("halo_name", test_halos.keys())
 @pytest.mark.parametrize("delta", test_deltas)
 @pytest.mark.parametrize("cosmo_name", test_cosmos.keys())
@@ -116,6 +117,7 @@ def test_potential(halo_name, delta, cosmo_name, return_vals: bool = False):
     halo = test_halos[halo_name]
     m_delta, c_delta, z = halo["M"], halo["c"], halo["z"]
     cosmo_j, cosmo_c = test_cosmos[cosmo_name]
+
     def einasto_potential_numeric(r, halo, r_max):
         """
         halo: a colossus halo
@@ -126,12 +128,13 @@ def test_potential(halo_name, delta, cosmo_name, return_vals: bool = False):
         def outer_term(r):
             def integrand(rp):
                 return halo.enclosedMass(rp) / rp**2
+
             return np.array([quad(integrand, ri, r_max)[0] for ri in r])
 
         # phi = -G * (halo.enclosedMass(r) / r + outer_term(r))
         phi = -G * outer_term(r)
         return phi
-    
+
     cosmo_c = cc.setCosmology(cosmo_c)
     alpha = halox.halo.einasto.a_from_nu(m_delta, z, cosmo_j)
 
@@ -141,7 +144,6 @@ def test_potential(halo_name, delta, cosmo_name, return_vals: bool = False):
     ein_c = profile_einasto.EinastoProfile(
         M=m_delta, c=c_delta, z=z, mdef=f"{delta:.0f}c", alpha=alpha
     )
-
 
     rs = jnp.logspace(-2, 1, 6)  # Mpc
     f = 1e4

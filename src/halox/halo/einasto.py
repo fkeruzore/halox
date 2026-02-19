@@ -9,9 +9,10 @@ from . import nfw
 from ..cosmology import G
 from .. import cosmology
 
-# TODO: 
+# TODO:
 # Add velocity dispersion and surface density (allign capabilities with NFW)
 # Add potential function to the jax friendlieness test (see how gammas behave)
+
 
 class EinastoHalo:
     """
@@ -32,6 +33,7 @@ class EinastoHalo:
         Density contrast in units of critical density at redshift z,
         defaults to 200.
     """
+
     # Reference: https://ui.adsabs.harvard.edu/abs/2012A%26A...540A..70R/abstract
 
     def __init__(
@@ -175,8 +177,8 @@ class EinastoHalo:
 
     #     phi = prefact * (lower3 / s + upper2)
     #     return phi
-    
-    def potential(self, r:ArrayLike) -> Array:
+
+    def potential(self, r: ArrayLike) -> Array:
         # Working test: Possible addition to JAX friendlieness test
         """Potential profile :math:`\\phi(r)`.
 
@@ -197,19 +199,21 @@ class EinastoHalo:
         s = (2.0 / self.alpha) ** (1.0 / self.alpha) * r / self.Rs
         x = s**self.alpha
 
-        prefact = -4 * jnp.pi * G * self.rho0 \
-            * jnp.exp(2 / self.alpha) / (s/r)**2 / self.alpha
+        prefact = (
+            -4
+            * jnp.pi
+            * G
+            * self.rho0
+            * jnp.exp(2 / self.alpha)
+            / (s / r) ** 2
+            / self.alpha
+        )
 
         gamma2 = jsp.special.gamma(a2)
         gamma3 = jsp.special.gamma(a3)
 
-        lower3 = (
-            jsp.special.gammainc(a3, x) * gamma3
-        )
-        upper2 = (
-            gamma2
-            * (jsp.special.gammaincc(a2, x))
-        )
+        lower3 = jsp.special.gammainc(a3, x) * gamma3
+        upper2 = gamma2 * (jsp.special.gammaincc(a2, x))
 
         phi = prefact * (lower3 / s + upper2)
         return phi
@@ -230,7 +234,7 @@ class EinastoHalo:
             Radius at new overdensity
         Array
             Concentration at new overdensity
-        
+
         Notes
         -----
         This conversion assumes an NFW profile.
@@ -243,11 +247,11 @@ class EinastoHalo:
             self.delta,
             delta_new,
         )
-        # self.m_delta = output[0] 
-        # removed this feature, must 
-        # instantiate new halo after 
-        # using this function if you 
-        # want all the properties 
+        # self.m_delta = output[0]
+        # removed this feature, must
+        # instantiate new halo after
+        # using this function if you
+        # want all the properties
         # of the new halo
         # self.r_delta = output[1]
         # self.c_delta = output[2]
@@ -260,13 +264,13 @@ class EinastoHalo:
 
 
 # Passing alpha is optional since it can also be estimated from the
-# Gao et al. 2008 relation between alpha and peak height. This relation was 
-# calibrated for nu_vir, so if the given mass definition is not 'vir' we 
-# convert the given mass to Mvir assuming an NFW profile with the given mass 
-# and concentration. This leads to a negligible inconsistency, but solving for 
+# Gao et al. 2008 relation between alpha and peak height. This relation was
+# calibrated for nu_vir, so if the given mass definition is not 'vir' we
+# convert the given mass to Mvir assuming an NFW profile with the given mass
+# and concentration. This leads to a negligible inconsistency, but solving for
 # the correct alpha iteratively would be much slower.
 def a_from_nu(
-    M: ArrayLike,  
+    M: ArrayLike,
     z: ArrayLike,
     cosmo: jc.Cosmology,
     n_k_int: int = 5000,
