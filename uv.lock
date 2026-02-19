@@ -1185,6 +1185,7 @@ dependencies = [
     { name = "scipy", version = "1.13.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.10'" },
     { name = "scipy", version = "1.15.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version == '3.10.*'" },
     { name = "scipy", version = "1.16.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
+    { name = "setuptools" },
 ]
 
 [package.optional-dependencies]
@@ -1245,6 +1246,7 @@ requires-dist = [
     { name = "pytest-cov", marker = "extra == 'tests'", specifier = ">=6.2.1" },
     { name = "pytest-xdist", marker = "extra == 'tests'", specifier = ">=3.7.0" },
     { name = "scipy", specifier = ">=1.13.1" },
+    { name = "setuptools", specifier = "<82.0.0" },
     { name = "sphinx", marker = "extra == 'docs'", specifier = ">=7.4.7" },
     { name = "sphinx-autodoc-typehints", marker = "extra == 'docs'", specifier = ">=2.3.0" },
     { name = "sphinx-book-theme", marker = "extra == 'docs'", specifier = ">=1.1.3" },

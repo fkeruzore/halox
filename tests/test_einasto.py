@@ -47,6 +47,11 @@ cc.addCosmology(
 G = halox.cosmology.G
 
 
+@jax.jit
+def a_from_nu(m_delta, z, cosmo_j):
+    return halox.halo.einasto.a_from_nu(m_delta, z, cosmo_j, n_k_int=200)
+
+
 @pytest.mark.parametrize("halo_name", test_halos.keys())
 @pytest.mark.parametrize("delta", test_deltas)
 @pytest.mark.parametrize("cosmo_name", test_cosmos.keys())
@@ -56,7 +61,7 @@ def test_density(halo_name, delta, cosmo_name, return_vals: bool = False):
     cosmo_j, cosmo_c = test_cosmos[cosmo_name]
 
     cosmo_c = cc.setCosmology(cosmo_c)
-    alpha = halox.halo.einasto.a_from_nu(m_delta, z, cosmo_j)
+    alpha = a_from_nu(m_delta, z, cosmo_j)
     ein_h = halox.halo.einasto.EinastoHalo(
         m_delta, c_delta, z, alpha=alpha, cosmo=cosmo_j, delta=delta
     )
@@ -171,7 +176,7 @@ def test_circular_velocity(
     cosmo_j, cosmo_c = test_cosmos[cosmo_name]
 
     cosmo_c = cc.setCosmology(cosmo_c)
-    alpha = halox.halo.einasto.a_from_nu(m_delta, z, cosmo_j)
+    alpha = a_from_nu(m_delta, z, cosmo_j)
     ein_h = halox.halo.einasto.EinastoHalo(
         m_delta, c_delta, z, alpha=alpha, cosmo=cosmo_j, delta=delta
     )
@@ -191,6 +196,15 @@ def test_circular_velocity(
     )
 
 
+@jax.jit
+def halox_convert_delta(m_delta, c_delta, z, cosmo_j, delta_in, delta_out):
+    alpha = a_from_nu(m_delta, z, cosmo_j)
+    ein_h = halox.halo.EinastoHalo(
+        m_delta, c_delta, z, alpha=alpha, cosmo=cosmo_j, delta=delta_in
+    )
+    return jnp.squeeze(jnp.array(ein_h.to_delta(delta_out)))
+
+
 @pytest.mark.parametrize("halo_name", test_halos.keys())
 @pytest.mark.parametrize("delta_in", test_deltas)
 @pytest.mark.parametrize("cosmo_name", test_cosmos.keys())
@@ -202,13 +216,8 @@ def test_convert_delta(
     cosmo_j, cosmo_c = test_cosmos[cosmo_name]
 
     cosmo_c = cc.setCosmology(cosmo_c)
-    alpha = halox.halo.einasto.a_from_nu(m_delta, z, cosmo_j)
-    ein_h = halox.halo.einasto.EinastoHalo(
-        m_delta, c_delta, z, alpha=alpha, cosmo=cosmo_j, delta=delta_in
-    )
 
     delta_out = 500.0 if delta_in == 200.0 else 200.0
-    res_h = jnp.squeeze(jnp.array(ein_h.to_delta(delta_out)))
     res_c = jnp.array(
         mass_defs.changeMassDefinition(
             m_delta,
@@ -220,6 +229,10 @@ def test_convert_delta(
         )
     )
     res_c = res_c.at[1].divide(1e3)
+
+    res_h = halox_convert_delta(
+        m_delta, c_delta, z, cosmo_j, delta_in, delta_out
+    )
 
     if return_vals:
         return res_h, res_c
