@@ -11,7 +11,7 @@ from .. import cosmology
 
 # TODO: 
 # Add velocity dispersion and surface density (allign capabilities with NFW)
-# Add potential function to the jax friendlieness test (see how gamma funcs behave)
+# Add potential function to the jax friendlieness test (see how gammas behave)
 
 class EinastoHalo:
     """
@@ -50,10 +50,11 @@ class EinastoHalo:
         self.delta = delta
         self.cosmo = cosmo
 
-        # Potential future choice? This is from a paper, fairly ubiquitous, need to cite
+        # Potential future choice? This is from a paper, fairly ubiquitous
         # Use the formula :math:`\\Delta_{vir} = 18 * \\pi ^ 2 + 82x -39x ^ 2`
         # :math: 'x = \\Omega_m (z) -1'
-        # delta_vir = 18*jnp.pi**2 + 82*(cosmo.Omega_m(self.z) - 1) - 39*(cosmo.Omega_m(self.z) - 1)**2
+        # delta_vir = 18*jnp.pi**2 + 82*(cosmo.Omega_m(self.z) - 1)\
+        #  - 39*(cosmo.Omega_m(self.z) - 1)**2
 
         mean_rho = delta * cosmology.critical_density(self.z, cosmo)
         self.r_delta = (3 * self.m_delta / (4 * jnp.pi * mean_rho)) ** (1 / 3)
@@ -196,7 +197,8 @@ class EinastoHalo:
         s = (2.0 / self.alpha) ** (1.0 / self.alpha) * r / self.Rs
         x = s**self.alpha
 
-        prefact = -4 * jnp.pi * G * self.rho0 * jnp.exp(2 / self.alpha) / (s/r)**2 / self.alpha
+        prefact = -4 * jnp.pi * G * self.rho0 \
+            * jnp.exp(2 / self.alpha) / (s/r)**2 / self.alpha
 
         gamma2 = jsp.special.gamma(a2)
         gamma3 = jsp.special.gamma(a3)
@@ -241,7 +243,12 @@ class EinastoHalo:
             self.delta,
             delta_new,
         )
-        # self.m_delta = output[0] #removed, must instantiate new halo after using this function if you want all the properties of the new halo
+        # self.m_delta = output[0] 
+        # removed this feature, must 
+        # instantiate new halo after 
+        # using this function if you 
+        # want all the properties 
+        # of the new halo
         # self.r_delta = output[1]
         # self.c_delta = output[2]
         # self.delta = delta_new

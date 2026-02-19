@@ -18,7 +18,7 @@ class duffy08: #need to verify this is not a halucination
     z, ArrayLike: Redshift
     M, ArrayLike: M200c
     """
-    name:str = "duffy08" # the following are the 200c parameters, there are others
+    name:str = "duffy08" # only the 200c parameters
     m_min: float = 1e11
     m_max: float = 1e15
     z_min: float = 0.0
