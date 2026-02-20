@@ -5,7 +5,7 @@ import jax_cosmo as jc
 import colossus.halo.concentration as ccon
 import colossus.cosmology.cosmology as cc
 import halox
-from halox.halo.cMrelation import (
+from halox.cm import (
     duffy08,
     klypin11,
     prada12,

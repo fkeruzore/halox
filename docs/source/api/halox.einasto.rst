@@ -13,4 +13,4 @@ halox.halo.einasto: The Einasto profile
     :member-order: bysource
     :members: density, enclosed_mass, potential, circular_velocity, to_delta
 
-..autofunction:: a_from_nu
+.. autofunction:: a_from_nu

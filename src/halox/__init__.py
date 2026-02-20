@@ -3,10 +3,10 @@ from . import hmf
 from . import lss
 from . import bias
 from . import halo
+from . import cm
 
 # Backward compatibility
 from .halo import nfw, einasto
-from .halo import cMrelation
 
 __all__ = [
     "nfw",
@@ -16,5 +16,5 @@ __all__ = [
     "lss",
     "bias",
     "halo",
-    "cMrelation",
+    "cm",
 ]
