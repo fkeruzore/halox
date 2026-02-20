@@ -14,6 +14,7 @@ from .. import cosmology
 # Add potential function to the jax friendlieness test (see how gammas behave)
 
 
+
 class EinastoHalo:
     """
     Properties of a dark matter halo following an Einasto profile.
@@ -27,6 +28,8 @@ class EinastoHalo:
         Concentration at overdensity `delta`
     z: float
         Redshift
+    alpha: float
+        Einasto profile alpha parameter.
     cosmo: jc.Cosmology
         Underlying cosmology
     delta: float
