@@ -7,7 +7,10 @@ halox.halo.nfw: The NFW profile
 
 .. autosummary::
     NFWHalo
+    delta_delta
 
 .. autoclass:: NFWHalo
     :member-order: bysource
     :members: density, enclosed_mass, potential, circular_velocity, velocity_dispersion, surface_density, to_delta
+
+.. autofunction:: delta_delta
