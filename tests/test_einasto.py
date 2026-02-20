@@ -8,6 +8,7 @@ import colossus.cosmology.cosmology as cc
 from scipy.integrate import quad
 import halox
 
+
 # Note, current alpha is calculated relying on a virial mass input,
 # currently this is still implemented for coverage, but it must be
 # understood that this current test is not necessarily physical
@@ -93,7 +94,8 @@ def test_enclosed_mass(
     cosmo_j, cosmo_c = test_cosmos[cosmo_name]
 
     cosmo_c = cc.setCosmology(cosmo_c)
-    alpha = a_from_nu(m_delta, z, cosmo_j)
+    alpha = halox.halo.einasto.a_from_nu(m_delta, z, cosmo_j)
+
     ein_h = halox.halo.einasto.EinastoHalo(
         m_delta, c_delta, z, alpha=alpha, cosmo=cosmo_j, delta=delta
     )
@@ -129,7 +131,9 @@ def test_potential(halo_name, delta, cosmo_name, return_vals: bool = False):
         r = np.atleast_1d(r)
 
         def outer_term(r):
-            integrand = lambda rp: halo.enclosedMass(rp) / rp**2
+            def integrand(rp):
+                return halo.enclosedMass(rp) / rp**2
+
             return np.array([quad(integrand, ri, r_max)[0] for ri in r])
 
         # phi = -G * (halo.enclosedMass(r) / r + outer_term(r))
@@ -137,7 +141,8 @@ def test_potential(halo_name, delta, cosmo_name, return_vals: bool = False):
         return phi
 
     cosmo_c = cc.setCosmology(cosmo_c)
-    alpha = a_from_nu(m_delta, z, cosmo_j)
+    alpha = halox.halo.einasto.a_from_nu(m_delta, z, cosmo_j)
+
     ein_h = halox.halo.einasto.EinastoHalo(
         m_delta, c_delta, z, alpha=alpha, cosmo=cosmo_j, delta=delta
     )

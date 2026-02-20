@@ -8,6 +8,7 @@ This section covers tutorials for the core physics calculations in halox.
 
    notebooks/nfw.ipynb
    notebooks/einasto.ipynb
+   notebooks/cMrelations.ipynb
    notebooks/lss.ipynb
    notebooks/hmf.ipynb
    notebooks/bias.ipynb

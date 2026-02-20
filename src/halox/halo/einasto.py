@@ -11,7 +11,8 @@ from .. import cosmology
 
 # TODO:
 # Add velocity dispersion and surface density (allign capabilities with NFW)
-# Add potential function to the jax friendlieness test (see how gamma funcs behave)
+# Add potential function to the jax friendlieness test (see how gammas behave)
+
 
 
 class EinastoHalo:
@@ -54,10 +55,11 @@ class EinastoHalo:
         self.delta = delta
         self.cosmo = cosmo
 
-        # Potential future choice? This is from a paper, fairly ubiquitous, need to cite
+        # Potential future choice? This is from a paper, fairly ubiquitous
         # Use the formula :math:`\\Delta_{vir} = 18 * \\pi ^ 2 + 82x -39x ^ 2`
         # :math: 'x = \\Omega_m (z) -1'
-        # delta_vir = 18*jnp.pi**2 + 82*(cosmo.Omega_m(self.z) - 1) - 39*(cosmo.Omega_m(self.z) - 1)**2
+        # delta_vir = 18*jnp.pi**2 + 82*(cosmo.Omega_m(self.z) - 1)\
+        #  - 39*(cosmo.Omega_m(self.z) - 1)**2
 
         mean_rho = delta * cosmology.critical_density(self.z, cosmo)
         self.r_delta = (3 * self.m_delta / (4 * jnp.pi * mean_rho)) ** (1 / 3)
@@ -141,6 +143,44 @@ class EinastoHalo:
         r = jnp.asarray(r)
         return jnp.sqrt(G * self.enclosed_mass(r) / r)
 
+    # def potential(self, r: ArrayLike) -> Array:
+    #     # Working test: Possible addition to JAX friendlieness test
+    #     """Potential profile :math:`\\phi(r)`.
+
+    #     Parameters
+    #     ----------
+    #     r : Array [h-1 Mpc]
+    #         Radius
+
+    #     Returns
+    #     -------
+    #     Array [km2 s-2]
+    #         Potential at radius `r`
+    #     """
+    #     r = jnp.asarray(r)
+    #     prefact = -4 * jnp.pi * G * self.rho0 * jnp.exp(2 / self.alpha)
+    #     a2 = 2.0 / self.alpha
+    #     a3 = 3.0 / self.alpha
+
+    #     s = (2.0 / self.alpha) ** (1.0 / self.alpha) * r / self.Rs
+    #     x = s**self.alpha
+
+    #     gamma2 = jsp.special.gamma(a2)
+    #     gamma3 = jsp.special.gamma(a3)
+
+    #     lower3 = (
+    #         jsp.special.gammainc(a3, x) * gamma3 / (s / r) ** 2 / self.alpha
+    #     )
+    #     upper2 = (
+    #         gamma2
+    #         * (1.0 - jsp.special.gammainc(a2, x))
+    #         / (s / r) ** 2
+    #         / self.alpha
+    #     )
+
+    #     phi = prefact * (lower3 / s + upper2)
+    #     return phi
+
     def potential(self, r: ArrayLike) -> Array:
         # Working test: Possible addition to JAX friendlieness test
         """Potential profile :math:`\\phi(r)`.
@@ -156,25 +196,27 @@ class EinastoHalo:
             Potential at radius `r`
         """
         r = jnp.asarray(r)
-        prefact = -4 * jnp.pi * G * self.rho0 * jnp.exp(2 / self.alpha)
         a2 = 2.0 / self.alpha
         a3 = 3.0 / self.alpha
 
         s = (2.0 / self.alpha) ** (1.0 / self.alpha) * r / self.Rs
         x = s**self.alpha
 
-        gamma2 = jsp.special.gamma(a2)
-        gamma3 = jsp.special.gamma(a3)
-
-        lower3 = (
-            jsp.special.gammainc(a3, x) * gamma3 / (s / r) ** 2 / self.alpha
-        )
-        upper2 = (
-            gamma2
-            * (1.0 - jsp.special.gammainc(a2, x))
+        prefact = (
+            -4
+            * jnp.pi
+            * G
+            * self.rho0
+            * jnp.exp(2 / self.alpha)
             / (s / r) ** 2
             / self.alpha
         )
+
+        gamma2 = jsp.special.gamma(a2)
+        gamma3 = jsp.special.gamma(a3)
+
+        lower3 = jsp.special.gammainc(a3, x) * gamma3
+        upper2 = gamma2 * (jsp.special.gammaincc(a2, x))
 
         phi = prefact * (lower3 / s + upper2)
         return phi
@@ -208,7 +250,12 @@ class EinastoHalo:
             self.delta,
             delta_new,
         )
-        # self.m_delta = output[0] #removed, must instantiate new halo after using this function if you want all the properties of the new halo
+        # self.m_delta = output[0]
+        # removed this feature, must
+        # instantiate new halo after
+        # using this function if you
+        # want all the properties
+        # of the new halo
         # self.r_delta = output[1]
         # self.c_delta = output[2]
         # self.delta = delta_new
@@ -220,12 +267,13 @@ class EinastoHalo:
 
 
 # Passing alpha is optional since it can also be estimated from the
-# Gao et al. 2008 relation between alpha and peak height. This relation was calibrated for
-# nu_vir, so if the given mass definition is not 'vir' we convert the given mass to Mvir
-# assuming an NFW profile with the given mass and concentration. This leads to a negligible
-# inconsistency, but solving for the correct alpha iteratively would be much slower.
+# Gao et al. 2008 relation between alpha and peak height. This relation was
+# calibrated for nu_vir, so if the given mass definition is not 'vir' we
+# convert the given mass to Mvir assuming an NFW profile with the given mass
+# and concentration. This leads to a negligible inconsistency, but solving for
+# the correct alpha iteratively would be much slower.
 def a_from_nu(
-    M: ArrayLike,  # this should be the virial mass, currently not, will need to change, see profile_einasto for more details
+    M: ArrayLike,
     z: ArrayLike,
     cosmo: jc.Cosmology,
     n_k_int: int = 5000,
@@ -257,6 +305,6 @@ def a_from_nu(
     -----
     This assumes that the input mass is the virial mass.
     """
-    nu = lss.peak_height(M, z, cosmo, n_k_int, delta_sc)
+    nu = lss.peak_height(M, z, cosmo, n_k_int)
     alpha = 0.155 + 0.0095 * nu**2
     return alpha
