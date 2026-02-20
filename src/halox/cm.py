@@ -10,27 +10,16 @@ jax.config.update("jax_enable_x64", True)
 # currently implementing all of these for 200c
 
 
-@dataclass(frozen=True)
 class duffy08:
     """
-    Duffy et al. (2008) mass-concentration relation using :math:`M_{200c}`.
+    Duffy et al. (2008) c-M relation using :math:`M_{200c}`.
 
     https://ui.adsabs.harvard.edu/abs/2008MNRAS.390L..64D/abstract
-
-    Calibrated cosmologies
-    ----------------------
-    WMAP5
-
-    Valid range
-    -----------
-    :math:`10^{11} \le M \le 10^{15}\, M_\odot`
-    :math:`0 \le z \le 2`
 
     Parameters
     ----------
     M : ArrayLike
-        Halo mass :math:`M_{200c}` in :math:`M_\odot`.
-
+        Halo mass :math:`M_{200c}` [Msun].
     z : ArrayLike
         Redshift.
 
@@ -41,24 +30,27 @@ class duffy08:
 
     Notes
     -----
-    The functional form is
+    - The functional form is
 
-    .. math::
+      .. math::
 
-        c(M, z) = A \left(\frac{M}{M_0}\right)^B (1 + z)^C
+        c(M, z) = A \\left(\\frac{M}{M_0}\\right)^B (1 + z)^C
 
-    with :math:`M_0 = 2 \times 10^{12}\, M_\odot`.
+      with :math:`M_0 = 2 \\times 10^{12}\\, M_\\odot`.
+    - Calibrated on WMAP5.
+    - Valid for :math:`10^{11} \\le M \\le 10^{15}\\, M_\\odot`,
+      :math:`0 \\le z \\le 2`.
     """
 
-    name: str = "duffy08"  # only the 200c parameters
-    m_min: float = 1e11
-    m_max: float = 1e15
-    z_min: float = 0.0
-    z_max: float = 2.0
+    name = "duffy08"
+    m_min = 1e11
+    m_max = 1e15
+    z_min = 0.0
+    z_max = 2.0
 
-    A: float = 5.71
-    B: float = -0.084
-    C: float = -0.47
+    A = 5.71
+    B = -0.084
+    C = -0.47
 
     def __call__(
         self, M: ArrayLike, z: ArrayLike
@@ -76,27 +68,16 @@ class duffy08:
 @dataclass
 class prada12:
     """
-    Prada et al. (2012) mass-concentration relation using :math:`M_{200c}`.
+    Prada et al. (2012) c-M relation using :math:`M_{200c}`.
 
     http://adsabs.harvard.edu/abs/2012MNRAS.423.3018P
-
-    Calibrated cosmologies
-    ----------------------
-    Any (cosmology-dependent through :math:`\sigma(M, z)`)
-
-    Valid range
-    -----------
-    :math:`M > 0`
-    :math:`z \ge 0`
 
     Parameters
     ----------
     cosmo : jc.Cosmology
-        Cosmology used to compute :math:`\sigma(M, z)`.
-
+        Cosmology used to compute :math:`\\sigma(M, z)`.
     M : ArrayLike
-        Halo mass :math:`M_{200c}` in :math:`h^{-1} M_\odot`.
-
+        Halo mass :math:`M_{200c}` [h-1 Msun].
     z : ArrayLike
         Redshift.
 
@@ -107,9 +88,11 @@ class prada12:
 
     Notes
     -----
-    This model predicts concentration as a function of peak height
-    via :math:`\sigma(M, z)` and captures an upturn in concentration
-    at high masses.
+    - Predicts concentration as a function of peak height via
+      math:`\\sigma(M, z)`, capturing an upturn in concentration
+      at high masses.
+    - Cosmology-dependent through :math:`\\sigma(M, z)`.
+    - Valid for any cosmology, :math:`M > 0`, :math:`z \\ge 0`.
     """
 
     name: str = "prada12"
@@ -160,44 +143,38 @@ class prada12:
         return c  # , valid
 
 
-@dataclass(frozen=True)
 class klypin11:
     """
-    Klypin et al. (2011) mass-concentration relation using
-    :math:`M_{\mathrm{vir}}` at :math:`z = 0`.
+    Klypin et al. (2011) c-M relation using
+    :math:`M_{\\rm vir}` at :math:`z = 0`.
 
     http://adsabs.harvard.edu/abs/2011ApJ...740..102K
-
-    Calibrated cosmologies
-    ----------------------
-    WMAP7
-
-    Valid range
-    -----------
-    :math:`3 \times 10^{10} \le M \le 5 \times 10^{14}\, h^{-1} M_\odot`
-    :math:`z = 0`
 
     Parameters
     ----------
     M : ArrayLike
-        Halo mass :math:`M_{\mathrm{vir}}` in :math:`h^{-1} M_\odot`.
+        Halo mass :math:`M_{\\rm vir}` [h-1 Msun].
 
     Returns
     -------
     c : ArrayLike
-        Concentration :math:`c_{\mathrm{vir}}`.
+        Concentration :math:`c_{\\rm vir}`.
 
     Notes
     -----
-    The original paper provides redshift evolution, but this
-    implementation corresponds only to the :math:`z = 0` case.
+    - Only implements the :math:`z = 0` case from the original
+      paper, which also provides redshift evolution.
+    - Calibrated on WMAP7.
+    - Valid for :math:`3 \\times 10^{10}` to
+      :math:`5 \\times 10^{14}\\, h^{-1} M_\\odot`,
+      :math:`z = 0` only.
     """
 
-    name: str = "klypin11"
-    m_min: float = 3e10
-    m_max: float = 5e14
-    z_min: float = 0.0
-    z_max: float = 0.0
+    name = "klypin11"
+    m_min = 3e10
+    m_max = 5e14
+    z_min = 0.0
+    z_max = 0.0
 
     def __call__(
         self,
@@ -215,28 +192,17 @@ class klypin11:
 @dataclass
 class child18all:
     """
-    Child et al. (2018) mass-concentration relation for all halos
-    using :math:`M_{200c}`.
+    Child et al. (2018) c-M relation for all halos using
+    :math:`M_{200c}`.
 
     https://ui.adsabs.harvard.edu/abs/2018ApJ...859...55C/abstract
-
-    Compatible cosmologies
-    ----------------------
-    WMAP7 (calibrated)
-
-    Valid range
-    -----------
-    :math:`M > 2.1 \times 10^{11}\, h^{-1} M_\odot`
-    :math:`0 < z < 4`
 
     Parameters
     ----------
     cosmo : jc.Cosmology
-        Cosmology used to compute :math:`\sigma(R)` and the growth factor.
-
+        Cosmology for :math:`\\sigma(R)` and the growth factor.
     M : ArrayLike
-        Halo mass :math:`M_{200c}` in :math:`h^{-1} M_\odot`.
-
+        Halo mass :math:`M_{200c}` [h-1 Msun].
     z : ArrayLike
         Redshift.
 
@@ -247,14 +213,17 @@ class child18all:
 
     Notes
     -----
-    This model introduces a characteristic mass scale :math:`M_*`
-    defined through
+    - Defines a characteristic mass :math:`M_*` through
 
-    .. math::
+      .. math::
 
-        \sigma(M_*, z) = \frac{\delta_{\mathrm{sc}}}{D(z)}
+          \\sigma(M_*, z) = \\frac{\\delta_{\\rm sc}}{D(z)}
 
-    The concentration depends on the ratio :math:`M / M_*`.
+      Concentration depends on the ratio :math:`M / M_*`.
+    - Calibrated on WMAP7.
+    - Valid for
+      :math:`M > 2.1 \\times 10^{11}\\, h^{-1} M_\\odot`,
+      :math:`0 < z < 4`.
     """
 
     same: str = "child18all"
@@ -304,28 +273,17 @@ class child18all:
 @dataclass
 class child18relaxed:
     """
-    Child et al. (2018) mass-concentration relation for relaxed halos
-    using :math:`M_{200c}`.
+    Child et al. (2018) c-M relation for relaxed halos using
+    :math:`M_{200c}`.
 
     https://ui.adsabs.harvard.edu/abs/2018ApJ...859...55C/abstract
-
-    Compatible cosmologies
-    ----------------------
-    WMAP7 (calibrated)
-
-    Valid range
-    -----------
-    :math:`M > 2.1 \times 10^{11}\, h^{-1} M_\odot`
-    :math:`0 < z < 4`
 
     Parameters
     ----------
     cosmo : jc.Cosmology
-        Cosmology used to compute :math:`\sigma(R)` and the growth factor.
-
+        Cosmology for :math:`\\sigma(R)` and the growth factor.
     M : ArrayLike
-        Halo mass :math:`M_{200c}` in :math:`h^{-1} M_\odot`.
-
+        Halo mass :math:`M_{200c}` [h-1 Msun].
     z : ArrayLike
         Redshift.
 
@@ -336,8 +294,12 @@ class child18relaxed:
 
     Notes
     -----
-    Same functional form as ``child18all`` but calibrated
-    specifically for relaxed halo populations.
+    - Same functional form as :class:`child18all` but calibrated
+      for relaxed halo populations.
+    - Calibrated on WMAP7.
+    - Valid for
+      :math:`M > 2.1 \\times 10^{11}\\, h^{-1} M_\\odot`,
+      :math:`0 < z < 4`.
     """
 
     same: str = "child18relaxed"
