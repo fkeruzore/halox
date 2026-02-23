@@ -27,8 +27,9 @@ For a manual installation, see the [documentation pages](https://halox.readthedo
 
 `halox` offers a JAX-powered differentiable and GPU-accelerated implementation of some widely used properties of dark matter halos and large-scale structure, including:
 
-* [`halox.nfw`](https://halox.readthedocs.io/en/latest/notebooks/nfw.html): Radial profiles of dark matter halos following a Navarro-Frenk-White (NFW) distribution;
-* [`halox.hmf`](https://halox.readthedocs.io/en/latest/notebooks/hmf.html): The halo mass function, quantifying the abundance of dark matter halos in mass and redshift, including its dependence on cosmological parameters;
+* [`halox.halo`](https://halox.readthedocs.io/en/latest/notebooks/nfw.html): Radial profiles of dark matter halos following Navarro-Frenk-White (NFW) and Einasto distributions;
+* [`halox.halo`](https://halox.readthedocs.io/en/latest/notebooks/cMrelations.html): Mass-concentration relations of dark matter halos;
+* [`halox.hmf`](https://halox.readthedocs.io/en/latest/notebooks/hmf.html): The halo mass function, quantifying the abundance of dark matter halos in mass and redshift and its dependence on cosmological parameters;
 * [`halox.bias`](https://halox.readthedocs.io/en/latest/notebooks/bias.html): The halo bias.
 
 All properties support cosmology dependence using [jax-cosmo](https://github.com/DifferentiableUniverseInitiative/jax_cosmo).
@@ -38,7 +39,7 @@ More information on the modules available can be found in the [documentation pag
 
 All functions available in halox are validated against existing, non-JAX-based software.
 Cosmology calculations are validated against [Astropy](https://www.astropy.org) for varying cosmological parameters and redshifts.
-Other quantities are validated against [Colossus](https://bdiemer.bitbucket.io/colossus/index.html#) for varying halo masses, redshifts, critical overdensities, and cosmological parameters.
+Other quantities are validated against [Colossus](https://bdiemer.bitbucket.io/colossus/index.html#) or [gala](https://gala.adrian.pw/en/latest/) for varying halo masses, redshifts, critical overdensities, and cosmological parameters.
 These tests are included in the automatic CI/CD pipeline; a visual comparison is also included in the [documentation](https://halox.readthedocs.io/en/latest/notebooks/halox_vs_colossus.html).
 
 ## Documentation
