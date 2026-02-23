@@ -6,11 +6,10 @@ from . import halo
 from . import cm
 
 # Backward compatibility
-from .halo import nfw, einasto
+from .halo import nfw
 
 __all__ = [
     "nfw",
-    "einasto",
     "cosmology",
     "hmf",
     "lss",
