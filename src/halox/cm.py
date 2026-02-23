@@ -30,6 +30,7 @@ class duffy08:
 
     Notes
     -----
+    - Warning: input masses must be in Msun, not Msun/h
     - The functional form is
 
       .. math::
