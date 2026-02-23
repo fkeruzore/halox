@@ -6,13 +6,11 @@ halox.cm: Mass-concentration Relations
 .. currentmodule:: halox.cm
 
 .. autosummary::
-   :toctree: generated/
-   :nosignatures:
-    duffy08
-    klypin11
-    prada12
-    child18all
-    child18relaxed
+   duffy08
+   klypin11
+   prada12
+   child18all
+   child18relaxed
 
 .. autoclass:: duffy08
    :members:
