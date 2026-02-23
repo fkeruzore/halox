@@ -70,3 +70,28 @@ def test_volume_element(cosmo_name):
     assert jnp.allclose(dV_j, jnp.array(dV_a), rtol=1e-2), (
         f"Different dV({test_zs}): {dV_j} != {dV_a}(ratio: {dV_j / dV_a})"
     )
+
+
+def test_sensitivity_all_params():
+    all_params = [
+        "Omega_c",
+        "Omega_b",
+        "h",
+        "n_s",
+        "sigma8",
+        "Omega_k",
+        "w0",
+        "wa",
+    ]
+    func = lambda cosmo: (
+        cosmo.Omega_c
+        + cosmo.Omega_b
+        + cosmo.h
+        + cosmo.n_s
+        + cosmo.sigma8
+        + cosmo.Omega_k
+        + cosmo.w0
+        + cosmo.wa
+    )
+    result = hc.sensitivity(func, hc.Planck18())
+    assert result == all_params
