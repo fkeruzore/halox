@@ -28,7 +28,7 @@ For a manual installation, see the [documentation pages](https://halox.readthedo
 `halox` offers a JAX-powered differentiable and GPU-accelerated implementation of some widely used properties of dark matter halos and large-scale structure, including:
 
 * [`halox.halo`](https://halox.readthedocs.io/en/latest/notebooks/nfw.html): Radial profiles of dark matter halos following Navarro-Frenk-White (NFW) and Einasto distributions;
-* [`halox.halo`](https://halox.readthedocs.io/en/latest/notebooks/cMrelations.html): Mass-concentration relations of dark matter halos;
+* [`halox.cm`](https://halox.readthedocs.io/en/latest/notebooks/cMrelations.html): Mass-concentration relations of dark matter halos;
 * [`halox.hmf`](https://halox.readthedocs.io/en/latest/notebooks/hmf.html): The halo mass function, quantifying the abundance of dark matter halos in mass and redshift and its dependence on cosmological parameters;
 * [`halox.bias`](https://halox.readthedocs.io/en/latest/notebooks/bias.html): The halo bias.
 
