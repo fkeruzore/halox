@@ -37,6 +37,7 @@ Learn more
    api/halox.cosmology
    api/halox.nfw
    api/halox.einasto
+   api/halox.cm
    api/halox.lss
    api/halox.hmf
    api/halox.bias

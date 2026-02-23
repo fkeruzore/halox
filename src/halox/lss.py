@@ -109,7 +109,7 @@ def sigma_R(
 
     # Power spectrum at redshift z
     a = 1.0 / (1.0 + z)
-    pk = jc.power.linear_matter_power(cosmo, k, a=a)  # type: ignore
+    pk = jc.power.linear_matter_power(cosmo, k, a=a)
     pk *= _jax_cosmo_pk_corr  # consistency with colossus
 
     # Window function for spherical top-hat
@@ -129,7 +129,12 @@ def sigma_R(
 
 
 def sigma_M(
-    M: ArrayLike, z: ArrayLike, cosmo: jc.Cosmology, n_k_int: int = 5000
+    M: ArrayLike,
+    z: ArrayLike,
+    cosmo: jc.Cosmology,
+    k_min: float = 1e-5,
+    k_max: float = 1e2,
+    n_k_int: int = 5000,
 ) -> Array:
     """Compute RMS variance of density fluctuations within the
     Lagrangian radius of a halo with mass M at redshift z.
@@ -154,7 +159,7 @@ def sigma_M(
     M = jnp.asarray(M)
     z = jnp.asarray(z)
     R = mass_to_lagrangian_radius(M, cosmo)
-    return sigma_R(R, z, cosmo, n_k_int=n_k_int)
+    return sigma_R(R, z, cosmo, k_min=k_min, k_max=k_max, n_k_int=n_k_int)
 
 
 def peak_height(
@@ -162,7 +167,9 @@ def peak_height(
     z: ArrayLike,
     cosmo: jc.Cosmology,
     n_k_int: int = 5000,
-    delta_sc: float = 1.686,
+    k_min: float = 1e-5,
+    k_max: float = 1e2,
+    delta_sc: float = 1.68647,
 ) -> Array:
     """
     Returns the peak height (nu) of a dark matter halo defined by
@@ -185,5 +192,7 @@ def peak_height(
     :return: Array
         Returns peak height (nu) for halos
     """
-    nu = delta_sc / sigma_M(M, z, cosmo, n_k_int=n_k_int)
+    nu = delta_sc / sigma_M(
+        M, z, cosmo, k_min=k_min, k_max=k_max, n_k_int=n_k_int
+    )
     return nu

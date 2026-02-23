@@ -3,8 +3,17 @@ from . import hmf
 from . import lss
 from . import bias
 from . import halo
+from . import cm
 
 # Backward compatibility
 from .halo import nfw
 
-__all__ = ["nfw", "cosmology", "hmf", "lss", "bias", "halo"]
+__all__ = [
+    "nfw",
+    "cosmology",
+    "hmf",
+    "lss",
+    "bias",
+    "halo",
+    "cm",
+]
