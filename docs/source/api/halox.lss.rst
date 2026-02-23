@@ -1,5 +1,5 @@
 halox.lss: Large-scale structure calculations
-===============================================
+=============================================
 
 ``halox`` provides a JAX implementation of large-scale structure calculations including RMS variance computations, mass-to-radius conversions, and overdensity transformations.
 Cosmology calculations (e.g. power spectra) rely on `jax-cosmo <https://github.com/DifferentiableUniverseInitiative/jax_cosmo>`_.
