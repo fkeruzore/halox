@@ -83,15 +83,18 @@ def test_sensitivity_all_params():
         "w0",
         "wa",
     ]
-    func = lambda cosmo: (
-        cosmo.Omega_c
-        + cosmo.Omega_b
-        + cosmo.h
-        + cosmo.n_s
-        + cosmo.sigma8
-        + cosmo.Omega_k
-        + cosmo.w0
-        + cosmo.wa
-    )
+
+    def func(cosmo):
+        return (
+            cosmo.Omega_c
+            + cosmo.Omega_b
+            + cosmo.h
+            + cosmo.n_s
+            + cosmo.sigma8
+            + cosmo.Omega_k
+            + cosmo.w0
+            + cosmo.wa
+        )
+
     result = hc.sensitivity(func, hc.Planck18())
     assert result == all_params

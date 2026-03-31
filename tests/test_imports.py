@@ -1,3 +1,6 @@
+# ruff: noqa: F401
+
+
 def test_imports():
     from halox.halo import NFWHalo, EinastoHalo
     from halox.bias import tinker10_bias
