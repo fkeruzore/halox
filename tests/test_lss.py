@@ -40,6 +40,7 @@ cc.addCosmology(
         ns=0.97,
     ),
 )
+test_n_k_ints = [5000, 1000]
 
 sigma_R = jax.jit(halox.lss.sigma_R)
 
@@ -120,7 +121,6 @@ def test_overdensity_c_to_m(delta_c, cosmo_name, return_vals=False):
     assert max_disc < 5e-3, (
         f"Bias in delta_m: avg={avg_disc:.3e}, max={max_disc:.3e}"
     )
-
 
 if __name__ == "__main__":
     cosmo_j, cosmo_c = test_cosmos["70_0.3"]

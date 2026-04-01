@@ -3,8 +3,9 @@ from jax import Array
 from jax.typing import ArrayLike
 import jax.numpy as jnp
 import jax_cosmo as jc
-from . import cosmology, lss
+from . import cosmology, lss, emus
 
+from pathlib import Path
 
 def _tinker08_parameters(
     z: ArrayLike,
@@ -132,6 +133,91 @@ def tinker08_mass_function(
     # Use autodiff to compute d ln sigma / dM
     d_ln_sigma_inv = jax.grad(
         lambda M: jnp.log(1.0 / lss.sigma_M(M, z, cosmo, n_k_int=n_k_int))
+    )
+
+    dn_dm = f_sigma * (rho_m / M) * jax.vmap(d_ln_sigma_inv)(M)
+
+    return jnp.squeeze(M * dn_dm)
+
+
+EMU_PATH = Path(__file__).parent / "emus" / "sigma_40k_conv7.npz"
+
+default_emu = emus.SigmaMEmulator(EMU_PATH)
+
+def tinker08_f_sigma_emu(
+    M: ArrayLike,
+    z: ArrayLike,
+    cosmo: jc.Cosmology,
+    delta_c: float = 200.0,
+    emu: emus.SigmaMEmulator = default_emu,
+) -> Array:
+    """Tinker08 multiplicity function :math:`f(\\sigma)`.
+
+    Parameters
+    ----------
+    M : Array
+        Halo mass [h-1 Msun]
+    z : Array
+        Redshift
+    cosmo : jc.Cosmology
+        Underlying cosmology
+    delta_c : float
+        Overdensity threshold, default 200.0
+    n_k_int : int
+        Number of k-space integration points for :math:`\\sigma(R,z)`,
+        default 5000
+
+    Returns
+    -------
+    Array
+        Mass function multiplicity
+    """
+    M = jnp.asarray(M)
+    z = jnp.asarray(z)
+    sigma = emu(m = M, z=z, cosmo_ray=cosmo)
+    A, a, b, c = _tinker08_parameters(z, cosmo, delta_c)
+    return A * ((b / sigma) ** a + 1.0) * jnp.exp(-c / sigma**2)
+
+
+def tinker08_mass_function_emu(
+    M: ArrayLike,
+    z: ArrayLike,
+    cosmo: jc.Cosmology,
+    delta_c: float = 200.0,
+    emu: emus.SigmaMEmulator = default_emu,
+) -> Array:
+    """Tinker08 halo mass function :math:`dn/d\\ln M`.
+
+    Parameters
+    ----------
+    M : Array
+        Halo mass [h-1 Msun]
+    z : Array
+        Redshift
+    cosmo : jc.Cosmology
+        Underlying cosmology, default Planck18
+    delta_c : float
+        Overdensity threshold, default 200.0
+    n_k_int : int
+        Number of k-space integration points for :math:`\\sigma(R,z)`,
+        default 5000
+
+    Returns
+    -------
+    Array
+        Mass function [h3 Mpc-3]
+    """
+    M = jnp.atleast_1d(M)
+    z = jnp.asarray(z)
+
+    # Background density
+    rho_m = cosmo.Omega_m * cosmology.critical_density(0.0, cosmo)
+
+    # Multiplicity function with redshift evolution
+    f_sigma = tinker08_f_sigma_emu(M, z, cosmo, delta_c, emu)
+    # Use autodiff to compute d ln sigma / dM
+    d_ln_sigma_inv = jax.grad(
+        lambda M: jnp.log(1.0 / emu(m = M, z=z, cosmo_ray=cosmo))
     )
 
     dn_dm = f_sigma * (rho_m / M) * jax.vmap(d_ln_sigma_inv)(M)

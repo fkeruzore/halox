@@ -4,6 +4,7 @@ from . import lss
 from . import bias
 from . import halo
 from . import cm
+from . import emus
 
 # Backward compatibility
 from .halo import nfw
@@ -16,4 +17,5 @@ __all__ = [
     "bias",
     "halo",
     "cm",
+    "emus"
 ]

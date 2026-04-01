@@ -128,7 +128,6 @@ def test_tinker08_dn_dnlm(delta_c, cosmo_name, n_k_int, return_vals=False):
         f"Bias in hmf: avg={avg_disc:.3e}, max={max_disc:.3e}"
     )
 
-
 if __name__ == "__main__":
     cosmo_j, cosmo_c = test_cosmos["70_0.3"]
     cosmo_c = cc.setCosmology(cosmo_c)
