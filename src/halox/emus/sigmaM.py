@@ -1,4 +1,3 @@
-from halox.lss import sigma_M
 import numpy as np
 import jax
 from jax import Array
@@ -106,6 +105,7 @@ def stack_cosmologies(cosmos: list[jc.Cosmology]) -> jc.Cosmology:
     )
 
 if __name__ == "__main__":
+    from halox.lss import sigma_M
     cosmo_fid = jc.Planck15()
 
     cosmo_high_s8 = jc.Cosmology(

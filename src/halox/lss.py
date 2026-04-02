@@ -2,14 +2,14 @@ from jax import Array
 from jax.typing import ArrayLike
 import jax.numpy as jnp
 import jax_cosmo as jc
-from . import cosmology
+from . import cosmology, emus
 
 
 # jax-cosmo power spectra differ from colossus at the 0.3% level, which
 # results in %-level discrepancies in HMF predictions. This fudge factor
 # solves that.
 _jax_cosmo_pk_corr = 1.0 / 1.0030
-
+default_emu = emus.sigmaM.SigmaMEmulator()
 
 def mass_to_lagrangian_radius(M: ArrayLike, cosmo: jc.Cosmology) -> Array:
     """Convert mass to Lagrangian radius.
@@ -170,11 +170,14 @@ def peak_height(
     k_min: float = 1e-5,
     k_max: float = 1e2,
     delta_sc: float = 1.68647,
+    emu: emus.sigmaM.SigmaMEmulator = default_emu,
+    emulate: bool = False,
 ) -> Array:
     """
     Returns the peak height (nu) of a dark matter halo defined by
     the spherical collapse overdensity and the RMS variance of the
-    density fluctuations within the Lagrangian raidus
+    density fluctuations within the Lagrangian raidus, optionally 
+    emulated
 
     Parameters
     ----------
@@ -189,10 +192,19 @@ def peak_height(
         default 5000
     delta_sc: float
         Required overdensity for spherical collapse, usually 1.686 (tophat)
+    emu: SigmaMEmulator
+        Trained NN for emulating sigmaM
+    emulate:
+        Condition to pass for option of emulation, 
     :return: Array
         Returns peak height (nu) for halos
     """
-    nu = delta_sc / sigma_M(
-        M, z, cosmo, k_min=k_min, k_max=k_max, n_k_int=n_k_int
-    )
+    if not emulate:
+        nu = delta_sc / sigma_M(
+            M, z, cosmo, k_min=k_min, k_max=k_max, n_k_int=n_k_int
+        )
+    else:
+        nu = delta_sc / emu(
+            M, z, cosmo
+        )
     return nu

@@ -131,7 +131,7 @@ def tinker10_bias_emu(
     z = jnp.asarray(z)
 
     # Calculate peak height nu = delta_sc / sigma(M,z)
-    nu = emus.sigmaM.peak_height_emu(M, z, cosmo, emu)
+    nu = lss.peak_height(M, z, cosmo, emu=emu, emulate=True)
 
     # Get parameters
     A, a, B, C = _tinker10_parameters(z, cosmo, delta_c)
