@@ -106,9 +106,10 @@ def test_tinker08_f_sigma_emu(delta_c, cosmo_name, return_vals=False):
         ]
     )
 
+    #testing on the default emulator
     tinker08_f_sigma = jax.jit(
-        lambda m, z: halox.hmf.tinker08_f_sigma_emu(
-            m, z, cosmo=cosmo_j, delta_c=delta_c
+        lambda m, z: halox.hmf.tinker08_f_sigma(
+            m, z, cosmo=cosmo_j, delta_c=delta_c, emulate = True
         )
     )
 
@@ -147,10 +148,10 @@ def test_tinker08_dn_dnlm_emu(delta_c, cosmo_name, return_vals=False):
             for i in range(len(test_mzs))
         ]
     )
-
+    # again, testing the default photo
     tinker08_mass_function = jax.jit(
-        lambda m, z: halox.hmf.tinker08_mass_function_emu(
-            m, z, cosmo=cosmo_j, delta_c=delta_c
+        lambda m, z: halox.hmf.tinker08_mass_function(
+            m, z, cosmo=cosmo_j, delta_c=delta_c, emulate = True
         )
     )
     f_h = jnp.array(
@@ -177,9 +178,16 @@ def test_tinker10_bias(delta_c, cosmo_name, return_vals=False):
     ms = test_mzs[:, 0]
     zs = test_mzs[:, 1]
 
+    # using default emulator
     b_emu = jnp.array(
     [
-        halox.bias.tinker10_bias_emu(ms[i], zs[i], cosmo=cosmo_j, delta_c=delta_c)
+        halox.bias.tinker10_bias(
+            ms[i], 
+            zs[i], 
+            cosmo=cosmo_j, 
+            delta_c=delta_c, 
+            emulate = True
+            )
         for i in range(len(test_mzs))]
     )
     b_h = jnp.array(

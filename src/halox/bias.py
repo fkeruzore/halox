@@ -4,7 +4,7 @@ import jax.numpy as jnp
 import jax_cosmo as jc
 from . import lss, emus
 
-
+default_emu = emus.sigmaM.SigmaMEmulator()
 def _tinker10_parameters(
     z: ArrayLike,
     cosmo: jc.Cosmology,
@@ -50,6 +50,8 @@ def tinker10_bias(
     delta_c: float = 200.0,
     delta_sc: float = 1.686,
     n_k_int: int = 5000,
+    emu : emus.sigmaM.SigmaMEmulator = default_emu,
+    emulate: bool = True,
 ) -> Array:
     """Tinker10 halo bias function.
 
@@ -80,7 +82,10 @@ def tinker10_bias(
     z = jnp.asarray(z)
 
     # Calculate peak height nu = delta_sc / sigma(M,z)
-    nu = lss.peak_height(M, z, cosmo, n_k_int=n_k_int)
+    if not emulate:    
+        nu = lss.peak_height(M, z, cosmo, n_k_int=n_k_int, emulate = emulate)
+    else:
+        nu = lss.peak_height(M, z, cosmo, emu = emu, emulate = emulate)
 
     # Get parameters
     A, a, B, C = _tinker10_parameters(z, cosmo, delta_c)
@@ -94,53 +99,3 @@ def tinker10_bias(
 
     return bias
 emu_def = emus.sigmaM.SigmaMEmulator()
-def tinker10_bias_emu(
-    M: ArrayLike,
-    z: ArrayLike,
-    cosmo: jc.Cosmology,
-    delta_c: float = 200.0,
-    delta_sc: float = 1.686,
-    emu = emu_def,
-) -> Array:
-    """Tinker10 halo bias function.
-
-    Linear halo bias as calibrated by Tinker et al. 2010.
-
-    Parameters
-    ----------
-    M : Array
-        Halo mass [h-1 Msun]
-    z : Array
-        Redshift
-    cosmo : jc.Cosmology
-        Underlying cosmology
-    delta_c : float
-        Overdensity threshold, default 200.0
-    delta_sc : float
-        Spherical collapse threshold, default 1.686
-    n_k_int : int
-        Number of k-space integration points for :math:`\\sigma(R,z)`,
-        default 5000
-
-    Returns
-    -------
-    Array
-        Linear halo bias
-    """
-    M = jnp.asarray(M)
-    z = jnp.asarray(z)
-
-    # Calculate peak height nu = delta_sc / sigma(M,z)
-    nu = lss.peak_height(M, z, cosmo, emu=emu, emulate=True)
-
-    # Get parameters
-    A, a, B, C = _tinker10_parameters(z, cosmo, delta_c)
-
-    # Fixed parameters
-    b = 1.5
-    c = 2.4
-
-    # Tinker10 bias formula
-    bias = 1.0 - A * (nu**a) / (nu**a + delta_sc**a) + B * nu**b + C * nu**c
-
-    return bias
