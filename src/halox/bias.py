@@ -51,7 +51,7 @@ def tinker10_bias(
     delta_sc: float = 1.686,
     n_k_int: int = 5000,
     emu : emus.sigmaM.SigmaMEmulator = default_emu,
-    emulate: bool = True,
+    emulate: bool = False,
 ) -> Array:
     """Tinker10 halo bias function.
 
@@ -98,4 +98,3 @@ def tinker10_bias(
     bias = 1.0 - A * (nu**a) / (nu**a + delta_sc**a) + B * nu**b + C * nu**c
 
     return bias
-emu_def = emus.sigmaM.SigmaMEmulator()
