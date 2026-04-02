@@ -4,15 +4,13 @@ from jax import Array
 from jax.typing import ArrayLike
 import jax.numpy as jnp
 import jax_cosmo as jc
-from pathlib import Path
-
+from importlib import resources
 # use boolean to control the emus
 
 class SigmaMEmulator:
-    def __init__(self, weights_path: str | Path = "/Users/lamoreau/halox/src/halox/emus/sigma_40k_conv7.npz"):
-        weights_path = Path(weights_path)
-
-        raw_weights = dict(np.load(weights_path, allow_pickle=True))
+    def __init__(self, weight_file = "sigma_40k_conv8.npz"):
+        with resources.path("halox.emus", weight_file) as data_path:
+            raw_weights = dict(np.load(data_path, allow_pickle=True))
 
         # Convert keys → clean format
         self.params = {}
@@ -43,7 +41,7 @@ class SigmaMEmulator:
     def normalize(x):
         bounds = jnp.array([
             [11, 16],   # logMass
-            [0.0075, 5],   # redshift
+            [-0.05, 5],   # redshift
             [0.01, 0.08],   # Omega_b
             [0.085, 0.5],   # Omega_c
             [0.6, 1.],   # sigma8
