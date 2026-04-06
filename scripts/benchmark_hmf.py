@@ -7,9 +7,10 @@ import time
 import jax
 import jax.numpy as jnp
 
+import halox
+
 jax.config.update("jax_enable_x64", True)
 
-import halox
 
 cosmo = halox.cosmology.Planck18()
 M = jnp.logspace(13, 15, 256)  # h^-1 Msun

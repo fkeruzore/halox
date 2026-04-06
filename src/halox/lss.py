@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from jax import Array
-import jax
 from jax.typing import ArrayLike
 import jax.numpy as jnp
 import jax_cosmo as jc
@@ -13,6 +12,7 @@ from .emus import SigmaMEmulator
 # results in %-level discrepancies in HMF predictions. This fudge factor
 # solves that.
 _jax_cosmo_pk_corr = 1.0 / 1.0030
+
 
 def mass_to_lagrangian_radius(M: ArrayLike, cosmo: jc.Cosmology) -> Array:
     """Convert mass to Lagrangian radius.
@@ -178,6 +178,7 @@ def sigma_M(
     R = mass_to_lagrangian_radius(M, cosmo)
     return sigma_R(R, z, cosmo, k_min=k_min, k_max=k_max, n_k_int=n_k_int)
 
+
 def peak_height(
     M: ArrayLike,
     z: ArrayLike,
@@ -216,7 +217,12 @@ def peak_height(
         Peak height :math:`\\nu`
     """
     sigma = sigma_M(
-        M, z, cosmo, k_min=k_min, k_max=k_max, n_k_int=n_k_int,
+        M,
+        z,
+        cosmo,
+        k_min=k_min,
+        k_max=k_max,
+        n_k_int=n_k_int,
         emu=emu,
     )
     return delta_sc / sigma

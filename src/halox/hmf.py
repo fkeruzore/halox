@@ -104,9 +104,7 @@ def tinker08_mass_function(
 
     # Multiplicity function
     A, a, b, c = _tinker08_parameters(z, cosmo, delta_c)
-    f_sigma = (
-        A * ((b / sigma) ** a + 1.0) * jnp.exp(-c / sigma**2)
-    )
+    f_sigma = A * ((b / sigma) ** a + 1.0) * jnp.exp(-c / sigma**2)
 
     # d ln(1/sigma) / dM via autodiff on the same sigma_fn
     def log_sigma_inv(M):

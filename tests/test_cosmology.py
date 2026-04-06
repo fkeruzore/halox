@@ -102,8 +102,14 @@ def test_sensitivity_all_params():
 
 def test_stack_cosmologies():
     param_names = [
-        "Omega_c", "Omega_b", "h", "n_s",
-        "sigma8", "Omega_k", "w0", "wa",
+        "Omega_c",
+        "Omega_b",
+        "h",
+        "n_s",
+        "sigma8",
+        "Omega_k",
+        "w0",
+        "wa",
     ]
     cosmos = [jc.Planck15(), hc.Planck18()]
     stacked = hc.stack_cosmologies(cosmos)
