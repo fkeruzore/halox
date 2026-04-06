@@ -1,0 +1,9 @@
+name,time_s
+Analytical; CPU; No JIT,3.672
+Analytical; CPU; JIT,0.08937
+Analytical; GPU; No JIT,5.678
+Analytical; GPU; JIT,0.00481
+Emulator; CPU; No JIT,0.06455
+Emulator; CPU; JIT,0.00552
+Emulator; GPU; No JIT,0.08269
+Emulator; GPU; JIT,0.0002448
