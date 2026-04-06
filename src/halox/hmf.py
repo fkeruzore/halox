@@ -58,7 +58,7 @@ def _tinker08_parameters(
 
     return jnp.array([A_z, a_z, b_z, c_0])
 
-@partial(jax.jit, static_argnames=["emu", "emulate", "delta_c", "n_k_int"])
+# @partial(jax.jit, static_argnames=["emu", "emulate", "delta_c", "n_k_int"])
 def tinker08_f_sigma(
     M: ArrayLike,
     z: ArrayLike,
@@ -102,7 +102,7 @@ def tinker08_f_sigma(
     A, a, b, c = _tinker08_parameters(z, cosmo, delta_c)
     return A * ((b / sigma) ** a + 1.0) * jnp.exp(-c / sigma**2)
 
-@partial(jax.jit, static_argnames=["emu", "emulate", "delta_c", "n_k_int"])
+# @partial(jax.jit, static_argnames=["emu", "emulate", "delta_c", "n_k_int"])
 def tinker08_mass_function(
     M: ArrayLike,
     z: ArrayLike,
