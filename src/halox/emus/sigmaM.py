@@ -8,7 +8,7 @@ from importlib import resources
 
 class SigmaMEmulator:
     def __init__(self, weight_file = "sigma_40k_conv8.npz"):
-        with resources.path("halox.emus", weight_file) as data_path:
+        with resources.as_file(resources.files("halox.emus") / weight_file) as data_path:
             raw_weights = dict(np.load(data_path, allow_pickle=True))
 
         # Convert keys → clean format
