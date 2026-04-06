@@ -1,11 +1,12 @@
+from __future__ import annotations
+
 import jax
 from jax import Array
 from jax.typing import ArrayLike
 import jax.numpy as jnp
 import jax_cosmo as jc
-from . import cosmology, lss, emus
-
-default_emu = emus.SigmaMEmulator()
+from . import cosmology, lss
+from .emus import SigmaMEmulator
 
 
 def _tinker08_parameters(
@@ -65,8 +66,7 @@ def tinker08_mass_function(
     cosmo: jc.Cosmology,
     delta_c: float = 200.0,
     n_k_int: int = 5000,
-    emu: emus.sigmaM.SigmaMEmulator = default_emu,
-    emulate: bool = False,
+    emu: SigmaMEmulator | None = None,
 ) -> Array:
     """Tinker08 halo mass function :math:`dn/d\\ln M`.
 
@@ -77,19 +77,15 @@ def tinker08_mass_function(
     z : Array
         Redshift
     cosmo : jc.Cosmology
-        Underlying cosmology, default Planck18
+        Underlying cosmology
     delta_c : float
         Overdensity threshold, default 200.0
     n_k_int : int
         Number of k-space integration points for :math:`\\sigma(R,z)`,
         default 5000
-    emu : SigmaMEmulator
-        Emulator callable that returns :math:`\\sigma(M)`,
-        default emus.SigmaMEmulator()
-    emulate: bool
-        True means mass function is emulated (emu used), False uses base
-        function
-        default False
+    emu : SigmaMEmulator, optional
+        Trained emulator for :math:`\\sigma(M)`.
+
     Returns
     -------
     Array
@@ -101,13 +97,8 @@ def tinker08_mass_function(
     # Background density
     rho_m = cosmo.Omega_m * cosmology.critical_density(0.0, cosmo)
 
-    # Single sigma(M) definition used for both forward and gradient
-    if emulate:
-        def sigma_fn(M):
-            return emu(M, z, cosmo_ray=cosmo)
-    else:
-        def sigma_fn(M):
-            return lss.sigma_M(M, z, cosmo, n_k_int=n_k_int)
+    def sigma_fn(M):
+        return lss.sigma_M(M, z, cosmo, n_k_int=n_k_int, emu=emu)
 
     sigma = sigma_fn(M)
 

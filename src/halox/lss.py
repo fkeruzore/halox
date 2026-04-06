@@ -1,16 +1,18 @@
+from __future__ import annotations
+
 from jax import Array
 import jax
 from jax.typing import ArrayLike
 import jax.numpy as jnp
 import jax_cosmo as jc
-from . import cosmology, emus
+from . import cosmology
+from .emus import SigmaMEmulator
 
 
 # jax-cosmo power spectra differ from colossus at the 0.3% level, which
 # results in %-level discrepancies in HMF predictions. This fudge factor
 # solves that.
 _jax_cosmo_pk_corr = 1.0 / 1.0030
-default_emu = emus.sigmaM.SigmaMEmulator()
 
 def mass_to_lagrangian_radius(M: ArrayLike, cosmo: jc.Cosmology) -> Array:
     """Convert mass to Lagrangian radius.
@@ -136,9 +138,14 @@ def sigma_M(
     k_min: float = 1e-5,
     k_max: float = 1e2,
     n_k_int: int = 5000,
+    emu: SigmaMEmulator | None = None,
 ) -> Array:
     """Compute RMS variance of density fluctuations within the
     Lagrangian radius of a halo with mass M at redshift z.
+
+    When ``emu`` is provided, the emulator is used instead of the
+    analytical integral and the ``k_min``, ``k_max``, ``n_k_int``
+    parameters are ignored.
 
     Parameters
     ----------
@@ -148,9 +155,16 @@ def sigma_M(
         Redshift
     cosmo : jc.Cosmology
         Underlying cosmology
+    k_min : float
+        Minimum k for integration [h Mpc-1], default 1e-5
+    k_max : float
+        Maximum k for integration [h Mpc-1], default 1e2
     n_k_int : int
         Number of k-space integration points for :math:`\\sigma(R,z)`,
         default 5000
+    emu : SigmaMEmulator, optional
+        Trained emulator for :math:`\\sigma(M)`. If provided, the
+        emulator is used instead of the analytical integral.
 
     Returns
     -------
@@ -159,6 +173,8 @@ def sigma_M(
     """
     M = jnp.asarray(M)
     z = jnp.asarray(z)
+    if emu is not None:
+        return emu(M, z, cosmo)
     R = mass_to_lagrangian_radius(M, cosmo)
     return sigma_R(R, z, cosmo, k_min=k_min, k_max=k_max, n_k_int=n_k_int)
 
@@ -170,14 +186,9 @@ def peak_height(
     k_min: float = 1e-5,
     k_max: float = 1e2,
     delta_sc: float = 1.68647,
-    emu: emus.sigmaM.SigmaMEmulator = default_emu,
-    emulate: bool = False,
+    emu: SigmaMEmulator | None = None,
 ) -> Array:
-    """
-    Returns the peak height (nu) of a dark matter halo defined by
-    the spherical collapse overdensity and the RMS variance of the
-    density fluctuations within the Lagrangian raidus, optionally 
-    emulated
+    """Peak height :math:`\\nu = \\delta_{sc} / \\sigma(M, z)`.
 
     Parameters
     ----------
@@ -190,19 +201,22 @@ def peak_height(
     n_k_int : int
         Number of k-space integration points for :math:`\\sigma(R,z)`,
         default 5000
-    delta_sc: float
-        Required overdensity for spherical collapse, usually 1.686 (tophat)
-    emu: SigmaMEmulator
-        Trained NN for emulating sigmaM
-    emulate:
-        Condition to pass for option of emulation, 
-    :return: Array
-        Returns peak height (nu) for halos
+    k_min : float
+        Minimum k for integration [h Mpc-1], default 1e-5
+    k_max : float
+        Maximum k for integration [h Mpc-1], default 1e2
+    delta_sc : float
+        Spherical collapse overdensity, default 1.68647
+    emu : SigmaMEmulator, optional
+        Trained emulator for :math:`\\sigma(M)`.
+
+    Returns
+    -------
+    Array
+        Peak height :math:`\\nu`
     """
-    if emulate:
-        sigma = emu(M, z, cosmo)
-    else:
-        sigma = sigma_M(
-            M, z, cosmo, k_min=k_min, k_max=k_max, n_k_int=n_k_int
-        )
+    sigma = sigma_M(
+        M, z, cosmo, k_min=k_min, k_max=k_max, n_k_int=n_k_int,
+        emu=emu,
+    )
     return delta_sc / sigma
