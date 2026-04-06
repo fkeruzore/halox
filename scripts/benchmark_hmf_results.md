@@ -2,7 +2,7 @@
 
 | Device | JIT | Analytical | Emulated |
 |--------|-----|------------|----------|
-| CPU | Yes | 109.54 ms | 6.25 ms |
-| CPU | No | 112.87 ms | 7.11 ms |
-| GPU | Yes | 5.30 ms | 279.7 µs |
-| GPU | No | 5.99 ms | 726.4 µs |
+| CPU | No | 3.894 s | 79.37 ms |
+| CPU | Yes | 97.32 ms | 6.59 ms |
+| GPU | No | 5.761 s | 93.73 ms |
+| GPU | Yes | 5.34 ms | 292.8 µs |

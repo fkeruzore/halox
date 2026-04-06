@@ -13,10 +13,11 @@ jax.config.update("jax_enable_x64", True)
 
 
 cosmo = halox.cosmology.Planck18()
+emu = halox.emus.SigmaMEmulator()
 M = jnp.logspace(13, 15, 256)  # h^-1 Msun
 z = jnp.linspace(0, 2, 16)
 N_WARMUP = 1
-N_REPEAT = 101
+N_REPEAT = 21
 
 
 def bench(fn, n_warmup=N_WARMUP, n_repeat=N_REPEAT):
@@ -35,12 +36,12 @@ def bench(fn, n_warmup=N_WARMUP, n_repeat=N_REPEAT):
     return sorted(times)[n_repeat // 2]  # median
 
 
-def hmf_grid(M, z, cosmo, emulate):
+def hmf_grid(M, z, cosmo, emu=None):
     """Computes dn/dlnM for all (M, z) pairs.
     Returns shape (len(z), len(M))."""
     return jax.vmap(
         lambda z_i: halox.hmf.tinker08_mass_function(
-            M, z_i, cosmo, emulate=emulate
+            M, z_i, cosmo, emu=emu
         )
     )(z)
 
@@ -55,13 +56,13 @@ except RuntimeError:
 results = {}  # (device_name, jit_label) -> {analytical: time, emulated: time}
 
 for dev_name, dev in devices.items():
-    for emulate, col_label in [(False, "Analytical"), (True, "Emulated")]:
+    for _emu, col_label in [(None, "Analytical"), (emu, "Emulated")]:
         # --- plain (no JIT) ---
         # nb: vmap still traces, but nothing is compiled ahead of time;
         # each call re-traces and compiles the inner vmap.
-        def _call_plain(_emulate=emulate, _dev=dev):
+        def _call_plain(_emu=_emu, _dev=dev):
             with jax.default_device(_dev):
-                return hmf_grid(M, z, cosmo, emulate=_emulate)
+                return hmf_grid(M, z, cosmo, emu=_emu)
 
         key_plain = (dev_name, "No JIT")
         results.setdefault(key_plain, {})[col_label] = bench(_call_plain)
@@ -69,8 +70,8 @@ for dev_name, dev in devices.items():
         # --- JIT-compiled ---
         # Wrap the full grid computation in jit so tracing happens once.
         _hmf_jit = jax.jit(
-            lambda M_, z_, _emulate=emulate: hmf_grid(
-                M_, z_, cosmo, emulate=_emulate
+            lambda M_, z_, _emu=_emu: hmf_grid(
+                M_, z_, cosmo, emu=_emu
             )
         )
 
@@ -120,3 +121,4 @@ with open("benchmark_hmf_results.csv", "w") as f:
             for jit_label in ["No JIT", "JIT"]:
                 t = results[(dev_name, jit_label)][col_label]
                 f.write(f"{method}; {dev_name}; {jit_label},{t}\n")
+
