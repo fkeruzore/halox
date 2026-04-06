@@ -77,8 +77,8 @@ class SigmaMEmulator:
         return self.normalize(x)
 
     # --- public API ---
-    def __call__(self, m: ArrayLike, z: ArrayLike, cosmo_ray: jc.Cosmology):
-        x = self.build_input(m, z, cosmo_ray)
+    def __call__(self, m: ArrayLike, z: ArrayLike, cosmo: jc.Cosmology):
+        x = self.build_input(m, z, cosmo)
         return jnp.squeeze(10 ** self.forward(x))
 
 def stack_cosmologies(cosmos: list[jc.Cosmology]) -> jc.Cosmology:
