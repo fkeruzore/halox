@@ -48,7 +48,7 @@ def test_sigmaM_emu(cosmo_name, n_k_int, return_vals=False):
     )
 
     emu = halox.emus.SigmaMEmulator()
-    tinker08_f_sigma_emu = jax.jit(lambda m, z: emu(m, z, cosmo_ray=cosmo_j))
+    tinker08_f_sigma_emu = jax.jit(lambda m, z: emu(m, z, cosmo=cosmo_j))
 
     f_h = jnp.array(
         [
@@ -77,16 +77,16 @@ def test_tinker08_dn_dnlm_emu(delta_c, cosmo_name, return_vals=False):
 
     tinker08_mass_function = jax.jit(
         lambda m, z: halox.hmf.tinker08_mass_function(
-            m, z, cosmo=cosmo_j, delta_c=delta_c, emulate=False
+            m, z, cosmo=cosmo_j, delta_c=delta_c
         )
     )
     f_c = jnp.array(
         [tinker08_mass_function(ms[i], zs[i]) for i in range(len(test_mzs))]
     )
-    # again, testing the default photo
+    emu = halox.emus.SigmaMEmulator()
     tinker08_mass_function_emu = jax.jit(
         lambda m, z: halox.hmf.tinker08_mass_function(
-            m, z, cosmo=cosmo_j, delta_c=delta_c, emulate=True
+            m, z, cosmo=cosmo_j, delta_c=delta_c, emu=emu
         )
     )
     f_h = jnp.array(
@@ -117,20 +117,18 @@ def test_tinker10_bias(delta_c, cosmo_name, return_vals=False):
     ms = test_mzs[:, 0]
     zs = test_mzs[:, 1]
 
-    # using default emulator
+    emu = halox.emus.SigmaMEmulator()
     b_emu = jnp.array(
         [
             halox.bias.tinker10_bias(
-                ms[i], zs[i], cosmo=cosmo_j, delta_c=delta_c, emulate=True
+                ms[i], zs[i], cosmo=cosmo_j, delta_c=delta_c, emu=emu
             )
             for i in range(len(test_mzs))
         ]
     )
     b_h = jnp.array(
         [
-            tinker10_bias(
-                ms[i], zs[i], cosmo=cosmo_j, delta_c=delta_c, emulate=False
-            )
+            tinker10_bias(ms[i], zs[i], cosmo=cosmo_j, delta_c=delta_c)
             for i in range(len(test_mzs))
         ]
     )
