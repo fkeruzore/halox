@@ -44,7 +44,7 @@ def _tinker10_parameters(
 
     return jnp.array([A, a, B, C])
 
-@partial(jax.jit, static_argnames=["emu", "emulate", "delta_c", "n_k_int"])
+# @partial(jax.jit, static_argnames=["emu", "emulate", "delta_c", "n_k_int"])
 def tinker10_bias(
     M: ArrayLike,
     z: ArrayLike,
