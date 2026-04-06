@@ -98,3 +98,21 @@ def test_sensitivity_all_params():
 
     result = hc.sensitivity(func, hc.Planck18())
     assert result == all_params
+
+
+def test_stack_cosmologies():
+    param_names = [
+        "Omega_c", "Omega_b", "h", "n_s",
+        "sigma8", "Omega_k", "w0", "wa",
+    ]
+    cosmos = [jc.Planck15(), hc.Planck18()]
+    stacked = hc.stack_cosmologies(cosmos)
+
+    assert stacked.Omega_c.shape == (2,), (
+        "Stacked cosmology should have array parameters of length 2"
+    )
+    for p in param_names:
+        expected = jnp.array([getattr(c, p) for c in cosmos])
+        assert jnp.allclose(getattr(stacked, p), expected), (
+            f"Stacked parameter {p} does not match individual cosmologies"
+        )
