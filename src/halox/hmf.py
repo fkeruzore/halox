@@ -3,10 +3,10 @@ from jax import Array
 from jax.typing import ArrayLike
 import jax.numpy as jnp
 import jax_cosmo as jc
-from functools import partial
 from . import cosmology, lss, emus
 
 default_emu = emus.SigmaMEmulator()
+
 
 def _tinker08_parameters(
     z: ArrayLike,
@@ -58,51 +58,7 @@ def _tinker08_parameters(
 
     return jnp.array([A_z, a_z, b_z, c_0])
 
-@partial(jax.jit, static_argnames=["emu", "emulate", "delta_c", "n_k_int"])
-def tinker08_f_sigma(
-    M: ArrayLike,
-    z: ArrayLike,
-    cosmo: jc.Cosmology,
-    delta_c: float = 200.0,
-    n_k_int: int = 5000,
-    emu: emus.sigmaM.SigmaMEmulator = default_emu,
-    emulate: bool = False
-) -> Array:
-    """Tinker08 multiplicity function :math:`f(\\sigma)`.
 
-    Parameters
-    ----------
-    M : Array
-        Halo mass [h-1 Msun]
-    z : Array
-        Redshift
-    cosmo : jc.Cosmology
-        Underlying cosmology
-    delta_c : float
-        Overdensity threshold, default 200.0
-    n_k_int : int
-        Number of k-space integration points for :math:`\\sigma(R,z)`,
-        default 5000
-
-    Returns
-    -------
-    Array
-        Mass function multiplicity
-    """
-    M = jnp.asarray(M)
-    z = jnp.asarray(z)
-
-    sigma = jax.lax.cond(
-        emulate,
-        lambda _: emu(M,z,cosmo_ray = cosmo),
-        lambda _: lss.sigma_M(M, z, cosmo, n_k_int = n_k_int),
-        operand = None
-        )
-
-    A, a, b, c = _tinker08_parameters(z, cosmo, delta_c)
-    return A * ((b / sigma) ** a + 1.0) * jnp.exp(-c / sigma**2)
-
-@partial(jax.jit, static_argnames=["emu", "emulate", "delta_c", "n_k_int"])
 def tinker08_mass_function(
     M: ArrayLike,
     z: ArrayLike,
@@ -131,7 +87,7 @@ def tinker08_mass_function(
         Emulator callable that returns :math:`\\sigma(M)`,
         default emus.SigmaMEmulator()
     emulate: bool
-        True means mass function is emulated (emu used), False uses base 
+        True means mass function is emulated (emu used), False uses base
         function
         default False
     Returns
@@ -145,35 +101,27 @@ def tinker08_mass_function(
     # Background density
     rho_m = cosmo.Omega_m * cosmology.critical_density(0.0, cosmo)
 
-    # Multiplicity function with redshift evolution
-    f_sigma = tinker08_f_sigma(
-        M, 
-        z, 
-        cosmo, 
-        delta_c, 
-        n_k_int=n_k_int, 
-        emu = emu, 
-        emulate = emulate
-        )
-    # d_ln_sigma_inv = jax.lax.cond(
-    #     emulate,
-    #     lambda _: jax.grad(lambda M: jnp.log(1.0/emu(M,z,cosmo_ray = cosmo))),
-    #     lambda _: jax.grad(lambda M: jnp.log(1.0/lss.sigma_M(M, z, cosmo, n_k_int = n_k_int))),
-    #     operand = None
-    #     )
-    def grad_log_sigma_inv_emu(M):
-        return jnp.log(1.0 / emu(M, z, cosmo_ray=cosmo))
+    # Single sigma(M) definition used for both forward and gradient
+    if emulate:
+        def sigma_fn(M):
+            return emu(M, z, cosmo_ray=cosmo)
+    else:
+        def sigma_fn(M):
+            return lss.sigma_M(M, z, cosmo, n_k_int=n_k_int)
 
-    def grad_log_sigma_inv_base(M):
-        return jnp.log(1.0 / lss.sigma_M(M, z, cosmo, n_k_int=n_k_int))
-    
-    d_ln_sigma_inv = jax.lax.cond(
-        emulate,
-        lambda M: jax.vmap(jax.grad(grad_log_sigma_inv_emu))(M),
-        lambda M: jax.vmap(jax.grad(grad_log_sigma_inv_base))(M),
-        operand = M
-        )
-    # Use autodiff to compute d ln sigma / dM
+    sigma = sigma_fn(M)
+
+    # Multiplicity function
+    A, a, b, c = _tinker08_parameters(z, cosmo, delta_c)
+    f_sigma = (
+        A * ((b / sigma) ** a + 1.0) * jnp.exp(-c / sigma**2)
+    )
+
+    # d ln(1/sigma) / dM via autodiff on the same sigma_fn
+    def log_sigma_inv(M):
+        return jnp.log(1.0 / sigma_fn(M))
+
+    d_ln_sigma_inv = jax.vmap(jax.grad(log_sigma_inv))(M)
 
     dn_dm = f_sigma * (rho_m / M) * d_ln_sigma_inv
 
