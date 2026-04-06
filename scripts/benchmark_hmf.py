@@ -15,7 +15,7 @@ cosmo = halox.cosmology.Planck18()
 M = jnp.logspace(13, 15, 256)  # h^-1 Msun
 z = jnp.linspace(0, 2, 16)
 N_WARMUP = 1
-N_REPEAT = 10
+N_REPEAT = 101
 
 
 def bench(fn, n_warmup=N_WARMUP, n_repeat=N_REPEAT):
