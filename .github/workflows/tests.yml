@@ -61,4 +61,4 @@ jobs:
       run: uv sync --locked --dev --extra tests
 
     - name: Run tests
-      run: uv run pytest -v --no-cov -k test_imports
+      run: uv run pytest -v --no-cov -k "test_imports or test_jax_friendliness"
