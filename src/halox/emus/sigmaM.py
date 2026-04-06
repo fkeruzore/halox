@@ -7,7 +7,7 @@ from importlib import resources
 # use boolean to control the emus
 
 class SigmaMEmulator:
-    def __init__(self, weight_file = "sigma_40k_conv8.npz"):
+    def __init__(self, weight_file = "sigma_40k_conv7.npz"):
         with resources.path("halox.emus", weight_file) as data_path:
             raw_weights = dict(np.load(data_path, allow_pickle=True))
 
