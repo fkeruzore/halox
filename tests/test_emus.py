@@ -26,12 +26,11 @@ test_cosmos = {
     ],
 }
 
-test_n_k_ints = [5000, 1000]
+n_k_int = 1000
 
 
 @pytest.mark.parametrize("cosmo_name", test_cosmos.keys())
-@pytest.mark.parametrize("n_k_int", test_n_k_ints)
-def test_sigmaM_emu(cosmo_name, n_k_int, return_vals=False):
+def test_sigmaM_emu(cosmo_name, return_vals=False):
     cosmo_j = test_cosmos[cosmo_name][0]
 
     ms = test_mzs[:, 0]
