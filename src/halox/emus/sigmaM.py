@@ -1,6 +1,5 @@
 import numpy as np
 import jax
-from jax import Array
 from jax.typing import ArrayLike
 import jax.numpy as jnp
 import jax_cosmo as jc
@@ -39,6 +38,9 @@ class SigmaMEmulator:
     
     @staticmethod
     def normalize(x):
+        # these are the bounds that emulator was trained on, 
+        # only change this if you are using emulator trained
+        # on different bound
         bounds = jnp.array([
             [11, 16],   # logMass
             [-0.05, 5],   # redshift
@@ -78,17 +80,6 @@ class SigmaMEmulator:
     def __call__(self, m: ArrayLike, z: ArrayLike, cosmo_ray: jc.Cosmology):
         x = self.build_input(m, z, cosmo_ray)
         return jnp.squeeze(10 ** self.forward(x))
-
-def peak_height_emu(
-        M: ArrayLike,
-        z: ArrayLike,
-        cosmo: jc.Cosmology,
-        emu,
-        delta_sc: float = 1.68647,
-    ) -> Array:
-    return delta_sc / emu(
-        M, z, cosmo
-    )
 
 def stack_cosmologies(cosmos: list[jc.Cosmology]) -> jc.Cosmology:
     return jc.Cosmology(

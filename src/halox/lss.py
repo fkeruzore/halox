@@ -1,4 +1,5 @@
 from jax import Array
+import jax
 from jax.typing import ArrayLike
 import jax.numpy as jnp
 import jax_cosmo as jc
@@ -125,7 +126,7 @@ def sigma_R(
     integrand = k**2 * pk * W**2
     sigma2 = jnp.trapezoid(integrand, k, axis=-1) / (2 * jnp.pi**2)
 
-    return jnp.sqrt(sigma2)
+    return jnp.squeeze(jnp.sqrt(sigma2))
 
 
 def sigma_M(
@@ -160,7 +161,6 @@ def sigma_M(
     z = jnp.asarray(z)
     R = mass_to_lagrangian_radius(M, cosmo)
     return sigma_R(R, z, cosmo, k_min=k_min, k_max=k_max, n_k_int=n_k_int)
-
 
 def peak_height(
     M: ArrayLike,
@@ -199,6 +199,16 @@ def peak_height(
     :return: Array
         Returns peak height (nu) for halos
     """
+    nu = jax.lax.cond(
+        emulate,
+        lambda _: delta_sc / sigma_M(
+            M, z, cosmo, k_min=k_min, k_max=k_max, n_k_int=n_k_int
+        ),
+        lambda _: delta_sc / emu(
+            M, z, cosmo
+        ),
+        operand = None
+    )
     if not emulate:
         nu = delta_sc / sigma_M(
             M, z, cosmo, k_min=k_min, k_max=k_max, n_k_int=n_k_int

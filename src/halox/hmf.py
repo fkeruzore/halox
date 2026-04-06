@@ -3,6 +3,7 @@ from jax import Array
 from jax.typing import ArrayLike
 import jax.numpy as jnp
 import jax_cosmo as jc
+from functools import partial
 from . import cosmology, lss, emus
 
 default_emu = emus.SigmaMEmulator()
@@ -57,7 +58,7 @@ def _tinker08_parameters(
 
     return jnp.array([A_z, a_z, b_z, c_0])
 
-
+@partial(jax.jit, static_argnames=["emu", "emulate", "delta_c", "n_k_int"])
 def tinker08_f_sigma(
     M: ArrayLike,
     z: ArrayLike,
@@ -91,15 +92,17 @@ def tinker08_f_sigma(
     M = jnp.asarray(M)
     z = jnp.asarray(z)
 
-    if not emulate:
-        sigma = lss.sigma_M(M, z, cosmo, n_k_int=n_k_int)
-    else:
-        sigma = emu(M,z,cosmo_ray=cosmo)
-    
+    sigma = jax.lax.cond(
+        emulate,
+        lambda _: emu(M,z,cosmo_ray = cosmo),
+        lambda _: lss.sigma_M(M, z, cosmo, n_k_int = n_k_int),
+        operand = None
+        )
+
     A, a, b, c = _tinker08_parameters(z, cosmo, delta_c)
     return A * ((b / sigma) ** a + 1.0) * jnp.exp(-c / sigma**2)
 
-
+@partial(jax.jit, static_argnames=["emu", "emulate", "delta_c", "n_k_int"])
 def tinker08_mass_function(
     M: ArrayLike,
     z: ArrayLike,
@@ -124,7 +127,13 @@ def tinker08_mass_function(
     n_k_int : int
         Number of k-space integration points for :math:`\\sigma(R,z)`,
         default 5000
-
+    emu : SigmaMEmulator
+        Emulator callable that returns :math:`\\sigma(M)`,
+        default emus.SigmaMEmulator()
+    emulate: bool
+        True means mass function is emulated (emu used), False uses base 
+        function
+        default False
     Returns
     -------
     Array
@@ -146,17 +155,26 @@ def tinker08_mass_function(
         emu = emu, 
         emulate = emulate
         )
+    # d_ln_sigma_inv = jax.lax.cond(
+    #     emulate,
+    #     lambda _: jax.grad(lambda M: jnp.log(1.0/emu(M,z,cosmo_ray = cosmo))),
+    #     lambda _: jax.grad(lambda M: jnp.log(1.0/lss.sigma_M(M, z, cosmo, n_k_int = n_k_int))),
+    #     operand = None
+    #     )
+    def grad_log_sigma_inv_emu(M):
+        return jnp.log(1.0 / emu(M, z, cosmo_ray=cosmo))
 
+    def grad_log_sigma_inv_base(M):
+        return jnp.log(1.0 / lss.sigma_M(M, z, cosmo, n_k_int=n_k_int))
+    
+    d_ln_sigma_inv = jax.lax.cond(
+        emulate,
+        lambda M: jax.vmap(jax.grad(grad_log_sigma_inv_emu))(M),
+        lambda M: jax.vmap(jax.grad(grad_log_sigma_inv_base))(M),
+        operand = M
+        )
     # Use autodiff to compute d ln sigma / dM
-    if not emulate:
-        d_ln_sigma_inv = jax.grad(
-            lambda M: jnp.log(1.0 / lss.sigma_M(M, z, cosmo, n_k_int=n_k_int))
-        )
-    else: 
-        d_ln_sigma_inv = jax.grad(
-            lambda M: jnp.log(1.0 / emu(M, z, cosmo))
-        )
 
-    dn_dm = f_sigma * (rho_m / M) * jax.vmap(d_ln_sigma_inv)(M)
+    dn_dm = f_sigma * (rho_m / M) * d_ln_sigma_inv
 
     return jnp.squeeze(M * dn_dm)
