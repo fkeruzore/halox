@@ -1,12 +1,12 @@
-import jax
 from jax import Array
 from jax.typing import ArrayLike
 import jax.numpy as jnp
 import jax_cosmo as jc
-from functools import partial
 from . import lss, emus
 
 default_emu = emus.sigmaM.SigmaMEmulator()
+
+
 def _tinker10_parameters(
     z: ArrayLike,
     cosmo: jc.Cosmology,
@@ -44,7 +44,7 @@ def _tinker10_parameters(
 
     return jnp.array([A, a, B, C])
 
-@partial(jax.jit, static_argnames=["emu", "emulate", "delta_c", "n_k_int"])
+
 def tinker10_bias(
     M: ArrayLike,
     z: ArrayLike,
@@ -52,7 +52,7 @@ def tinker10_bias(
     delta_c: float = 200.0,
     delta_sc: float = 1.686,
     n_k_int: int = 5000,
-    emu : emus.sigmaM.SigmaMEmulator = default_emu,
+    emu: emus.sigmaM.SigmaMEmulator = default_emu,
     emulate: bool = False,
 ) -> Array:
     """Tinker10 halo bias function.
@@ -83,12 +83,10 @@ def tinker10_bias(
     M = jnp.asarray(M)
     z = jnp.asarray(z)
 
-    nu = jax.lax.cond(
-        emulate,
-        lambda _: emu(M,z,cosmo),
-        lambda _: lss.sigma_M(M,z,cosmo, n_k_int=n_k_int),
-        operand = None
+    nu = lss.peak_height(
+        M, z, cosmo, n_k_int=n_k_int, emu=emu, emulate=emulate
     )
+
     # Get parameters
     A, a, B, C = _tinker10_parameters(z, cosmo, delta_c)
 
