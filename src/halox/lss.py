@@ -199,22 +199,10 @@ def peak_height(
     :return: Array
         Returns peak height (nu) for halos
     """
-    nu = jax.lax.cond(
-        emulate,
-        lambda _: delta_sc / sigma_M(
-            M, z, cosmo, k_min=k_min, k_max=k_max, n_k_int=n_k_int
-        ),
-        lambda _: delta_sc / emu(
-            M, z, cosmo
-        ),
-        operand = None
-    )
-    if not emulate:
-        nu = delta_sc / sigma_M(
-            M, z, cosmo, k_min=k_min, k_max=k_max, n_k_int=n_k_int
-        )
+    if emulate:
+        sigma = emu(M, z, cosmo)
     else:
-        nu = delta_sc / emu(
-            M, z, cosmo
+        sigma = sigma_M(
+            M, z, cosmo, k_min=k_min, k_max=k_max, n_k_int=n_k_int
         )
-    return nu
+    return delta_sc / sigma
