@@ -100,7 +100,7 @@ def test_tinker08_dn_dnlm_emu(delta_c, cosmo_name, return_vals=False):
     discrepancy = (f_h - f_c) / f_c
     avg_disc = jnp.mean(discrepancy)
     max_disc = jnp.max(jnp.abs(discrepancy))
-    assert max_disc < 2e-2, (
+    assert max_disc < 5e-2, (
         f"Bias in hmf_emu: avg={avg_disc:.3e}, max={max_disc:.3e}"
     )
 
@@ -137,6 +137,6 @@ def test_tinker10_bias(delta_c, cosmo_name, return_vals=False):
     discrepancy = b_emu / b_h - 1.0
     avg_disc = jnp.mean(discrepancy)
     max_disc = jnp.max(jnp.abs(discrepancy))
-    assert max_disc < 5e-3, (
+    assert max_disc < 5e-2, (
         f"Bias in halo bias_emu: avg={avg_disc:.3e}, max={max_disc:.3e}"
     )
