@@ -58,7 +58,6 @@ def _tinker08_parameters(
 
     return jnp.array([A_z, a_z, b_z, c_0])
 
-# @partial(jax.jit, static_argnames=["emu", "emulate", "delta_c", "n_k_int"])
 def tinker08_f_sigma(
     M: ArrayLike,
     z: ArrayLike,
@@ -102,7 +101,6 @@ def tinker08_f_sigma(
     A, a, b, c = _tinker08_parameters(z, cosmo, delta_c)
     return A * ((b / sigma) ** a + 1.0) * jnp.exp(-c / sigma**2)
 
-# @partial(jax.jit, static_argnames=["emu", "emulate", "delta_c", "n_k_int"])
 def tinker08_mass_function(
     M: ArrayLike,
     z: ArrayLike,
@@ -155,12 +153,6 @@ def tinker08_mass_function(
         emu = emu, 
         emulate = emulate
         )
-    # d_ln_sigma_inv = jax.lax.cond(
-    #     emulate,
-    #     lambda _: jax.grad(lambda M: jnp.log(1.0/emu(M,z,cosmo_ray = cosmo))),
-    #     lambda _: jax.grad(lambda M: jnp.log(1.0/lss.sigma_M(M, z, cosmo, n_k_int = n_k_int))),
-    #     operand = None
-    #     )
     def grad_log_sigma_inv_emu(M):
         return jnp.log(1.0 / emu(M, z, cosmo_ray=cosmo))
 
