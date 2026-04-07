@@ -39,5 +39,6 @@ Learn more
    api/halox.einasto
    api/halox.cm
    api/halox.lss
+   api/halox.emus
    api/halox.hmf
    api/halox.bias
