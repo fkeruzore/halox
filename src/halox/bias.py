@@ -81,6 +81,11 @@ def tinker10_bias(
     -------
     Array
         Linear halo bias
+
+    See Also
+    --------
+    halox.emus.SigmaMEmulator
+        Emulator for :math:`\\sigma(M,z)`.
     """
     M = jnp.asarray(M)
     z = jnp.asarray(z)

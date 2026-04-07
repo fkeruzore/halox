@@ -170,6 +170,11 @@ def sigma_M(
     -------
     Array
         RMS variance :math:`\\sigma(M,z)`
+
+    See Also
+    --------
+    halox.emus.SigmaMEmulator
+        Emulator for :math:`\\sigma(M,z)`.
     """
     M = jnp.asarray(M)
     z = jnp.asarray(z)
@@ -215,6 +220,11 @@ def peak_height(
     -------
     Array
         Peak height :math:`\\nu`
+
+    See Also
+    --------
+    halox.emus.SigmaMEmulator
+        Emulator for :math:`\\sigma(M,z)`.
     """
     sigma = sigma_M(
         M,

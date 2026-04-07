@@ -90,6 +90,11 @@ def tinker08_mass_function(
     -------
     Array
         Mass function [h3 Mpc-3]
+
+    See Also
+    --------
+    halox.emus.SigmaMEmulator
+        Emulator for :math:`\\sigma(M,z)`.
     """
     M = jnp.atleast_1d(M)
     z = jnp.asarray(z)
