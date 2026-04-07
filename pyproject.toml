@@ -9,7 +9,16 @@ authors = [
 ]
 requires-python = ">=3.9"
 dependencies = [
-    "jax>=0.4.30",
+    # Intel macOS → force older JAX
+    "jax==0.4.30; sys_platform == 'darwin' and platform_machine == 'x86_64'",
+    "jaxlib==0.4.30; sys_platform == 'darwin' and platform_machine == 'x86_64'",
+
+    # Apple Silicon macOS → allow newer JAX
+    "jax>=0.4.30; sys_platform == 'darwin' and platform_machine == 'arm64'",
+
+    # Linux/Windows → allow newer JAX
+    "jax>=0.4.30; sys_platform != 'darwin'",
+    
     "jax-cosmo>=0.1.0",
     "jaxopt>=0.8.0",
     "scipy>=1.13.1",
