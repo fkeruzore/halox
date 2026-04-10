@@ -61,7 +61,7 @@ jobs:
       run: uv sync --locked --extra tests_lite
 
     - name: Run tests
-      run: uv run pytest -v --no-cov -k "test_imports or test_jax_friendliness"
+      run: uv run pytest -v --no-cov tests/test_imports.py tests/test_jax_friendliness.py
 
   install_multi_platform_tests:
     strategy:
@@ -83,4 +83,4 @@ jobs:
       run: uv sync --locked --extra tests_lite
 
     - name: Run tests
-      run: uv run pytest -v --no-cov -k "test_imports or test_jax_friendliness"
+      run: uv run pytest -v --no-cov tests/test_imports.py tests/test_jax_friendliness.py
