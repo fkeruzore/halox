@@ -34,6 +34,9 @@ class SigmaMEmulator:
             name = k.replace("('", "").replace("')", "").replace("', '", ".")
             self.params[name] = jnp.array(v)
 
+        # Detect number of layers from weight keys
+        self.n_layers = sum(1 for k in self.params if k.endswith(".kernel"))
+
     @staticmethod
     def silu(x: Array) -> Array:
         """SiLU (Sigmoid Linear Unit) activation function.
@@ -87,10 +90,14 @@ class SigmaMEmulator:
         """
         p = self.params
 
-        x = self.silu(self.linear(x, p["linear1.kernel"], p["linear1.bias"]))
-        x = self.silu(self.linear(x, p["linear2.kernel"], p["linear2.bias"]))
-        x = self.silu(self.linear(x, p["linear3.kernel"], p["linear3.bias"]))
-        x = self.linear(x, p["linear4.kernel"], p["linear4.bias"])
+        for i in range(1, self.n_layers):
+            k = f"linear{i}.kernel"
+            b = f"linear{i}.bias"
+            x = self.silu(self.linear(x, p[k], p[b]))
+
+        k = f"linear{self.n_layers}.kernel"
+        b = f"linear{self.n_layers}.bias"
+        x = self.linear(x, p[k], p[b])
 
         return x.squeeze(-1)
 
@@ -192,3 +199,4 @@ class SigmaMEmulator:
         """
         x = self.build_input(m, z, cosmo)
         return jnp.squeeze(10 ** self.forward(x))
+        # return jnp.squeeze(self.forward(x))
