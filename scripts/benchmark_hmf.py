@@ -40,9 +40,7 @@ def hmf_grid(M, z, cosmo, emu=None):
     """Computes dn/dlnM for all (M, z) pairs.
     Returns shape (len(z), len(M))."""
     return jax.vmap(
-        lambda z_i: halox.hmf.tinker08_mass_function(
-            M, z_i, cosmo, emu=emu
-        )
+        lambda z_i: halox.hmf.tinker08_mass_function(M, z_i, cosmo, emu=emu)
     )(z)
 
 
@@ -70,9 +68,7 @@ for dev_name, dev in devices.items():
         # --- JIT-compiled ---
         # Wrap the full grid computation in jit so tracing happens once.
         _hmf_jit = jax.jit(
-            lambda M_, z_, _emu=_emu: hmf_grid(
-                M_, z_, cosmo, emu=_emu
-            )
+            lambda M_, z_, _emu=_emu: hmf_grid(M_, z_, cosmo, emu=_emu)
         )
 
         def _call_jit(_dev=dev, _fn=_hmf_jit):
@@ -121,4 +117,3 @@ with open("benchmark_hmf_results.csv", "w") as f:
             for jit_label in ["No JIT", "JIT"]:
                 t = results[(dev_name, jit_label)][col_label]
                 f.write(f"{method}; {dev_name}; {jit_label},{t}\n")
-

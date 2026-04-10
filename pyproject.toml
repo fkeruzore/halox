@@ -18,7 +18,7 @@ dependencies = [
 
     # Linux/Windows → allow newer JAX
     "jax>=0.4.30; sys_platform != 'darwin'",
-    
+
     "jax-cosmo>=0.1.0",
     "jaxopt>=0.8.0",
     "scipy>=1.13.1",
