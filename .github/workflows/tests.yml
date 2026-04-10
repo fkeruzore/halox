@@ -56,15 +56,16 @@ jobs:
 
     - name: Install Python
       run: uv python install ${{ matrix.python-version }}
-    
+
     - name: Install the project
-      run: uv sync --locked --dev --extra tests
+      run: uv sync --locked --extra tests_lite
 
     - name: Run tests
       run: uv run pytest -v --no-cov -k "test_imports or test_jax_friendliness"
 
   install_multi_platform_tests:
     strategy:
+      fail-fast: false
       matrix:
         os: [ubuntu-latest, macos-latest, macos-13, windows-latest]
     runs-on: ${{ matrix.os }}
@@ -79,7 +80,7 @@ jobs:
       run: uv python install 3.12
 
     - name: Install the project
-      run: uv sync --locked --dev --extra tests
+      run: uv sync --locked --extra tests_lite
 
     - name: Run tests
       run: uv run pytest -v --no-cov -k "test_imports or test_jax_friendliness"
