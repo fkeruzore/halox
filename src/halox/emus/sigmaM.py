@@ -26,11 +26,15 @@ class SigmaMEmulator:
         with resources.as_file(
             resources.files("halox.emus") / weight_file
         ) as data_path:
-            raw_weights = dict(np.load(data_path, allow_pickle=True))
+            raw = np.load(data_path, allow_pickle=True)
+            self.mins = raw["bounds"][:, 0]
+            self.ranges = raw["bounds"][:, 1] - self.mins
+            weights = {k:raw[k] for k in raw.files if k != "bounds"}
+
 
         # Convert keys → clean format
         self.params = {}
-        for k, v in raw_weights.items():
+        for k, v in weights.items():
             name = k.replace("('", "").replace("')", "").replace("', '", ".")
             self.params[name] = jnp.array(v)
         
@@ -101,8 +105,7 @@ class SigmaMEmulator:
 
         return x.squeeze(-1)
 
-    @staticmethod
-    def normalize(x: Array) -> Array:
+    def normalize(self, x: Array) -> Array:
         """Normalize inputs to [0, 1] using the training bounds.
 
         The inputs correspond to: log10(M [h-1 Msun]), z, Omega_b,
@@ -121,23 +124,8 @@ class SigmaMEmulator:
         # these are the bounds that emulator was trained on,
         # only change this if you are using emulator trained
         # on different bound
-        bounds = jnp.array(
-            [
-                [11, 16],  # logMass
-                [-0.04, 5],  # redshift
-                [0.01, 0.08],  # Omega_b
-                [0.085, 0.5],  # Omega_c
-                [0.6, 1.0],  # sigma8
-                [0.4, 1.0],  # h
-                [0.8, 1.1],  # n_s
-            ]
-        )
 
-        mins = bounds[:, 0]
-        maxs = bounds[:, 1]
-        ranges = maxs - mins
-
-        return (x - mins) / ranges
+        return (x - self.mins) / self.ranges
 
     # --- input builder ---
     def build_input(
@@ -199,4 +187,3 @@ class SigmaMEmulator:
         """
         x = self.build_input(m, z, cosmo)
         return jnp.squeeze(10 ** self.forward(x))
-        # return jnp.squeeze(self.forward(x))
