@@ -37,9 +37,6 @@ class SigmaMEmulator:
         # Detect number of layers from weight keys
         self.n_layers = sum(1 for k in self.params if k.endswith(".kernel"))
 
-    def test(self):
-        print(sorted(self.params.keys()))
-
     @staticmethod
     def silu(x: Array) -> Array:
         """SiLU (Sigmoid Linear Unit) activation function.
@@ -203,6 +200,3 @@ class SigmaMEmulator:
         x = self.build_input(m, z, cosmo)
         return jnp.squeeze(10 ** self.forward(x))
         # return jnp.squeeze(self.forward(x))
-
-if __name__ == "__main__":
-    SigmaMEmulator().test()
