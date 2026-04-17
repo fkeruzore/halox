@@ -22,7 +22,7 @@ class SigmaMEmulator:
         default ``"sigma_40k_conv8.npz"``.
     """
 
-    def __init__(self, weight_file: str = "sigma_40k_conv8.npz"):
+    def __init__(self, weight_file: str = "sigma_mp4.npz"):
         with resources.as_file(
             resources.files("halox.emus") / weight_file
         ) as data_path:
@@ -33,9 +33,12 @@ class SigmaMEmulator:
         for k, v in raw_weights.items():
             name = k.replace("('", "").replace("')", "").replace("', '", ".")
             self.params[name] = jnp.array(v)
-
+        
         # Detect number of layers from weight keys
         self.n_layers = sum(1 for k in self.params if k.endswith(".kernel"))
+
+    def test(self):
+        print(sorted(self.params.keys()))
 
     @staticmethod
     def silu(x: Array) -> Array:
@@ -124,7 +127,7 @@ class SigmaMEmulator:
         bounds = jnp.array(
             [
                 [11, 16],  # logMass
-                [-0.05, 5],  # redshift
+                [-0.04, 5],  # redshift
                 [0.01, 0.08],  # Omega_b
                 [0.085, 0.5],  # Omega_c
                 [0.6, 1.0],  # sigma8
@@ -200,3 +203,6 @@ class SigmaMEmulator:
         x = self.build_input(m, z, cosmo)
         return jnp.squeeze(10 ** self.forward(x))
         # return jnp.squeeze(self.forward(x))
+
+if __name__ == "__main__":
+    SigmaMEmulator().test()
