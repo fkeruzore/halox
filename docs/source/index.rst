@@ -29,6 +29,7 @@ Learn more
    physics_modules
    notebooks/halox_vs_colossus.ipynb
    notebooks/gradients.ipynb
+   notebooks/using_the_emulator.ipynb
 
 .. toctree::
    :maxdepth: 1

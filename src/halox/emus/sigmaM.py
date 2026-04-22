@@ -19,7 +19,7 @@ class SigmaMEmulator:
     ----------
     weight_file : str, optional
         Name of the weight file to load from the package data,
-        default ``"sigma_40k_conv8.npz"``.
+        default ``"sigma_mp4.npz"``.
     """
 
     def __init__(self, weight_file: str = "sigma_mp4.npz"):
