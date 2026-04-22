@@ -39,53 +39,13 @@ cc.addCosmology(
         ns=0.97,
     ),
 )
-
-tinker08_f_sigma = jax.jit(halox.hmf.tinker08_f_sigma)
-tinker08_mass_function = jax.jit(halox.hmf.tinker08_mass_function)
+test_n_k_ints = [1000, 500]
 
 
 @pytest.mark.parametrize("delta_c", test_deltas)
 @pytest.mark.parametrize("cosmo_name", test_cosmos.keys())
-def test_tinker08_f_sigma(delta_c, cosmo_name, return_vals=False):
-    cosmo_j, cosmo_c = test_cosmos[cosmo_name]
-    cosmo_c = cc.setCosmology(cosmo_c)
-
-    ms = test_mzs[:, 0]
-    zs = test_mzs[:, 1]
-
-    f_c = jnp.array(
-        [
-            mass_function.massFunction(
-                ms[i],
-                zs[i],
-                mdef=f"{delta_c:.0f}c",
-                model="tinker08",
-                q_in="M",
-                q_out="f",
-            )
-            for i in range(len(test_mzs))
-        ]
-    )
-    f_h = jnp.array(
-        [
-            tinker08_f_sigma(ms[i], zs[i], cosmo=cosmo_j, delta_c=delta_c)
-            for i in range(len(test_mzs))
-        ]
-    )
-
-    if return_vals:
-        return f_h, f_c
-    discrepancy = f_h / f_c - 1.0
-    avg_disc = jnp.mean(discrepancy)
-    max_disc = jnp.max(jnp.abs(discrepancy))
-    assert max_disc < 2e-2, (
-        f"Bias in f(sigma): avg={avg_disc:.3e}, max={max_disc:.3e}"
-    )
-
-
-@pytest.mark.parametrize("delta_c", test_deltas)
-@pytest.mark.parametrize("cosmo_name", test_cosmos.keys())
-def test_tinker08_dn_dnlm(delta_c, cosmo_name, return_vals=False):
+@pytest.mark.parametrize("n_k_int", test_n_k_ints)
+def test_tinker08_dn_dnlm(delta_c, cosmo_name, n_k_int, return_vals=False):
     cosmo_j, cosmo_c = test_cosmos[cosmo_name]
     cosmo_c = cc.setCosmology(cosmo_c)
 
@@ -105,13 +65,14 @@ def test_tinker08_dn_dnlm(delta_c, cosmo_name, return_vals=False):
             for i in range(len(test_mzs))
         ]
     )
+
+    tinker08_mass_function = jax.jit(
+        lambda m, z: halox.hmf.tinker08_mass_function(
+            m, z, cosmo=cosmo_j, delta_c=delta_c, n_k_int=n_k_int
+        )
+    )
     f_h = jnp.array(
-        [
-            tinker08_mass_function(
-                ms[i], zs[i], cosmo=cosmo_j, delta_c=delta_c
-            )
-            for i in range(len(test_mzs))
-        ]
+        [tinker08_mass_function(ms[i], zs[i]) for i in range(len(test_mzs))]
     )
 
     if return_vals:

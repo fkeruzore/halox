@@ -40,6 +40,7 @@ cc.addCosmology(
         ns=0.97,
     ),
 )
+test_n_k_ints = [5000, 1000]
 
 sigma_R = jax.jit(halox.lss.sigma_R)
 

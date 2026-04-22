@@ -1,8 +1,9 @@
 from jax import Array
-from jax.typing import ArrayLike
 import jax
+from jax.typing import ArrayLike
 import jax.numpy as jnp
 import jax_cosmo as jc
+from jaxopt import LBFGSB
 
 from ..cosmology import G
 from .. import cosmology
@@ -232,38 +233,84 @@ class NFWHalo:
         Array
             Concentration at new overdensity
         """
-        from scipy.optimize import minimize
 
         # Target density for the new overdensity definition
         rho_c = cosmology.critical_density(self.z, self.cosmo)
         target_density = delta_new * rho_c
 
-        # Objective function to minimize: |mean_density - target_density|^2
+        # Normalized objective function (critical for numerical stability)
         def lsq(r_new):
-            m_enc = self.enclosed_mass(r_new)
-            mean_density = m_enc / (4.0 * jnp.pi * r_new**3 / 3.0)
-            return jnp.squeeze(mean_density - target_density) ** 2
+            m_enc = self.enclosed_mass(r_new[0])
+            mean_density = m_enc / (4.0 * jnp.pi * r_new[0] ** 3 / 3.0)
+            # Normalize by target_density to get dimensionless objective
+            return ((mean_density - target_density) / target_density) ** 2
 
         # Initial guess based on scaling relation
-        r0 = float(self.r_delta * (self.delta / delta_new) ** (1 / 3))
+        r0 = jnp.array([self.r_delta * (self.delta / delta_new) ** (1 / 3)])
 
         # Bounds for the optimization
-        bounds = [(0.01 * float(self.r_delta), 10.0 * float(self.r_delta))]
+        lower = jnp.array([0.01 * self.r_delta])
+        upper = jnp.array([10.0 * self.r_delta])
+        bounds = (lower, upper)
 
-        # Use L-BFGS-B with JAX gradients
-        result = minimize(
-            jax.jit(lsq),
-            r0,
-            method="L-BFGS-B",
-            jac=jax.jit(jax.grad(lsq)),
-            bounds=bounds,
-            options={"ftol": 1e-12, "gtol": 1e-12},
-        )
+        # Use jaxopt LBFGSB optimizer
+        optimizer = LBFGSB(fun=lsq, tol=1e-12)
+        result = optimizer.run(r0, bounds=bounds)
 
-        r_new = result.x[0]
+        r_new = result.params[0]
 
         # Calculate new mass and concentration
         m_new = self.enclosed_mass(r_new)
         c_new = r_new / self.Rs
 
         return m_new, r_new, c_new
+
+
+def delta_delta(
+    M: ArrayLike,
+    # current solution for other halos, probably not the fastest
+    # but we can optimize this later
+    c: ArrayLike,
+    z: ArrayLike,
+    cosmo: jc.Cosmology,
+    delta_old: float,
+    delta_new: float,
+) -> tuple[Array, Array, Array]:
+    """Convert between overdensity definitions assuming an NFW profile.
+
+    Parameters
+    ----------
+    M : Array
+        Halo mass at ``delta_old`` overdensity [h-1 Msun]
+    c : Array
+        Concentration at ``delta_old`` overdensity
+    z : Array
+        Redshift
+    cosmo : jc.Cosmology
+        Underlying cosmology
+    delta_old : float
+        Input overdensity in units of critical density at redshift z
+    delta_new : float
+        Output overdensity in units of critical density at redshift z
+
+    Returns
+    -------
+    Array [h-1 Msun]
+        Halo mass at ``delta_new`` overdensity
+    Array [h-1 Mpc]
+        Halo radius at ``delta_new`` overdensity
+    Array
+        Concentration at ``delta_new`` overdensity
+    """
+    M = jnp.atleast_1d(M)
+    c = jnp.atleast_1d(c)
+    z = jnp.atleast_1d(z)
+
+    def single_halo(Mi, ci, zi):
+        halo = NFWHalo(Mi, ci, zi, cosmo, delta_old)
+        return halo.to_delta(delta_new)
+
+    # Vectorize over halo index
+    M_new, R_new, c_new = jax.vmap(single_halo)(M, c, z)
+
+    return (jnp.squeeze(M_new), jnp.squeeze(R_new), jnp.squeeze(c_new))

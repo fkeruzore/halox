@@ -7,8 +7,8 @@
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
 project = "halox"
-copyright = "2025, Florian Kéruzoré"
-author = "Florian Kéruzoré"
+copyright = "2026, F. Kéruzoré et al."
+author = "F. Kéruzoré, L. Moreau"
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
@@ -39,8 +39,8 @@ exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 
 html_theme = "sphinx_book_theme"
 html_static_path = ["_static"]
-html_logo = "../../logo/logo_text.png"
-html_favicon = "../../logo/logo.png"
+html_logo = "../../imgs/logo_text.png"
+html_favicon = "../../imgs/logo.png"
 html_theme_options = {
     "show_toc_level": 2,
     "repository_url": "https://github.com/fkeruzore/halox",

@@ -70,3 +70,55 @@ def test_volume_element(cosmo_name):
     assert jnp.allclose(dV_j, jnp.array(dV_a), rtol=1e-2), (
         f"Different dV({test_zs}): {dV_j} != {dV_a}(ratio: {dV_j / dV_a})"
     )
+
+
+def test_sensitivity_all_params():
+    all_params = [
+        "Omega_c",
+        "Omega_b",
+        "h",
+        "n_s",
+        "sigma8",
+        "Omega_k",
+        "w0",
+        "wa",
+    ]
+
+    def func(cosmo):
+        return (
+            cosmo.Omega_c
+            + cosmo.Omega_b
+            + cosmo.h
+            + cosmo.n_s
+            + cosmo.sigma8
+            + cosmo.Omega_k
+            + cosmo.w0
+            + cosmo.wa
+        )
+
+    result = hc.sensitivity(func, hc.Planck18())
+    assert result == all_params
+
+
+def test_stack_cosmologies():
+    param_names = [
+        "Omega_c",
+        "Omega_b",
+        "h",
+        "n_s",
+        "sigma8",
+        "Omega_k",
+        "w0",
+        "wa",
+    ]
+    cosmos = [jc.Planck15(), hc.Planck18()]
+    stacked = hc.stack_cosmologies(cosmos)
+
+    assert stacked.Omega_c.shape == (2,), (
+        "Stacked cosmology should have array parameters of length 2"
+    )
+    for p in param_names:
+        expected = jnp.array([getattr(c, p) for c in cosmos])
+        assert jnp.allclose(getattr(stacked, p), expected), (
+            f"Stacked parameter {p} does not match individual cosmologies"
+        )

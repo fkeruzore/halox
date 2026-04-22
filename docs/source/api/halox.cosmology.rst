@@ -1,5 +1,5 @@
 halox.cosmology: Cosmology calculations
-===========================================
+=======================================
 
 For cosmology calculations, ``halox`` relies on `jax-cosmo <https://github.com/DifferentiableUniverseInitiative/jax_cosmo>`_, and adds a few convenience functions.
 
@@ -9,7 +9,9 @@ For cosmology calculations, ``halox`` relies on `jax-cosmo <https://github.com/D
     hubble_parameter
     critical_density
     differential_comoving_volume
+    sensitivity
 
 .. autofunction:: hubble_parameter
 .. autofunction:: critical_density
 .. autofunction:: differential_comoving_volume
+.. autofunction:: sensitivity

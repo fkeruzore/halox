@@ -1,9 +1,11 @@
-import jax
+from __future__ import annotations
+
 from jax import Array
 from jax.typing import ArrayLike
 import jax.numpy as jnp
 import jax_cosmo as jc
 from . import cosmology
+from .emus import SigmaMEmulator
 
 
 # jax-cosmo power spectra differ from colossus at the 0.3% level, which
@@ -70,6 +72,7 @@ def sigma_R(
     cosmo: jc.Cosmology,
     k_min: float = 1e-5,
     k_max: float = 1e2,
+    n_k_int: int = 5000,
 ) -> Array:
     """Compute RMS variance of density fluctuations in spheres
     of radius R at redshift z.
@@ -86,6 +89,9 @@ def sigma_R(
         Minimum k for integration [h Mpc-1], default 1e-5
     k_max : float
         Maximum k for integration [h Mpc-1], default 1e2
+    n_k_int : int
+        Number of k-space integration points for :math:`\\sigma(R,z)`,
+        default 5000
 
     Returns
     -------
@@ -94,12 +100,19 @@ def sigma_R(
     """
     R = jnp.asarray(R)
     z = jnp.asarray(z)
-    # Create k array for integration (already in h/Mpc)
-    k = jnp.logspace(jnp.log10(k_min), jnp.log10(k_max), 5000)
+
+    # Following is needed to be able to JIT this function for different values
+    # of n_k_int. We need to ensure n_k_int is a concrete Python int (required
+    # for static array shape) and to clear jax_cosmo's workspace cache to avoid
+    # tracer leaks across different JITs
+    n_k_int = int(n_k_int)
+    cosmo._workspace.clear()
+    # Create k array for integration (h/Mpc)
+    k = jnp.logspace(jnp.log10(k_min), jnp.log10(k_max), n_k_int)
 
     # Power spectrum at redshift z
     a = 1.0 / (1.0 + z)
-    pk = jc.power.linear_matter_power(cosmo, k, a=a)  # type: ignore
+    pk = jc.power.linear_matter_power(cosmo, k, a=a)
     pk *= _jax_cosmo_pk_corr  # consistency with colossus
 
     # Window function for spherical top-hat
@@ -115,12 +128,24 @@ def sigma_R(
     integrand = k**2 * pk * W**2
     sigma2 = jnp.trapezoid(integrand, k, axis=-1) / (2 * jnp.pi**2)
 
-    return jnp.sqrt(sigma2)
+    return jnp.squeeze(jnp.sqrt(sigma2))
 
 
-def sigma_M(M: ArrayLike, z: ArrayLike, cosmo: jc.Cosmology) -> Array:
+def sigma_M(
+    M: ArrayLike,
+    z: ArrayLike,
+    cosmo: jc.Cosmology,
+    k_min: float = 1e-5,
+    k_max: float = 1e2,
+    n_k_int: int = 5000,
+    emu: SigmaMEmulator | None = None,
+) -> Array:
     """Compute RMS variance of density fluctuations within the
     Lagrangian radius of a halo with mass M at redshift z.
+
+    When ``emu`` is provided, the emulator is used instead of the
+    analytical integral and the ``k_min``, ``k_max``, ``n_k_int``
+    parameters are ignored.
 
     Parameters
     ----------
@@ -130,13 +155,84 @@ def sigma_M(M: ArrayLike, z: ArrayLike, cosmo: jc.Cosmology) -> Array:
         Redshift
     cosmo : jc.Cosmology
         Underlying cosmology
+    k_min : float
+        Minimum k for integration [h Mpc-1], default 1e-5
+    k_max : float
+        Maximum k for integration [h Mpc-1], default 1e2
+    n_k_int : int
+        Number of k-space integration points for :math:`\\sigma(R,z)`,
+        default 5000
+    emu : SigmaMEmulator, optional
+        Trained emulator for :math:`\\sigma(M)`. If provided, the
+        emulator is used instead of the analytical integral.
 
     Returns
     -------
     Array
         RMS variance :math:`\\sigma(M,z)`
+
+    See Also
+    --------
+    halox.emus.SigmaMEmulator
+        Emulator for :math:`\\sigma(M,z)`.
     """
     M = jnp.asarray(M)
     z = jnp.asarray(z)
+    if emu is not None:
+        return emu(M, z, cosmo)
     R = mass_to_lagrangian_radius(M, cosmo)
-    return sigma_R(R, z, cosmo)
+    return sigma_R(R, z, cosmo, k_min=k_min, k_max=k_max, n_k_int=n_k_int)
+
+
+def peak_height(
+    M: ArrayLike,
+    z: ArrayLike,
+    cosmo: jc.Cosmology,
+    n_k_int: int = 5000,
+    k_min: float = 1e-5,
+    k_max: float = 1e2,
+    delta_sc: float = 1.68647,
+    emu: SigmaMEmulator | None = None,
+) -> Array:
+    """Peak height :math:`\\nu = \\delta_{sc} / \\sigma(M, z)`.
+
+    Parameters
+    ----------
+    M : Array
+        Mass [h-1 Msun]
+    z : Array
+        Redshift
+    cosmo : jc.Cosmology
+        Underlying cosmology
+    n_k_int : int
+        Number of k-space integration points for :math:`\\sigma(R,z)`,
+        default 5000
+    k_min : float
+        Minimum k for integration [h Mpc-1], default 1e-5
+    k_max : float
+        Maximum k for integration [h Mpc-1], default 1e2
+    delta_sc : float
+        Spherical collapse overdensity, default 1.68647
+    emu : SigmaMEmulator, optional
+        Trained emulator for :math:`\\sigma(M)`.
+
+    Returns
+    -------
+    Array
+        Peak height :math:`\\nu`
+
+    See Also
+    --------
+    halox.emus.SigmaMEmulator
+        Emulator for :math:`\\sigma(M,z)`.
+    """
+    sigma = sigma_M(
+        M,
+        z,
+        cosmo,
+        k_min=k_min,
+        k_max=k_max,
+        n_k_int=n_k_int,
+        emu=emu,
+    )
+    return delta_sc / sigma

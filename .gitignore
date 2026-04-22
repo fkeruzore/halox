@@ -11,9 +11,22 @@ docs/jupyter_execute
 .venv
 
 # Agents
+AGENTS.md
 CLAUDE.md
 claude_debug/*
+GEMINI.md
+
+# Heavy logo files
+imgs/*.key
 
 # Misc
 **.DS_Store
 .coverage
+coverage.json
+
+# Lance notebooks
+notebooks/T08_emulation.ipynb
+notebooks/emu_timing_tests.ipynb
+notebooks/sigmaM.ipynb
+notebooks/sigma_emulation.ipynb
+notebooks/lances_notebooks/*

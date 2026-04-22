@@ -1,9 +1,12 @@
+from __future__ import annotations
+
 import jax
 from jax import Array
 from jax.typing import ArrayLike
 import jax.numpy as jnp
 import jax_cosmo as jc
 from . import cosmology, lss
+from .emus import SigmaMEmulator
 
 
 def _tinker08_parameters(
@@ -57,13 +60,15 @@ def _tinker08_parameters(
     return jnp.array([A_z, a_z, b_z, c_0])
 
 
-def tinker08_f_sigma(
+def tinker08_mass_function(
     M: ArrayLike,
     z: ArrayLike,
     cosmo: jc.Cosmology,
     delta_c: float = 200.0,
+    n_k_int: int = 5000,
+    emu: SigmaMEmulator | None = None,
 ) -> Array:
-    """Tinker08 multiplicity function :math:`f(\\sigma)`.
+    """Tinker08 halo mass function :math:`dn/d\\ln M`.
 
     Parameters
     ----------
@@ -75,42 +80,21 @@ def tinker08_f_sigma(
         Underlying cosmology
     delta_c : float
         Overdensity threshold, default 200.0
-
-    Returns
-    -------
-    Array
-        Mass function multiplicity
-    """
-    M = jnp.asarray(M)
-    z = jnp.asarray(z)
-    sigma = lss.sigma_M(M, z, cosmo)
-    A, a, b, c = _tinker08_parameters(z, cosmo, delta_c)
-    return A * ((b / sigma) ** a + 1.0) * jnp.exp(-c / sigma**2)
-
-
-def tinker08_mass_function(
-    M: ArrayLike,
-    z: ArrayLike,
-    cosmo: jc.Cosmology,
-    delta_c: float = 200.0,
-) -> Array:
-    """Tinker08 halo mass function :math:`dn/d\\ln M`.
-
-    Parameters
-    ----------
-    M : Array
-        Halo mass [h-1 Msun]
-    z : Array
-        Redshift
-    cosmo : jc.Cosmology
-        Underlying cosmology, default Planck18
-    delta_c : float
-        Overdensity threshold, default 200.0
+    n_k_int : int
+        Number of k-space integration points for :math:`\\sigma(R,z)`,
+        default 5000
+    emu : SigmaMEmulator, optional
+        Trained emulator for :math:`\\sigma(M)`.
 
     Returns
     -------
     Array
         Mass function [h3 Mpc-3]
+
+    See Also
+    --------
+    halox.emus.SigmaMEmulator
+        Emulator for :math:`\\sigma(M,z)`.
     """
     M = jnp.atleast_1d(M)
     z = jnp.asarray(z)
@@ -118,14 +102,21 @@ def tinker08_mass_function(
     # Background density
     rho_m = cosmo.Omega_m * cosmology.critical_density(0.0, cosmo)
 
-    # Multiplicity function with redshift evolution
-    f_sigma = tinker08_f_sigma(M, z, cosmo, delta_c)
+    def sigma_fn(M):
+        return lss.sigma_M(M, z, cosmo, n_k_int=n_k_int, emu=emu)
 
-    # Use autodiff to compute d ln sigma / dM
-    d_ln_sigma_inv = jax.grad(
-        lambda M: jnp.log(1.0 / lss.sigma_M(M, z, cosmo))
-    )
+    sigma = sigma_fn(M)
 
-    dn_dm = f_sigma * (rho_m / M) * jax.vmap(d_ln_sigma_inv)(M)
+    # Multiplicity function
+    A, a, b, c = _tinker08_parameters(z, cosmo, delta_c)
+    f_sigma = A * ((b / sigma) ** a + 1.0) * jnp.exp(-c / sigma**2)
+
+    # d ln(1/sigma) / dM via autodiff on the same sigma_fn
+    def log_sigma_inv(M):
+        return jnp.log(1.0 / sigma_fn(M))
+
+    d_ln_sigma_inv = jax.vmap(jax.grad(log_sigma_inv))(M)
+
+    dn_dm = f_sigma * (rho_m / M) * d_ln_sigma_inv
 
     return jnp.squeeze(M * dn_dm)
