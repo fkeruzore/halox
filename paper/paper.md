@@ -90,13 +90,13 @@ sigma_analytical = lss.sigmaM(M, z, cosmo)
 emu = emus.sigmaM.SigmaMEmulation()
 sigma_emulated = lss.sigmaM(M, z, cosmo, emu = emu)
 ```
-![$\sigma(M) Graph$](sigmaM_emulator_validation.png)
-![HMF Graph](hmf_emulator_validation.png)
+![Fig 1. $\sigma(M)$ that I want to see the caption for please](sigmaM_emulator_validation.png)
+![Fig 2. HMF Graph](hmf_emulator_validation.png)
 
 # Speedup
 
 To benchmark the speed up provided by calculating with `halox`, the tool was tested on different architectures, both with and without JIT compilation. JIT compilation alone provides a significant acceleration, but leveraging GPU architecture provides an even greater ~18x speedup over running on CPU architectures when JIT compiled. Emulation provides even more acceleration; the JIT compiled, emulated function running on GPUs was 332x faster than the original JIT compiled CPU run, showing clear performance gains.
-![Speedup Graph](benchmark_hmf_results.png)
+![Fig 3. Speedup Graph](benchmark_hmf_results.png)
 
 # Validation
 
