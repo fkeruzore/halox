@@ -26,10 +26,10 @@ Learn more
    :caption: Tutorials
 
    install
-   notebooks/halox_vs_colossus.ipynb
    notebooks/gradients.ipynb
    notebooks/vmap_cosmo.ipynb
    notebooks/using_the_emulator.ipynb
+   notebooks/halox_vs_colossus.ipynb
 
 
 .. toctree::
