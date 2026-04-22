@@ -14,10 +14,16 @@ df = pd.read_csv("benchmark_hmf_results.csv")
 baseline = df.loc[df["name"] == "Analytical; CPU; JIT", "time_s"].values[0]
 df["speedup"] = baseline / df["time_s"]
 
-df[["method", "device", "jit"]] = df["name"].str.split("; ", expand=True)
-df["label"] = df["method"] + "; " + df["device"]
+colossus_time = df.loc[df["name"] == "colossus", "time_s"].values[0]
+colossus_speedup = baseline / colossus_time
 
-pivot = df.pivot(index="label", columns="jit", values="speedup")
+df_halox = df[df["name"].str.contains("; ")].copy()
+df_halox[["method", "device", "jit"]] = df_halox["name"].str.split(
+    "; ", expand=True
+)
+df_halox["label"] = df_halox["method"] + "; " + df_halox["device"]
+
+pivot = df_halox.pivot(index="label", columns="jit", values="speedup")
 pivot = pivot.loc[
     ["Analytical; CPU", "Analytical; GPU", "Emulator; CPU", "Emulator; GPU"]
 ]
@@ -65,6 +71,23 @@ for i, (_, row) in enumerate(pivot.iterrows()):
         color="k",
         fontsize=10,
     )
+
+ax.barh(
+    ["Colossus (CPU)"],
+    [colossus_speedup],
+    color="C3",
+    edgecolor="white",
+    alpha=1.0,
+)
+ax.text(
+    colossus_speedup * 1.08,
+    "Colossus (CPU)",
+    f"{colossus_speedup:.3g}×",
+    va="center",
+    ha="left",
+    color="k",
+    fontsize=10,
+)
 
 ax.axvline(1, color="k", ls="--", lw=0.8)
 ax.invert_yaxis()
