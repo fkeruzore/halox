@@ -24,6 +24,37 @@ Planck18 = partial(
 )
 
 
+def stack_cosmologies(cosmos: list[jc.Cosmology]) -> jc.Cosmology:
+    """Stacks a list of cosmologies into a single batched cosmology.
+
+    Each cosmological parameter of the returned object is a 1-D array
+    whose i-th element corresponds to that parameter in the i-th input
+    cosmology. This is useful for vectorized evaluation of functions
+    over a set of cosmologies via JAX broadcasting.
+
+    Parameters
+    ----------
+    cosmos : list[jc.Cosmology]
+        List of cosmologies to stack.
+
+    Returns
+    -------
+    jc.Cosmology
+        A single cosmology whose parameters are 1-D arrays of length
+        ``len(cosmos)``.
+    """
+    return jc.Cosmology(
+        Omega_b=jnp.array([c.Omega_b for c in cosmos]),
+        Omega_c=jnp.array([c.Omega_c for c in cosmos]),
+        sigma8=jnp.array([c.sigma8 for c in cosmos]),
+        h=jnp.array([c.h for c in cosmos]),
+        n_s=jnp.array([c.n_s for c in cosmos]),
+        Omega_k=jnp.array([c.Omega_k for c in cosmos]),
+        w0=jnp.array([c.w0 for c in cosmos]),
+        wa=jnp.array([c.wa for c in cosmos]),
+    )
+
+
 def sensitivity(
     func: Callable[[jc.Cosmology], Array],
     cosmo: jc.Cosmology,

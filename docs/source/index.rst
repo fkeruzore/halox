@@ -26,9 +26,23 @@ Learn more
    :caption: Tutorials
 
    install
-   physics_modules
-   notebooks/halox_vs_colossus.ipynb
    notebooks/gradients.ipynb
+   notebooks/vmap_cosmo.ipynb
+   notebooks/using_the_emulator.ipynb
+   notebooks/halox_vs_colossus.ipynb
+
+
+.. toctree::
+   :maxdepth: 1
+   :caption: Physics modules gallery
+
+   notebooks/nfw.ipynb
+   notebooks/einasto.ipynb
+   notebooks/cMrelations.ipynb
+   notebooks/lss.ipynb
+   notebooks/hmf.ipynb
+   notebooks/bias.ipynb
+
 
 .. toctree::
    :maxdepth: 1
@@ -39,5 +53,6 @@ Learn more
    api/halox.einasto
    api/halox.cm
    api/halox.lss
+   api/halox.emus
    api/halox.hmf
    api/halox.bias

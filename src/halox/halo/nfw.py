@@ -276,26 +276,31 @@ def delta_delta(
     delta_old: float,
     delta_new: float,
 ) -> tuple[Array, Array, Array]:
-    """
-    Convert between overdensity masses for an arbitrary halo profile
-    assuming an nfw profile (This is the method used in colossus so
-    familiar and consistent)
+    """Convert between overdensity definitions assuming an NFW profile.
 
     Parameters
     ----------
-    m_delta: float
-        Mass at overdensity `delta` [h-1 Msun] (changes in output)
-    c_delta: float
-        Concentration at overdensity `delta` (changes in output)
-    z: float
-        Redshift (no change)
-    cosmo: jc.Cosmology
-        Underlying cosmology (no change)
-    delta_old: float
-        Current overdensity factor
-    delta_new: float
-        Desired overdensity factor
+    M : Array
+        Halo mass at ``delta_old`` overdensity [h-1 Msun]
+    c : Array
+        Concentration at ``delta_old`` overdensity
+    z : Array
+        Redshift
+    cosmo : jc.Cosmology
+        Underlying cosmology
+    delta_old : float
+        Input overdensity in units of critical density at redshift z
+    delta_new : float
+        Output overdensity in units of critical density at redshift z
 
+    Returns
+    -------
+    Array [h-1 Msun]
+        Halo mass at ``delta_new`` overdensity
+    Array [h-1 Mpc]
+        Halo radius at ``delta_new`` overdensity
+    Array
+        Concentration at ``delta_new`` overdensity
     """
     M = jnp.atleast_1d(M)
     c = jnp.atleast_1d(c)

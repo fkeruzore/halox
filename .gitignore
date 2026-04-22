@@ -23,3 +23,10 @@ imgs/*.key
 **.DS_Store
 .coverage
 coverage.json
+
+# Lance notebooks
+notebooks/T08_emulation.ipynb
+notebooks/emu_timing_tests.ipynb
+notebooks/sigmaM.ipynb
+notebooks/sigma_emulation.ipynb
+notebooks/lances_notebooks/*

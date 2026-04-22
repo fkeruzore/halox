@@ -278,8 +278,7 @@ def a_from_nu(
     n_k_int: int = 5000,
     delta_sc: float = 1.686,
 ) -> Array:
-    """
-    Returns the alpha parameter from the peak height value of the halo.
+    """Einasto alpha parameter from the Gao et al. 2008 peak height relation.
 
     Parameters
     ----------
@@ -292,13 +291,13 @@ def a_from_nu(
     n_k_int : int
         Number of k-space integration points for :math:`\\sigma(R,z)`,
         default 5000
-    delta_sc: float
-        Required overdensity for spherical collapse, usually 1.686 (tophat)
+    delta_sc : float
+        Spherical collapse overdensity, default 1.686
 
     Returns
     -------
     Array
-        Returns alpha for halos
+        Einasto alpha parameter
 
     Notes
     -----

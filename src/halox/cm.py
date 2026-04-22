@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from jax import Array
 from jax.typing import ArrayLike
 import jax
 import jax.numpy as jnp
@@ -25,7 +26,7 @@ class duffy08:
 
     Returns
     -------
-    c : ArrayLike
+    c : Array
         Concentration :math:`c_{200c}`.
 
     Notes
@@ -55,7 +56,7 @@ class duffy08:
 
     def __call__(
         self, M: ArrayLike, z: ArrayLike
-    ) -> ArrayLike:  # could I need cosmo?
+    ) -> Array:  # could I need cosmo?
         # valid:bool = (
         # (M >= self.m_min) &
         # (M <= self.m_max) &
@@ -84,13 +85,13 @@ class prada12:
 
     Returns
     -------
-    c : ArrayLike
+    c : Array
         Concentration :math:`c_{200c}`.
 
     Notes
     -----
     - Predicts concentration as a function of peak height via
-      math:`\\sigma(M, z)`, capturing an upturn in concentration
+      :math:`\\sigma(M, z)`, capturing an upturn in concentration
       at high masses.
     - Cosmology-dependent through :math:`\\sigma(M, z)`.
     - Valid for any cosmology, :math:`M > 0`, :math:`z \\ge 0`.
@@ -109,7 +110,7 @@ class prada12:
         self,
         M: ArrayLike,
         z: ArrayLike,
-    ) -> ArrayLike:
+    ) -> Array:
         # valid:bool = (
         # (M >= self.m_min) &
         # (M <= self.m_max) &
@@ -158,7 +159,7 @@ class klypin11:
 
     Returns
     -------
-    c : ArrayLike
+    c : Array
         Concentration :math:`c_{\\rm vir}`.
 
     Notes
@@ -180,7 +181,7 @@ class klypin11:
     def __call__(
         self,
         M: ArrayLike,
-    ) -> ArrayLike:  # could I need cosmo, no
+    ) -> Array:  # could I need cosmo, no
         # valid:bool = (
         # (M >= self.m_min) &
         # (M <= self.m_max) &
@@ -209,7 +210,7 @@ class child18all:
 
     Returns
     -------
-    c : ArrayLike
+    c : Array
         Concentration :math:`c_{200c}`.
 
     Notes
@@ -227,7 +228,7 @@ class child18all:
       :math:`0 < z < 4`.
     """
 
-    same: str = "child18all"
+    name: str = "child18all"
     m_min: float = 2.1e11
     m_max: float = jnp.inf
     z_min: float = 0
@@ -243,7 +244,7 @@ class child18all:
         self,
         M: ArrayLike,
         z: ArrayLike,
-    ) -> ArrayLike:
+    ) -> Array:
         # valid: bool etc.
         deltath = 1.68647
 
@@ -290,7 +291,7 @@ class child18relaxed:
 
     Returns
     -------
-    c : ArrayLike
+    c : Array
         Concentration :math:`c_{200c}`.
 
     Notes
@@ -303,7 +304,7 @@ class child18relaxed:
       :math:`0 < z < 4`.
     """
 
-    same: str = "child18relaxed"
+    name: str = "child18relaxed"
     m_min: float = 2.1e11
     m_max: float = jnp.inf
     z_min: float = 0
@@ -319,7 +320,7 @@ class child18relaxed:
         self,
         M: ArrayLike,
         z: ArrayLike,
-    ) -> ArrayLike:
+    ) -> Array:
         # valid: bool etc.
         deltath = 1.68647
 

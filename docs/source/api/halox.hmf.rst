@@ -8,7 +8,5 @@ Cosmology calculations (e.g. power spectra) rely on `jax-cosmo <https://github.c
 
 .. autosummary::
     tinker08_mass_function
-    tinker08_f_sigma
 
 .. autofunction:: tinker08_mass_function
-.. autofunction:: tinker08_f_sigma

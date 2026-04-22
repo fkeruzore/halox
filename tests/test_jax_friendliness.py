@@ -4,6 +4,14 @@ import halox
 
 jax.config.update("jax_enable_x64", True)
 
+# Shared setup for emulator tests
+_cosmo = halox.cosmology.Planck18()
+_emu = halox.emus.SigmaMEmulator()
+_M = jnp.float64(1e14)
+_z = jnp.float64(0.5)
+_Ms = jnp.array([1e13, 1e14, 1e15])
+_zs = jnp.array([0.0, 0.5, 2.0])
+
 
 def test_convert_delta_parallel():
     m_delta, c_delta, z = (
@@ -22,3 +30,84 @@ def test_convert_delta_parallel():
     convert_deltas = jax.vmap(convert_delta)
     res = jnp.array(convert_deltas(m_delta, c_delta, z))  # M, R, c
     assert jnp.all(jnp.isfinite(res)), f"Infinite predictions: {res}"
+
+
+# --- JIT tests ---
+
+
+def test_jit_sigma_M_emu():
+    f = jax.jit(lambda m, z: halox.lss.sigma_M(m, z, _cosmo, emu=_emu))
+    res = f(_M, _z)
+    assert jnp.all(jnp.isfinite(res))
+
+
+def test_jit_peak_height_emu():
+    f = jax.jit(lambda m, z: halox.lss.peak_height(m, z, _cosmo, emu=_emu))
+    res = f(_M, _z)
+    assert jnp.all(jnp.isfinite(res))
+
+
+def test_jit_tinker08_mass_function_emu():
+    f = jax.jit(
+        lambda m, z: halox.hmf.tinker08_mass_function(
+            m, z, cosmo=_cosmo, emu=_emu
+        )
+    )
+    res = f(_M, _z)
+    assert jnp.all(jnp.isfinite(res))
+
+
+def test_jit_tinker10_bias_emu():
+    f = jax.jit(
+        lambda m, z: halox.bias.tinker10_bias(m, z, cosmo=_cosmo, emu=_emu)
+    )
+    res = f(_M, _z)
+    assert jnp.all(jnp.isfinite(res))
+
+
+# --- vmap tests ---
+
+
+def test_vmap_sigma_M_emu():
+    f = jax.vmap(lambda m, z: halox.lss.sigma_M(m, z, _cosmo, emu=_emu))
+    res = f(_Ms, _zs)
+    assert jnp.all(jnp.isfinite(res))
+
+
+def test_vmap_peak_height_emu():
+    f = jax.vmap(lambda m, z: halox.lss.peak_height(m, z, _cosmo, emu=_emu))
+    res = f(_Ms, _zs)
+    assert jnp.all(jnp.isfinite(res))
+
+
+def test_vmap_tinker08_mass_function_emu():
+    f = jax.vmap(
+        lambda m, z: halox.hmf.tinker08_mass_function(
+            m, z, cosmo=_cosmo, emu=_emu
+        )
+    )
+    res = f(_Ms, _zs)
+    assert jnp.all(jnp.isfinite(res))
+
+
+def test_vmap_tinker10_bias_emu():
+    f = jax.vmap(
+        lambda m, z: halox.bias.tinker10_bias(m, z, cosmo=_cosmo, emu=_emu)
+    )
+    res = f(_Ms, _zs)
+    assert jnp.all(jnp.isfinite(res))
+
+
+# --- grad tests ---
+
+
+def test_grad_sigma_M_emu():
+    f = jax.grad(lambda m: halox.lss.sigma_M(m, _z, _cosmo, emu=_emu))
+    res = f(_M)
+    assert jnp.all(jnp.isfinite(res))
+
+
+def test_grad_peak_height_emu():
+    f = jax.grad(lambda m: halox.lss.peak_height(m, _z, _cosmo, emu=_emu))
+    res = f(_M)
+    assert jnp.all(jnp.isfinite(res))

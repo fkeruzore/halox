@@ -1,8 +1,11 @@
+from __future__ import annotations
+
 from jax import Array
 from jax.typing import ArrayLike
 import jax.numpy as jnp
 import jax_cosmo as jc
 from . import lss
+from .emus import SigmaMEmulator
 
 
 def _tinker10_parameters(
@@ -50,6 +53,7 @@ def tinker10_bias(
     delta_c: float = 200.0,
     delta_sc: float = 1.686,
     n_k_int: int = 5000,
+    emu: SigmaMEmulator | None = None,
 ) -> Array:
     """Tinker10 halo bias function.
 
@@ -70,17 +74,23 @@ def tinker10_bias(
     n_k_int : int
         Number of k-space integration points for :math:`\\sigma(R,z)`,
         default 5000
+    emu : SigmaMEmulator, optional
+        Trained emulator for :math:`\\sigma(M)`.
 
     Returns
     -------
     Array
         Linear halo bias
+
+    See Also
+    --------
+    halox.emus.SigmaMEmulator
+        Emulator for :math:`\\sigma(M,z)`.
     """
     M = jnp.asarray(M)
     z = jnp.asarray(z)
 
-    # Calculate peak height nu = delta_sc / sigma(M,z)
-    nu = lss.peak_height(M, z, cosmo, n_k_int=n_k_int)
+    nu = lss.peak_height(M, z, cosmo, n_k_int=n_k_int, emu=emu)
 
     # Get parameters
     A, a, B, C = _tinker10_parameters(z, cosmo, delta_c)
