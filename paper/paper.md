@@ -96,7 +96,7 @@ sigma_emulated = lss.sigmaM(M, z, cosmo, emu = emu)
 # Speedup
 
 To benchmark the speed up provided by calculating with `halox`, the tool was tested on different architectures, both with and without JIT compilation. JIT compilation alone provides a significant acceleration, but leveraging GPU architecture provides an even greater ~18x speedup over running on CPU architectures when JIT compiled. Emulation provides even more acceleration; the JIT compiled, emulated function running on GPUs was 332x faster than the original JIT compiled CPU run, showing clear performance gains.
-![Speedup Graph](paper/benchmark_hmf_results.png)
+![Speedup Graph](benchmark_hmf_results.png)
 
 # Validation
 
