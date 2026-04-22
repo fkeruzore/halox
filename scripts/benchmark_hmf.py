@@ -6,6 +6,9 @@ import time
 
 import jax
 import jax.numpy as jnp
+import numpy as np
+import colossus.cosmology.cosmology as cc
+from colossus.lss import mass_function
 
 import halox
 
@@ -15,9 +18,10 @@ jax.config.update("jax_enable_x64", True)
 cosmo = halox.cosmology.Planck18()
 emu = halox.emus.SigmaMEmulator()
 M = jnp.logspace(13, 15, 256)  # h^-1 Msun
-z = jnp.linspace(0, 2, 16)
+z = jnp.linspace(0, 1, 16)
 N_WARMUP = 1
 N_REPEAT = 21
+N_K_INT = 500
 
 
 def bench(fn, n_warmup=N_WARMUP, n_repeat=N_REPEAT):
@@ -40,7 +44,9 @@ def hmf_grid(M, z, cosmo, emu=None):
     """Computes dn/dlnM for all (M, z) pairs.
     Returns shape (len(z), len(M))."""
     return jax.vmap(
-        lambda z_i: halox.hmf.tinker08_mass_function(M, z_i, cosmo, emu=emu)
+        lambda z_i: halox.hmf.tinker08_mass_function(
+            M, z_i, cosmo, emu=emu, n_k_int=N_K_INT
+        )
     )(z)
 
 
@@ -79,6 +85,40 @@ for dev_name, dev in devices.items():
         results.setdefault(key_jit, {})[col_label] = bench(_call_jit)
 
 
+# --- Colossus (CPU, no JIT) ---
+cc.setCosmology("planck18")
+M_np = np.asarray(M)
+z_np = np.asarray(z)
+
+
+def _call_colossus():
+    out = np.empty((z_np.size, M_np.size))
+    for i, zi in enumerate(z_np):
+        out[i] = mass_function.massFunction(
+            M_np,
+            float(zi),
+            mdef="200c",
+            model="tinker08",
+            q_in="M",
+            q_out="dndlnM",
+        )
+    return out
+
+
+colossus_time = bench(_call_colossus)
+
+# --- Sanity check: halox analytical vs colossus (tolerance matches tests) ---
+_halox_ref = np.asarray(hmf_grid(M, z, cosmo, emu=None))
+_colossus_ref = _call_colossus()
+_disc = _halox_ref / _colossus_ref - 1.0
+_max_disc = float(np.max(np.abs(_disc)))
+assert _max_disc < 2e-2, (
+    f"halox analytical vs colossus disagreement too large: "
+    f"max={_max_disc:.3e}"
+)
+print(f"halox vs colossus max relative discrepancy: {_max_disc:.3e}")
+
+
 def fmt(t):
     if t < 1e-3:
         return f"{t * 1e6:.1f} µs"
@@ -99,6 +139,8 @@ for (dev_name, jit_label), cols in sorted(results.items()):
         f"| {fmt(cols['Emulated'])} |"
     )
 
+lines.append(f"| CPU | No | Colossus: {fmt(colossus_time)} | |")
+
 table = "\n".join(lines)
 print(table)
 
@@ -117,3 +159,4 @@ with open("benchmark_hmf_results.csv", "w") as f:
             for jit_label in ["No JIT", "JIT"]:
                 t = results[(dev_name, jit_label)][col_label]
                 f.write(f"{method}; {dev_name}; {jit_label},{t}\n")
+    f.write(f"colossus,{colossus_time}\n")
