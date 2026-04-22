@@ -90,7 +90,7 @@ sigma_analytical = lss.sigmaM(M, z, cosmo)
 emu = emus.sigmaM.SigmaMEmulation()
 sigma_emulated = lss.sigmaM(M, z, cosmo, emu = emu)
 ```
-![Fig 1. $\sigma(M)$ that I want to see the caption for please](sigmaM_emulator_validation.png)
+![Fig 1. $\sigma(M)$ that I want to see the caption for please. \label{fig:figure1}](sigmaM_emulator_validation.png)
 ![Fig 2. HMF Graph](hmf_emulator_validation.png)
 
 # Speedup
