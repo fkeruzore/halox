@@ -18,7 +18,7 @@ jax.config.update("jax_enable_x64", True)
 cosmo = halox.cosmology.Planck18()
 emu = halox.emus.SigmaMEmulator()
 M = jnp.logspace(13, 15, 256)  # h^-1 Msun
-z = jnp.linspace(0, 1, 16)
+z = jnp.linspace(0, 1, 128)
 N_WARMUP = 1
 N_REPEAT = 21
 N_K_INT = 500
