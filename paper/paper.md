@@ -90,8 +90,8 @@ sigma_analytical = lss.sigmaM(M, z, cosmo)
 emu = emus.sigmaM.SigmaMEmulation()
 sigma_emulated = lss.sigmaM(M, z, cosmo, emu = emu)
 ```
-![$\sigma(M) Graph$](paper/sigmaM_emulator_validation.png)
-![HMF Graph](paper/hmf_emulator_validation.png)
+![$\sigma(M) Graph$](sigmaM_emulator_validation.png)
+![HMF Graph](hmf_emulator_validation.png)
 
 # Speedup
 
