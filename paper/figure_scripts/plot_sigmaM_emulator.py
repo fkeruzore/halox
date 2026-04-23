@@ -121,11 +121,11 @@ ax_top.legend(fontsize=7, ncol=3)
 
 ax_bot.axhline(0, color="k", ls=":", lw=0.8)
 ax_bot.set_ylabel("Difference [%]")
-ax_bot.set_ylim(-1, 1)
+ax_bot.set_ylim(-0.5, 0.5)
 ax_bot.set_xlabel(r"$M$ [$h^{-1}\,M_\odot$]")
 
 fig.tight_layout()
-fig.savefig("scripts/sigmaM_emulator_validation.png", dpi=300)
+fig.savefig("sigmaM_emulator_validation.png", dpi=500)
 
 # ===== HMF plot =====
 delta_c = 200.0
@@ -193,14 +193,14 @@ for label, color, hmf_a, hmf_e, hmf_c in hmf_results:
     ax_bot2.semilogx(masses_np, diff_a, color=color, ls="-", lw=1.5)
     ax_bot2.semilogx(masses_np, diff_e, color=color, ls="--", lw=2)
 
-ax_top2.set_ylabel(r"$dn/d\ln M$ [$h^{3}\,\mathrm{Mpc}^{-3}$]")
+ax_top2.set_ylabel(r"${\rm d}n/{\rm d}\ln M$ [$h^{3}\,\mathrm{Mpc}^{-3}$]")
 ax_top2.legend(fontsize=7, ncol=3)
 
 ax_bot2.axhline(0, color="k", ls=":", lw=0.8)
 ax_bot2.set_ylabel("Difference [%]")
-ax_bot2.set_ylim(-15, 15)
+ax_bot2.set_ylim(-7.5, 7.5)
 ax_bot2.set_xlabel(r"$M$ [$h^{-1}\,M_\odot$]")
 
 fig2.tight_layout()
-fig2.savefig("scripts/hmf_emulator_validation.png", dpi=300)
+fig2.savefig("hmf_emulator_validation.png", dpi=500)
 plt.show()
