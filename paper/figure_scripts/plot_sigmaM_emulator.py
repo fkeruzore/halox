@@ -206,7 +206,7 @@ for label, color, hmf_a, hmf_e, hmf_c in hmf_results:
     diff_a = (hmf_a / hmf_c - 1) * 100
     diff_e = (hmf_e / hmf_c - 1) * 100
     ax_bot2.semilogx(masses_np, diff_a, color=color, ls="--", lw=2.0)
-    ax_bot2.semilogx(masses_np, diff_e, color=lighten_color(color, -1/3), ls=":", lw=2.5)
+    ax_bot2.semilogx(masses_np, diff_e, color=lighten_color(color, 1/3), ls=":", lw=2.5)
 
 ax_top2.set_ylabel(r"${\rm d}n/{\rm d}\ln M$ [$h^{3}\,\mathrm{Mpc}^{-3}$]")
 ax_top2.legend(fontsize=7, ncol=3)
