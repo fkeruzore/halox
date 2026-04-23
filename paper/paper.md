@@ -37,7 +37,7 @@ or modeling various physical properties of dark matter halos, such as mass accre
 
 The `halox` library offers a JAX implementation of some widely used properties which, while existing in other libraries focused on halo modeling, do not currently have a publicly available, differentiable and GPU-accelerated implementation, namely:
 
-* Radial profiles of dark matter halos following Navarro-Frenk-White [NFW, @Navarro:1997] and Einasto [Einasto, @Einasto:1965] distributions;
+* Radial profiles of dark matter halos following Navarro-Frenk-White [@Navarro:1997] and Einasto [@Einasto:1965] distributions;
 * Concentration-mass relations
 * The halo mass function, quantifying the abundance of dark matter halos in mass and redshift, including its dependence on cosmological parameters;
 * The halo bias.
@@ -60,10 +60,10 @@ At the time of writing (software version 1.2.0), this includes the following pro
   * Velocity dispersion $\sigma_{v}(r)$ (NFW only);
   * Projected surface density $\Sigma(r)$ (NFW only).
 * Concentration-mass relations: There are implementations of several relations including:
-  * @Duffy: 2008
-  * @Klypin: 2011
-  * @Prada: 2012
-  * @Child: 2018 (for all halo and relaxed halo populations)
+  * @Duffy:2008
+  * @Klypin:2011
+  * @Prada:2012
+  * @Child:2018 (for all halo and relaxed halo populations)
 * Large-scale structure: Building upon the power spectra computations implemented in JAX-cosmo, `halox` provides implementations of the RMS variance of the matter distribution in spheres of radius $R$, $\sigma(R)$. It also includes a wrapper function to perform the computation within the Lagrangian radius of a halo of mass $M$, $\sigma(M)$.
 * Halo mass function (HMF): The HMF model of @Tinker:2008, predicting ${\rm d}N / {\rm d} \ln M$ as a function of halo mass $M$, redshift $z$, and cosmology.
 * Halo bias: The linear bias model of @Tinker:2010 as a function of halo mass $M$, redshift $z$, and cosmology.
@@ -81,7 +81,7 @@ $\sigma(M)$ is the root-mean-square fluctuations of the density field for the re
 
 $$\sigma^2(M,z) = D^2(z)\,\sigma^2(M, 0) = D^2(z) \, \frac{1}{2 \pi} \int _0 ^\infty k^2 P(k,R) dk $$
 
-where $R = \left(\frac{3M}{4 \pi \bar{\rho}_0}\right)$. Computing this integral requires significant computational resources, making $\sigma(M)$ the primary bottleneck when computing the HMF and halo bias. Therefore, `halox` also includes an emulated calculation of this quantity using a multi-layer perceptron. The emulator is trained on the halox $\sigma(M)$ implementation. The training set is taken from a Sobol sample over log(M), log(1+z), and the cosmological parameters $\Omega_b$, $\Omega_c$, $h$, $n_s$, and $\sigma_8$, and accepts input vectors in M, z, and those same cosmological parameters. The emulator is accurate to within a percent for both $\sigma(M)$ and the halo bias, and within two percent for the HMF. To compute $\sigma(M)$, HMF, or halo bias using the emulator, simply instantiate the emulator, then pass it in as the “emu” argument to the original $\sigma(M)$ function in halox as seen below.
+where $R = \left(\frac{3M}{4 \pi \bar{\rho}_0}\right)$. Computing this integral requires significant computational resources, making $\sigma(M)$ the primary bottleneck when computing the HMF and halo bias. Therefore, `halox` also includes an emulated calculation of this quantity using a multi-layer perceptron. The emulator is trained on the halox $\sigma(M)$ implementation. The training set is taken from a Sobol sample over log(M), log(1+z), and the cosmological parameters $\Omega_b$, $\Omega_c$, $h$, $n_s$, and $\sigma_8$, and accepts input vectors in M, z, and those same cosmological parameters. The emulator is accurate to within a percent for both $\sigma(M)$ and the halo bias, and within six percent for the HMF. To compute $\sigma(M)$, HMF, or halo bias using the emulator, simply instantiate the emulator, then pass it in as the “emu” argument to the original $\sigma(M)$ function in halox as seen below.
 ```
 # analytical calculation
 sigma_analytical = lss.sigmaM(M, z, cosmo)
@@ -90,13 +90,15 @@ sigma_analytical = lss.sigmaM(M, z, cosmo)
 emu = emus.sigmaM.SigmaMEmulation()
 sigma_emulated = lss.sigmaM(M, z, cosmo, emu = emu)
 ```
-![$\sigma(M) Graph$](paper/sigmaM_emulator_validation.png)
-![HMF Graph](paper/hmf_emulator_validation.png)
+![Comparing emulated and non-emulated $\sigma(M)$ calculations, plotted against mass, varying both redshift and cosmology. Residuals stay below the percent level. \label{fig:figure1}](sigmaM_emulator_validation.png)
+
+![Comparing HMF calculation using emulated and non-emulated evaluations of $\sigma(M)$. \label{fig:figure2}](hmf_emulator_validation.png)
 
 # Speedup
 
-To benchmark the speed up provided by calculating with `halox`, the tool was tested on different architectures, both with and without JIT compilation. JIT compilation alone provides a significant acceleration, but leveraging GPU architecture provides an even greater ~18x speedup over running on CPU architectures when JIT compiled. Emulation provides even more acceleration; the JIT compiled, emulated function running on GPUs was 332x faster than the original JIT compiled CPU run, showing clear performance gains.
-![Speedup Graph](paper/benchmark_hmf_results.png)
+To benchmark the speed up provided by calculating with `halox`, the tool was tested on different architectures, both with and without JIT compilation. JIT compilation alone provides a significant acceleration, but leveraging GPU architecture and JIT compilation provides an even greater speedup. Emulation provides even more acceleration; the JIT compiled, emulated function running on GPUs is even faster than the non-emulated counterpart. `halox` is still slower than `colossus` [@Diemer:2018] when JIT compiled on CPU architecture, but can still provide considerable speedup over halox using GPU architecture.
+
+![The performance of HMF computation for the halox package on different architectures and against `colossus`. All CPU runs are still slower than `colossus` irrespective of emulation. GPU architecture enables further speedup, allowing for faster computations than `colossus` both with and without emulation, with significant speedup when using the emulated function over the standard calculation. \label{fig:figure3}](benchmark_hmf_results.png)
 
 # Validation
 
