@@ -22,7 +22,7 @@ Dark matter halos are fundamental structures in cosmology, forming the gravitati
 Their properties and statistical distribution (including the halo mass function) are invaluable tools to infer the fundamental properties of the Universe.
 The `halox` package is a JAX-powered Python library enabling differentiable and accelerated computations of key properties of dark matter halos, and of the halo mass function.
 The automatic differentiation capabilities of `halox` enable its usage in gradient-based workflows, *e.g.* in efficient Hamiltonian Monte Carlo sampling or machine learning applications.
-[speed]
+The acceleration capabilities of `halox` enable faster calculation of implemented quantities than current packages such as `colossus`, though only when running using GPU architectures.
 
 # Statement of need
 
@@ -96,7 +96,7 @@ sigma_emulated = lss.sigmaM(M, z, cosmo, emu = emu)
 
 # Speedup
 
-To benchmark the speed up provided by calculating with `halox`, the tool was tested on different architectures, both with and without JIT compilation. JIT compilation alone provides a significant acceleration, but leveraging GPU architecture and JIT compilation provides an even greater speedup. Emulation provides even more acceleration; the JIT compiled, emulated function running on GPUs is even faster than the non-emulated counterpart. `halox` is still slower than `colossus` [@Diemer:2018] when JIT compiled on CPU architecture, but can still provide considerable speedup over halox using GPU architecture.
+To benchmark the speed up provided by calculating with `halox`, the tool was tested on different architectures, both with and without JIT compilation. JIT compilation alone provides a significant acceleration, but leveraging GPU architecture and JIT compilation provides an even greater speedup. Emulation provides even more acceleration; the JIT compiled, emulated function running on GPUs is even faster than the non-emulated counterpart. `halox` is still slower than `colossus` [@Diemer:2018] when JIT compiled on CPU architecture, but can still provide considerable speedup over `halox` and `colossus` using GPU architecture.
 
 ![The performance of HMF computation for the halox package on different architectures and against `colossus`. All CPU runs are still slower than `colossus` irrespective of emulation. GPU architecture enables further speedup, allowing for faster computations than `colossus` both with and without emulation, with significant speedup when using the emulated function over the standard calculation. \label{fig:figure3}](benchmark_hmf_results.png)
 
