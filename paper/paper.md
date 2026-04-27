@@ -8,10 +8,18 @@ authors:
   - name: Florian Kéruzoré
     orcid: 0000-0002-9605-5588
     affiliation: 1
+    equal-contrib: true
+authors:
+  - name: Lance Moreau
+    orcid: 0000-0000-0000-0000
+    affiliation: "2, 1"
+    equal-contrib: true
 affiliations:
  - name: High Energy Physics Division, Argonne National Laboratory, Lemont, IL 60439, USA
    index: 1
-date: 8 September 2025
+ - name: UMD
+   index: 2
+date: 27 April 2026
 bibliography: paper.bib
 
 ---
@@ -49,7 +57,7 @@ The use of JAX as a backend allows these functions to be compiled and GPU-accele
 ## Available physical quantities
 
 The `halox` library seeks to provide JAX-based implementations of common models of dark matter halo properties and of large-scale structure.
-At the time of writing (software version 1.2.0), this includes the following properties:
+At the time of writing (software version 2.0.0), this includes the following properties:
 
 * Cosmological quantities: `halox` relies on JAX-cosmo [@Campagne:2023] for cosmology-dependent calculations, and includes wrapper functions to compute some additional properties, such as critical density $\rho_{\rm c}$ and differential comoving volume element ${\rm d}V_{c} / {\rm d}\Omega {\rm d}z$.
 * Radially-dependent physical properties of NFW and Einasto dark matter halos. Our NFW and Einasto implementations are based on the analytical derivations of @Lokas:2001 and @Retana-Montenegro:2012 respectively, and include the following quantities:
@@ -77,11 +85,16 @@ As a result, all functions can be compiled just-in-time using `jax.jit`, hardwar
 
 ## Emulation
 
-$\sigma(M)$ is the root-mean-square fluctuations of the density field for the region of space within radius R that would collapse to a total mass of M given the average density of the universe. This is found using the equation: 
+$\sigma(M)$ is the root-mean-square fluctuations of the density field for the region of space within radius R that would collapse to a total mass of M given the average density of the universe. This is found using the equation:
 
 $$\sigma^2(M,z) = D^2(z)\,\sigma^2(M, 0) = D^2(z) \, \frac{1}{2 \pi} \int _0 ^\infty k^2 P(k,R) dk $$
 
-where $R = \left(\frac{3M}{4 \pi \bar{\rho}_0}\right)$. Computing this integral requires significant computational resources, making $\sigma(M)$ the primary bottleneck when computing the HMF and halo bias. Therefore, `halox` also includes an emulated calculation of this quantity using a 5-layer, 64 node wide multi-layer perceptron. The emulator trained on the halox $\sigma(M)$ implementation. The training set is taken from a Sobol sample over log(M), log(1+z), and the cosmological parameters $\Omega_b$, $\Omega_c$, $h$, $n_s$, and $\sigma_8$. The emulator accepts input vectors in M, z, and those same cosmological parameters, and this input mirrors the inputs for the original function. The emulator is accurate to within a percent for both $\sigma(M)$ and the halo bias, and within six percent for the HMF. To compute $\sigma(M)$, HMF, or halo bias using the emulator, simply instantiate the emulator, then pass it in as the “emu” argument to the original $\sigma(M)$ function in halox as seen below.
+where $R = \left(\frac{3M}{4 \pi \bar{\rho}_0}\right)$.
+Computing this integral requires significant computational resources, making $\sigma(M)$ the primary bottleneck when computing the HMF and halo bias.
+Therefore, `halox` also includes an emulated calculation of this quantity using a 5-layer, 64 node wide multi-layer perceptron.
+The emulator trained on the halox $\sigma(M)$ implementation. The training set is taken from a Sobol sample over log(M), log(1+z), and the cosmological parameters $\Omega_b$, $\Omega_c$, $h$, $n_s$, and $\sigma_8$.
+The emulator accepts input vectors in M, z, and those same cosmological parameters, and this input mirrors the inputs for the original function.
+The emulator is accurate to within a percent for both $\sigma(M)$ and the halo bias, and within six percent for the HMF. To compute $\sigma(M)$, HMF, or halo bias using the emulator, simply instantiate the emulator, then pass it in as the “emu” argument to the original $\sigma(M)$ function in halox as seen below.
 ```
 # analytical calculation
 sigma_analytical = lss.sigmaM(M, z, cosmo)
@@ -96,7 +109,10 @@ sigma_emulated = lss.sigmaM(M, z, cosmo, emu = emu)
 
 # Speedup
 
-To benchmark the speed up provided by calculating with `halox`, the tool was tested on different architectures, both with and without JIT compilation. JIT compilation alone provides a significant acceleration, but leveraging GPU architecture and JIT compilation provides an even greater speedup. Emulation provides even more acceleration; the JIT compiled, emulated function running on GPUs is even faster than the non-emulated counterpart. `halox` is still slower than `colossus` [@Diemer:2018] when JIT compiled on CPU architecture, but can still provide considerable speedup over `halox` and `colossus` using GPU architecture.
+To benchmark the speed up provided by calculating with `halox`, the tool was tested on different architectures, both with and without JIT compilation.
+JIT compilation alone provides a significant acceleration, but leveraging GPU architecture and JIT compilation provides an even greater speedup.
+Emulation provides even more acceleration; the JIT compiled, emulated function running on GPUs is even faster than the non-emulated counterpart.
+`halox` is still slower than `colossus` [@Diemer:2018] when JIT compiled on CPU architecture, but can still provide considerable speedup over `halox` and `colossus` using GPU architecture.
 
 ![The performance of HMF computation for the halox package on different architectures and against `colossus`. All CPU runs are still slower than `colossus` irrespective of emulation. GPU architecture enables further speedup, allowing for faster computations than `colossus` both with and without emulation, with significant speedup when using the emulated function over the standard calculation. \label{fig:figure3}](benchmark_hmf_results.png)
 
@@ -110,8 +126,11 @@ These tests are included in an automatic CI/CD pipeline on the GitHub repository
 # Acknowledgments
 
 We would like to thank Andrew Hearin, Matt Becker, Georgios Zacharegkas, and Lindsey Bleem for useful discussions and feedback on `halox`.
-We acknowledge the use of Anthropic's Claude Code in the development of `halox`.
 Argonne National Laboratory’s work was supported by the U.S. Department of Energy, Office of Science, Office of High Energy Physics, under contract DE-AC02-06CH11357.
+
+**AI usage disclosure**
+We acknowledge the use of Anthropic's Claude (Sonnet 4.5, Opus 4.5, Opus 4.6) in the development of `halox` (code and documentation).
+We note that no AI was used in writing the unit test suite enforcing accuracy of the software.
 
 # References
 
