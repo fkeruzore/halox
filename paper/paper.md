@@ -22,7 +22,7 @@ Dark matter halos are fundamental structures in cosmology, forming the gravitati
 Their properties and statistical distribution (including the halo mass function) are invaluable tools to infer the fundamental properties of the Universe.
 The `halox` package is a JAX-powered Python library enabling differentiable and accelerated computations of key properties of dark matter halos, and of the halo mass function.
 The automatic differentiation capabilities of `halox` enable its usage in gradient-based workflows, *e.g.* in efficient Hamiltonian Monte Carlo sampling or machine learning applications.
-The acceleration capabilities of `halox` enable faster calculation of implemented quantities than current packages such as `colossus`, though only when running using GPU architectures.
+The acceleration capabilities of `halox` enable faster calculation of implemented quantities than current packages such as `colossus`, though only when running on GPU architectures.
 
 # Statement of need
 
@@ -81,7 +81,7 @@ $\sigma(M)$ is the root-mean-square fluctuations of the density field for the re
 
 $$\sigma^2(M,z) = D^2(z)\,\sigma^2(M, 0) = D^2(z) \, \frac{1}{2 \pi} \int _0 ^\infty k^2 P(k,R) dk $$
 
-where $R = \left(\frac{3M}{4 \pi \bar{\rho}_0}\right)$. Computing this integral requires significant computational resources, making $\sigma(M)$ the primary bottleneck when computing the HMF and halo bias. Therefore, `halox` also includes an emulated calculation of this quantity using a multi-layer perceptron. The emulator is trained on the halox $\sigma(M)$ implementation. The training set is taken from a Sobol sample over log(M), log(1+z), and the cosmological parameters $\Omega_b$, $\Omega_c$, $h$, $n_s$, and $\sigma_8$. The emulator accepts input vectors in M, z, and those same cosmological parameters, and this input mirrors the inputs for the original function. The emulator is accurate to within a percent for both $\sigma(M)$ and the halo bias, and within six percent for the HMF. To compute $\sigma(M)$, HMF, or halo bias using the emulator, simply instantiate the emulator, then pass it in as the “emu” argument to the original $\sigma(M)$ function in halox as seen below.
+where $R = \left(\frac{3M}{4 \pi \bar{\rho}_0}\right)$. Computing this integral requires significant computational resources, making $\sigma(M)$ the primary bottleneck when computing the HMF and halo bias. Therefore, `halox` also includes an emulated calculation of this quantity using a 5-layer, 64 node wide multi-layer perceptron. The emulator trained on the halox $\sigma(M)$ implementation. The training set is taken from a Sobol sample over log(M), log(1+z), and the cosmological parameters $\Omega_b$, $\Omega_c$, $h$, $n_s$, and $\sigma_8$. The emulator accepts input vectors in M, z, and those same cosmological parameters, and this input mirrors the inputs for the original function. The emulator is accurate to within a percent for both $\sigma(M)$ and the halo bias, and within six percent for the HMF. To compute $\sigma(M)$, HMF, or halo bias using the emulator, simply instantiate the emulator, then pass it in as the “emu” argument to the original $\sigma(M)$ function in halox as seen below.
 ```
 # analytical calculation
 sigma_analytical = lss.sigmaM(M, z, cosmo)
