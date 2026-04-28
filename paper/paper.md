@@ -11,14 +11,16 @@ authors:
     equal-contrib: true
 authors:
   - name: Lance Moreau
-    orcid: 0000-0000-0000-0000
-    affiliation: "2, 1"
+    orcid: 0009-0004-5742-8478
+    affiliation: "3, 2, 1"
     equal-contrib: true
 affiliations:
  - name: High Energy Physics Division, Argonne National Laboratory, Lemont, IL 60439, USA
    index: 1
- - name: UMD
+ - name: Department of Astronomy, University of Maryland, College Park, MD 20742-2421, USA
    index: 2
+ - name: Department of Physics, University of Maryland, College Park, MD 20742-2421, USA
+   index: 3
 date: 27 April 2026
 bibliography: paper.bib
 
