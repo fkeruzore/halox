@@ -32,7 +32,7 @@ Dark matter halos are fundamental structures in cosmology, forming the gravitati
 Their properties and statistical distribution (including the halo mass function) are invaluable tools to infer the fundamental properties of the Universe.
 The `halox` package is a JAX-powered Python library enabling differentiable and accelerated computations of key properties of dark matter halos, and of the halo mass function.
 The automatic differentiation capabilities of `halox` enable its usage in gradient-based workflows, *e.g.* in efficient Hamiltonian Monte Carlo sampling or machine learning applications.
-The acceleration capabilities of `halox` enable faster calculation of implemented quantities than current packages such as `colossus`, though only when running on GPU architectures.
+The acceleration capabilities of `halox` enable significant speedups over existing packages such as `colossus` on GPU architectures, while offering comparable or slightly reduced performance on CPUs.
 
 # Statement of need
 
@@ -87,16 +87,16 @@ As a result, all functions can be compiled just-in-time using `jax.jit`, hardwar
 
 ## Emulation
 
-$\sigma(M)$ is the root-mean-square fluctuations of the density field for the region of space within radius R that would collapse to a total mass of M given the average density of the universe. This is found using the equation:
+$\sigma(M)$ is the root-mean-square fluctuations of the matter density field smoothed on the scale R, the Lagrangian radius for a halo of mass M. This is computed using the equation:
 
-$$\sigma^2(M,z) = D^2(z)\,\sigma^2(M, 0) = D^2(z) \, \frac{1}{2 \pi} \int _0 ^\infty k^2 P(k,R) dk $$
+$$\sigma^2(M,z) =\, \frac{1}{2 \pi^2} \int _0 ^\infty k^2 P(k,z,R) dk $$
 
-where $R = \left(\frac{3M}{4 \pi \bar{\rho}_0}\right)$.
-Computing this integral requires significant computational resources, making $\sigma(M)$ the primary bottleneck when computing the HMF and halo bias.
-Therefore, `halox` also includes an emulated calculation of this quantity using a 5-layer, 64 node wide multi-layer perceptron.
-The emulator trained on the halox $\sigma(M)$ implementation. The training set is taken from a Sobol sample over log(M), log(1+z), and the cosmological parameters $\Omega_b$, $\Omega_c$, $h$, $n_s$, and $\sigma_8$.
-The emulator accepts input vectors in M, z, and those same cosmological parameters, and this input mirrors the inputs for the original function.
-The emulator is accurate to within a percent for both $\sigma(M)$ and the halo bias, and within six percent for the HMF. To compute $\sigma(M)$, HMF, or halo bias using the emulator, simply instantiate the emulator, then pass it in as the “emu” argument to the original $\sigma(M)$ function in halox as seen below.
+where $R = \left(\frac{3M}{4 \pi \bar{\rho}_0}\right)^{\frac{1}{3}}$ is the Langrangian radius for mass M, $k$ is spatial frequency, and $P(k,z,r)$ is the power spectrum as a function of spatial frequency, redshift, and Lagrangian radius.
+Computing this integral is computationally expensive and the primary bottleneck in calculations of the HMF and halo bias.
+To address this, `halox` also includes an emulated calculation of this quantity using a 5-layer, 64 node wide multi-layer perceptron.
+The emulator was trained on the halox $\sigma(M)$ implementation. The training set is taken from a Sobol sample over log(M), log(1+z), and the cosmological parameters $\Omega_b$, $\Omega_c$, $h$, $n_s$, and $\sigma_8$.
+As inputs, the emulator accepts M, z, and those same cosmological parameters, mirroring the inputs for the original function.
+The emulator is accurate to within a percent for both $\sigma(M)$ and the halo bias, and within six percent for the HMF across the tested parameter space. To compute $\sigma(M)$, HMF, or halo bias using the emulator, simply instantiate the emulator, then pass it in as the “emu” argument to the original $\sigma(M)$ function in halox as seen below.
 ```
 # analytical calculation
 sigma_analytical = lss.sigmaM(M, z, cosmo)
@@ -111,12 +111,12 @@ sigma_emulated = lss.sigmaM(M, z, cosmo, emu = emu)
 
 # Speedup
 
-To benchmark the speed up provided by calculating with `halox`, the tool was tested on different architectures, both with and without JIT compilation.
-JIT compilation alone provides a significant acceleration, but leveraging GPU architecture and JIT compilation provides an even greater speedup.
-Emulation provides even more acceleration; the JIT compiled, emulated function running on GPUs is even faster than the non-emulated counterpart.
-`halox` is still slower than `colossus` [@Diemer:2018] when JIT compiled on CPU architecture, but can still provide considerable speedup over `halox` and `colossus` using GPU architecture.
+Benchmarking `halox` involved testing on different architectures, both with and without JIT compilation. Since all functions in `halox` support JIT compilation, JIT-compiled performance is adopted as the baseline.
+JIT compilation alone provides a significant acceleration over non-JIT compiled functions on all architectures. Hardware acceleration with GPUs only provides a speedup when using JIT compilation, and underperforms CPUs for non-JIT compiled executions.
+Emulation provides additional acceleration to both JIT compilation and hardware acceleration. The JIT compiled emulated function executing on GPUs is the fastest configuration, with emulated executions on CPUs barely overperforming the baseline.
+`colossus` [@Diemer:2018] outperforms JIT-compiled `halox` on CPU architecture, for both emulated and non-emulated executions. Hardware acceleration using GPUs allows `halox` to outperform `colossus` which does natively support GPU acceleration.
 
-![The performance of HMF computation for the halox package on different architectures and against `colossus`. All CPU runs are still slower than `colossus` irrespective of emulation. GPU architecture enables further speedup, allowing for faster computations than `colossus` both with and without emulation, with significant speedup when using the emulated function over the standard calculation. \label{fig:figure3}](benchmark_hmf_results.png)
+![The performance of HMF computation for the halox package on different architectures and against `colossus`. All CPU executions are still slower than `colossus` irrespective of emulation. GPU architecture enables further speedup, allowing for faster computations than `colossus` both with and without emulation, with significant speedup when using the emulated function over the standard calculation. \label{fig:figure3}](benchmark_hmf_results.png)
 
 # Validation
 
