@@ -19,13 +19,18 @@ cosmo = halox.cosmology.Planck18()
 emu = halox.emus.SigmaMEmulator()
 M = jnp.logspace(13, 15, 256)  # h^-1 Msun
 z = jnp.linspace(0, 1, 128)
-N_WARMUP = 1
+N_WARMUP = 3
 N_REPEAT = 21
 N_K_INT = 500
 
 
-def bench(fn, n_warmup=N_WARMUP, n_repeat=N_REPEAT):
-    """Return median wall-clock time in seconds for calling fn()."""
+def bench(fn, n_warmup=N_WARMUP, n_repeat=N_REPEAT, reducer="median"):
+    """Return wall-clock time in seconds for calling fn().
+
+    ``reducer="median"`` is robust to OS noise (use for no-JIT rows where
+    Python dispatch dominates). ``reducer="min"`` reports the steady-state
+    floor (use for JIT rows where the floor is the real device time).
+    """
     for _ in range(n_warmup):
         result = fn()
         jax.block_until_ready(result)
@@ -37,6 +42,8 @@ def bench(fn, n_warmup=N_WARMUP, n_repeat=N_REPEAT):
         jax.block_until_ready(result)
         t1 = time.perf_counter()
         times.append(t1 - t0)
+    if reducer == "min":
+        return min(times)
     return sorted(times)[n_repeat // 2]  # median
 
 
@@ -57,32 +64,56 @@ try:
 except RuntimeError:
     print(r"/!\ No GPU found - GPU rows will be skipped.")
 
+def _to_device(tree, dev):
+    """device_put every array leaf in a pytree onto ``dev``."""
+    if tree is None:
+        return None
+    return jax.tree_util.tree_map(lambda x: jax.device_put(x, dev), tree)
+
+
 results = {}  # (device_name, jit_label) -> {analytical: time, emulated: time}
 
 for dev_name, dev in devices.items():
-    for _emu, col_label in [(None, "Analytical"), (emu, "Emulated")]:
+    # Move inputs and any closed-over array state onto the target device once,
+    # so jit dispatch compiles for ``dev`` and no implicit H2D copies happen
+    # inside the timed loop.
+    M_dev = jax.device_put(M, dev)
+    z_dev = jax.device_put(z, dev)
+    cosmo_dev = _to_device(cosmo, dev)
+    emu_dev = _to_device(emu, dev)
+
+    for _emu, col_label in [(None, "Analytical"), (emu_dev, "Emulated")]:
         # --- plain (no JIT) ---
         # nb: vmap still traces, but nothing is compiled ahead of time;
         # each call re-traces and compiles the inner vmap.
-        def _call_plain(_emu=_emu, _dev=dev):
-            with jax.default_device(_dev):
-                return hmf_grid(M, z, cosmo, emu=_emu)
+        def _call_plain(_emu=_emu):
+            return hmf_grid(M_dev, z_dev, cosmo_dev, emu=_emu)
+
+        # Sanity-check device placement on the first run of each combo.
+        _probe = _call_plain()
+        jax.block_until_ready(_probe)
+        assert dev in _probe.devices(), (
+            f"expected result on {dev}, got {_probe.devices()}"
+        )
 
         key_plain = (dev_name, "No JIT")
-        results.setdefault(key_plain, {})[col_label] = bench(_call_plain)
+        results.setdefault(key_plain, {})[col_label] = bench(
+            _call_plain, reducer="median"
+        )
 
         # --- JIT-compiled ---
         # Wrap the full grid computation in jit so tracing happens once.
         _hmf_jit = jax.jit(
-            lambda M_, z_, _emu=_emu: hmf_grid(M_, z_, cosmo, emu=_emu)
+            lambda M_, z_, _emu=_emu: hmf_grid(M_, z_, cosmo_dev, emu=_emu)
         )
 
-        def _call_jit(_dev=dev, _fn=_hmf_jit):
-            with jax.default_device(_dev):
-                return _fn(M, z)
+        def _call_jit(_fn=_hmf_jit):
+            return _fn(M_dev, z_dev)
 
         key_jit = (dev_name, "JIT")
-        results.setdefault(key_jit, {})[col_label] = bench(_call_jit)
+        results.setdefault(key_jit, {})[col_label] = bench(
+            _call_jit, reducer="min"
+        )
 
 
 # --- Colossus (CPU, no JIT) ---
