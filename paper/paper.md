@@ -126,7 +126,7 @@ The emulator is accurate to within a percent for both $\sigma(M)$ and the halo b
 For comparison, we also compare to the performance of `colossus` on the same computation.
 Three results stand out.
 First, we see that `colossus` outperforms `halox` on CPU, by about a factor of three for the analytic computation, owing to calls to highly efficient libraries such as CAMB [@Lewis:2011] and well-optimized interpolation and integration schemes.
-Second, using a GPU significantly accelerates `halox` predictions, by a factor of over 20 for the analytic computation, and of about 65 got the emulated version.
+Second, using a GPU significantly accelerates `halox` predictions, by a factor of over 20 for the analytic computation, and of about 65 for the emulated version.
 Third, using the neural network emulator as a backend for the $\sigma(M)$ computation enables a substantial speedup, up to $95\times$ compared to baseline, and $34\times$ compared to `colossus`.
 These results demonstrate the strong potential of `halox` in GPU-based cosmological analyses, delivering considerable speedup in addition to automatic differentiation.
 
