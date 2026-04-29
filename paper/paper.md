@@ -83,17 +83,18 @@ At the time of writing (software version 2.0.0), this includes the following pro
 
 All calculations available in `halox` are written using JAX and JAX-cosmo.
 As a result, all functions can be compiled just-in-time using `jax.jit`, hardware-accelerated, and are automatically differentiable with respect to their input parameters, including halo mass, redshift, and cosmological parameters.
+In addition, all JAX transformations can be used on `halox` functions, including native vectorization and parallelization using *e.g.* `jax.vmap`.
 
 ## Emulation
 
 $\sigma^2(R)$ is the variance of the fluctuations of the matter density field in a sphere of radius $R$, given by:
 
-$$\sigma^2(R,z,\Omega) = \frac{1}{(2 \pi)^2} \int_0^\infty k^2 W^2(k, R) P(k, z, \Omega) {\rm d}k \label{eq:sigma}$$,
+$$\sigma^2(R,z,\Omega) = \frac{1}{2 \pi^2} \int_0^\infty k^2 W^2(k, R) P(k, z, \Omega) {\rm d}k$$,
 
-where $z$ denotes redshift, $\Omega$ cosmological parameters, and $k$ spatial frequency; $P(k,z,\Omega)$ is the power spectrum, and $W$ is the cosmological transfer function..
-$\sigma$ is an essential ingredient in computing both halo mass function and halo bias in most standard parameterizations [*e.g.*, @Tinker:2010], and the numerical integration in \autoref{eq:sigma} is computationally expensive, and often the primary bottleneck in such calculations.
+where $z$ denotes redshift, $\Omega$ cosmological parameters, and $k$ spatial frequency; $P(k,z,\Omega)$ is the power spectrum, and $W$ is the Fourier transform of the spherical top-hat window function.
+$\sigma$ is an essential ingredient in computing both halo mass function and halo bias in most standard parameterizations [*e.g.*, @Tinker:2010], and the numerical integration is computationally expensive, and often the primary bottleneck in such calculations.
 
-To tackle this issue, `halox` also includes an emulated calculation of $\sigma$, as a function of mass (the Lagrangian mass contained in a radius $R$ in \autoref{eq:sigma}), redshift, and cosmological parameters.
+To tackle this issue, `halox` also includes an emulated calculation of $\sigma$, as a function of mass (the Lagrangian mass contained in a radius $R$), redshift, and cosmological parameters.
 Our emulator consists of a multi-layer perceptron with three hidden layers, each of width 64.
 The emulator was trained on the halox $\sigma(M)$ implementation.
 The training set is taken from a Sobol sample over log(M), log(1+z), and the cosmological parameters $\Omega_b$, $\Omega_c$, $h$, $n_s$, and $\sigma_8$.
@@ -128,7 +129,7 @@ Hardware acceleration with GPUs only provides a speedup when using JIT compilati
 Emulation provides additional acceleration to both JIT compilation and hardware acceleration.
 The JIT compiled emulated function executing on GPUs is the fastest configuration, with emulated executions on CPUs barely overperforming the baseline.
 `colossus` [@Diemer:2018] outperforms JIT-compiled `halox` on CPU architecture, for both emulated and non-emulated executions.
-Hardware acceleration using GPUs allows `halox` to outperform `colossus` which does natively support GPU acceleration.
+Hardware acceleration using GPUs allows `halox` to outperform `colossus`, which does not natively support GPU acceleration.
 
 ![The performance of HMF computation for the halox package on different architectures and against `colossus`. All CPU executions are still slower than `colossus` irrespective of emulation. GPU architecture enables further speedup, allowing for faster computations than `colossus` both with and without emulation, with significant speedup when using the emulated function over the standard calculation. \label{fig:figure3}](benchmark_hmf_results.png)
 
