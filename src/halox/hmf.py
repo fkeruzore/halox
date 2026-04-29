@@ -102,20 +102,18 @@ def tinker08_mass_function(
     # Background density
     rho_m = cosmo.Omega_m * cosmology.critical_density(0.0, cosmo)
 
-    def sigma_fn(M):
-        return lss.sigma_M(M, z, cosmo, n_k_int=n_k_int, emu=emu)
+    def sigma_fn(M_scalar):
+        return lss.sigma_M(M_scalar, z, cosmo, n_k_int=n_k_int, emu=emu)
 
-    sigma = sigma_fn(M)
+    # Compute sigma(M) and dsigma/dM in a single autodiff pass per element
+    sigma, dsigma_dM = jax.vmap(jax.value_and_grad(sigma_fn))(M)
 
     # Multiplicity function
     A, a, b, c = _tinker08_parameters(z, cosmo, delta_c)
     f_sigma = A * ((b / sigma) ** a + 1.0) * jnp.exp(-c / sigma**2)
 
-    # d ln(1/sigma) / dM via autodiff on the same sigma_fn
-    def log_sigma_inv(M):
-        return jnp.log(1.0 / sigma_fn(M))
-
-    d_ln_sigma_inv = jax.vmap(jax.grad(log_sigma_inv))(M)
+    # d ln(1/sigma) / dM = -d ln(sigma)/dM = -(1/sigma) dsigma/dM
+    d_ln_sigma_inv = -dsigma_dM / sigma
 
     dn_dm = f_sigma * (rho_m / M) * d_ln_sigma_inv
 
