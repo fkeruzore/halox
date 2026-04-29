@@ -4,13 +4,12 @@ halox.emus: Emulators
 ``halox`` provides JAX-powered neural network emulators to speed up expensive theory computations.
 In particular, it packs an emulator of the RMS of density fluctuations $\\sigma$ as a function of mass, redshift, and cosmology, which can be used as a backend to compute halo bias and halo mass function.
 
-.. list-table:: Emulator Summary
+.. list-table:: Available emulators
    :widths: 18 12 12 12 10 10 12 12 10 12 12
    :header-rows: 1
 
    * - File Name
      - Network
-     - Activation
      - Epochs
      - :math:`M`
      - :math:`z`
@@ -21,8 +20,7 @@ In particular, it packs an emulator of the RMS of density fluctuations $\\sigma$
      - :math:`n_s`
 
    * - sigma_mp4.npz (default)
-     - 64 x 5
-     - SiLU
+     - MLP; 3 hidden layers (size 64); SiLU inner activations
      - 25,000
      - [11, 16]
      - [-0.04, 5]
