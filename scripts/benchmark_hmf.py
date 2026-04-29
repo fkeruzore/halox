@@ -18,7 +18,7 @@ jax.config.update("jax_enable_x64", True)
 cosmo = halox.cosmology.Planck18()
 emu = halox.emus.SigmaMEmulator()
 M = jnp.logspace(13, 15, 256)  # h^-1 Msun
-z = jnp.linspace(0, 1, 128)
+z = jnp.linspace(0, 1, 256)
 N_WARMUP = 3
 N_REPEAT = 21
 N_K_INT = 500
@@ -98,7 +98,7 @@ for dev_name, dev in devices.items():
 
         key_plain = (dev_name, "No JIT")
         results.setdefault(key_plain, {})[col_label] = bench(
-            _call_plain, reducer="median"
+            _call_plain, reducer="min"
         )
 
         # --- JIT-compiled ---
