@@ -9,7 +9,6 @@ authors:
     orcid: 0000-0002-9605-5588
     affiliation: 1
     equal-contrib: true
-authors:
   - name: Lance Moreau
     orcid: 0009-0004-5742-8478
     affiliation: "3, 2, 1"
@@ -21,7 +20,7 @@ affiliations:
    index: 2
  - name: Department of Physics, University of Maryland, College Park, MD 20742-2421, USA
    index: 3
-date: 27 April 2026
+date: 28 April 2026
 bibliography: paper.bib
 
 ---
@@ -32,13 +31,13 @@ Dark matter halos are fundamental structures in cosmology, forming the gravitati
 Their properties and statistical distribution (including the halo mass function) are invaluable tools to infer the fundamental properties of the Universe.
 The `halox` package is a JAX-powered Python library enabling differentiable and accelerated computations of key properties of dark matter halos, and of the halo mass function.
 The automatic differentiation capabilities of `halox` enable its usage in gradient-based workflows, *e.g.* in efficient Hamiltonian Monte Carlo sampling or machine learning applications.
-The acceleration capabilities of `halox` enable significant speedups over existing packages such as `colossus` on GPU architectures, while offering comparable or slightly reduced performance on CPUs.
+The acceleration capabilities of `halox` enable significant speedups over existing packages such as `colossus` on GPU architectures, while offering comparable performance on CPUs.
 
 # Statement of need
 
 In cosmology and astrophysics, modeling dark matter halos is central to understanding the large-scale structure of the Universe and its formation.
 This has motivated the development of many toolkits focused on halo modeling, such as, *e.g.*, halofit [@Smith:2003], halotools [@Hearin:2017], colossus [@Diemer:2018], or pyCCL [@Chisari:2019].
-Recently, the AI-driven advent of novel computational frameworks such as JAX [@Bradbury:2018], have led to the development of differentiable and hardware-accelerated software to simulate and model physical processes, with *e.g.* Brax [@Brax:2021] and JAX, MD [@Jaxmd:2020].
+Recently, the AI-driven advent of novel computational frameworks such as JAX [@Bradbury:2018] has led to the development of differentiable and hardware-accelerated software to simulate and model physical processes, with *e.g.* Brax [@Brax:2021] and JAX, MD [@Jaxmd:2020].
 The increasing complexity of cosmological data and astrophysical models has motivated the wide adoption of this framework in cosmology, where JAX-powered software has been published to address a wide variety of scientific goals, including
 modeling fundamental cosmological quantities, with, *e.g.*, JAX-cosmo [@Campagne:2023] and LINX [@Giovanetti:2024];
 simulating density fields and observables, with, *e.g.*, SHAMNet [@Hearin:2022], DISCO-DJ [@Hahn:2024], JAXpm [@Jaxpm:2025], and JAX-GalSim [@Mendoza:2025; @JaxGalSim:2025];
@@ -52,7 +51,7 @@ The `halox` library offers a JAX implementation of some widely used properties w
 * The halo mass function, quantifying the abundance of dark matter halos in mass and redshift, including its dependence on cosmological parameters;
 * The halo bias.
 
-The use of JAX as a backend allows these functions to be compiled and GPU-accelerated, enabling high-performance computations; and automatically differentiable, enabling their efficient use in gradient-based workflows, such as sensitivity analyses, Hamiltonian Monte-Carlo sampling for Bayesian inference, or machine learning-based methods. In addition, expensive computations of large-scale structure properties are further accelerated using neural network emulators, preserving hardware acceleration and differentiability while enabling faster calculations thanks to approximate calculations.
+The use of JAX as a backend allows these functions to be compiled and GPU-accelerated, enabling high-performance computations; and automatically differentiable, enabling their efficient use in gradient-based workflows, such as sensitivity analyses, Hamiltonian Monte-Carlo sampling for Bayesian inference, or machine learning-based methods. In addition, expensive computations of large-scale structure properties are further accelerated using neural network emulators, preserving hardware acceleration and differentiability while enabling faster calculations thanks to approximate calculations (see the **Emulation** section).
 
 # Features
 
@@ -84,39 +83,60 @@ At the time of writing (software version 2.0.0), this includes the following pro
 
 All calculations available in `halox` are written using JAX and JAX-cosmo.
 As a result, all functions can be compiled just-in-time using `jax.jit`, hardware-accelerated, and are automatically differentiable with respect to their input parameters, including halo mass, redshift, and cosmological parameters.
+In addition, all JAX transformations can be used on `halox` functions, including native vectorization and parallelization using *e.g.* `jax.vmap`.
 
 ## Emulation
 
-$\sigma(M)$ is the root-mean-square fluctuations of the matter density field smoothed on the scale R, the Lagrangian radius for a halo of mass M. This is computed using the equation:
+$\sigma^2(R)$ is the variance of the fluctuations of the matter density field in a sphere of radius $R$, given by:
 
-$$\sigma^2(M,z) =\, \frac{1}{2 \pi^2} \int _0 ^\infty k^2 P(k,z,R) dk $$
+$$\sigma^2(R,z,\Omega) = \frac{1}{2 \pi^2} \int_0^\infty k^2 W^2(k, R) P(k, z, \Omega) {\rm d}k$$,
 
-where $R = \left(\frac{3M}{4 \pi \bar{\rho}_0}\right)^{\frac{1}{3}}$ is the Langrangian radius for mass M, $k$ is spatial frequency, and $P(k,z,r)$ is the power spectrum as a function of spatial frequency, redshift, and Lagrangian radius.
-Computing this integral is computationally expensive and the primary bottleneck in calculations of the HMF and halo bias.
-To address this, `halox` also includes an emulated calculation of this quantity using a 5-layer, 64 node wide multi-layer perceptron.
-The emulator was trained on the halox $\sigma(M)$ implementation. The training set is taken from a Sobol sample over log(M), log(1+z), and the cosmological parameters $\Omega_b$, $\Omega_c$, $h$, $n_s$, and $\sigma_8$.
-As inputs, the emulator accepts M, z, and those same cosmological parameters, mirroring the inputs for the original function.
-The emulator is accurate to within a percent for both $\sigma(M)$ and the halo bias, and within six percent for the HMF across the tested parameter space. To compute $\sigma(M)$, HMF, or halo bias using the emulator, simply instantiate the emulator, then pass it in as the “emu” argument to the original $\sigma(M)$ function in halox as seen below.
-```
-# analytical calculation
-sigma_analytical = lss.sigmaM(M, z, cosmo)
+where $z$ denotes redshift, $\Omega$ cosmological parameters, and $k$ spatial frequency; $P(k,z,\Omega)$ is the power spectrum, and $W$ is the Fourier transform of the spherical top-hat window function.
+$\sigma$ is an essential ingredient in computing both halo mass function and halo bias in most standard parameterizations [*e.g.*, @Tinker:2010], and the numerical integration is computationally expensive, and often the primary bottleneck in such calculations.
 
-# emulated calculation (using the default network weights)
+To tackle this issue, `halox` also includes an emulated calculation of $\sigma$, as a function of mass (the Lagrangian mass contained in a radius $R$), redshift, and cosmological parameters.
+Our emulator consists of a multi-layer perceptron with three hidden layers, each of width 64.
+The emulator was trained on the halox $\sigma(M)$ implementation.
+The training set is taken from a Sobol sample over log(M), log(1+z), and the cosmological parameters $\Omega_b$, $\Omega_c$, $h$, $n_s$, and $\sigma_8$.
+To compute $\sigma(M)$, HMF, or halo bias using the emulator, users may simply instantiate the emulator, then pass it in as an optional argument to the original $\sigma(M)$ function in halox:
+
+```py
+# analytical calculations
+sigma = halox.lss.sigmaM(M, z, cosmo)
+hmf = halox.hmf.tinker08_mass_function(M, z, cosmo)
+bias = halox.bias.tinker10(M, z, cosmo)
+
+# emulated calculations (using the default network weights)
 emu = emus.sigmaM.SigmaMEmulation()
-sigma_emulated = lss.sigmaM(M, z, cosmo, emu = emu)
+sigma_e = halox.lss.sigmaM(M, z, cosmo, emu=emu)
+hmf_e = halox.hmf.tinker08_mass_function(M, z, cosmo, emu=emu)
+bias_e = halox.bias.tinker10(M, z, cosmo, emu=emu)
 ```
-![Comparing emulated and non-emulated $\sigma(M)$ calculations, plotted against mass, varying both redshift and cosmology. Residuals stay below the percent level. \label{fig:figure1}](sigmaM_emulator_validation.png)
 
-![Comparing HMF calculation using emulated and non-emulated evaluations of $\sigma(M)$. \label{fig:figure2}](hmf_emulator_validation.png)
+The emulator is accurate to within a percent for both $\sigma(M)$ and the halo bias, and within six percent for the HMF across the tested parameter space.
+\autoref{fig:figure1} and \autoref{fig:figure2} show the accuracy of emulator-based predictions of $\sigma(M)$ and of the halo mass function for different cosmologies up to $z=1$, demonstrating remarkable accuracy.
+
+![*Top:* $\sigma(M)$ predicted using `colossus`, `halox`, and the `halox` emulator, varying redshift and cosmology. *Bottom:* Fractional difference between `halox` predictions and `colossus`.](sigmaM_emulator_validation.png){#fig:figure1 width="90%"}
+
+![Same as Figure 1 for the halo mass function.](hmf_emulator_validation.png){#fig:figure2 width="90%"}
 
 # Speedup
 
-Benchmarking `halox` involved testing on different architectures, both with and without JIT compilation. Since all functions in `halox` support JIT compilation, JIT-compiled performance is adopted as the baseline.
-JIT compilation alone provides a significant acceleration over non-JIT compiled functions on all architectures. Hardware acceleration with GPUs only provides a speedup when using JIT compilation, and underperforms CPUs for non-JIT compiled executions.
-Emulation provides additional acceleration to both JIT compilation and hardware acceleration. The JIT compiled emulated function executing on GPUs is the fastest configuration, with emulated executions on CPUs barely overperforming the baseline.
-`colossus` [@Diemer:2018] outperforms JIT-compiled `halox` on CPU architecture, for both emulated and non-emulated executions. Hardware acceleration using GPUs allows `halox` to outperform `colossus` which does natively support GPU acceleration.
+Benchmarking `halox` involved testing on different architectures, both with and without JIT compilation.
+Since all functions in `halox` support JIT compilation, JIT-compiled performance is adopted as the baseline.
+JIT compilation alone provides a significant acceleration over non-JIT compiled functions on all architectures.
+Hardware acceleration with GPUs only provides a speedup when using JIT compilation, and underperforms CPUs for non-JIT compiled executions.
+Emulation provides additional acceleration to both JIT compilation and hardware acceleration.
+The JIT compiled emulated function executing on GPUs is the fastest configuration, with emulated executions on CPUs barely overperforming the baseline.
+`colossus` [@Diemer:2018] outperforms JIT-compiled `halox` on CPU architecture, for both emulated and non-emulated executions.
+Hardware acceleration using GPUs allows `halox` to outperform `colossus`, which does not natively support GPU acceleration.
 
 ![The performance of HMF computation for the halox package on different architectures and against `colossus`. All CPU executions are still slower than `colossus` irrespective of emulation. GPU architecture enables further speedup, allowing for faster computations than `colossus` both with and without emulation, with significant speedup when using the emulated function over the standard calculation. \label{fig:figure3}](benchmark_hmf_results.png)
+
+Also mention:
+CPU: AMD EPYC 7742 2.25GHz
+GPU: A100-SXM4-40GB
+256 masses * 128 redshifts * 1 cosmology
 
 # Validation
 
