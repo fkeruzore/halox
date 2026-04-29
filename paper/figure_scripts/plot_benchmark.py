@@ -3,9 +3,18 @@
 Speedup is relative to the CPU JIT Analytical baseline.
 """
 
+import argparse
 import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib.patches import Patch
+
+parser = argparse.ArgumentParser(description=__doc__)
+parser.add_argument(
+    "--nojit",
+    action="store_true",
+    help="Also plot the No JIT bars alongside the JIT bars.",
+)
+args = parser.parse_args()
 
 plt.style.use(["seaborn-v0_8-darkgrid", "petroff10"])
 plt.rcParams.update({"xtick.direction": "in", "ytick.direction": "in"})
@@ -33,44 +42,64 @@ hatches = [r"xx" if "Analytical" in lbl else r"//" for lbl in pivot.index]
 
 fig, ax = plt.subplots(figsize=(8, 4))
 
-# Full bar: JIT speedup (transparent)
-ax.barh(
-    pivot.index,
-    pivot["JIT"],
-    color=colors,
-    hatch=hatches,
-    edgecolor="white",
-    alpha=0.35,
-)
-# Overlapping bar: No JIT speedup (opaque)
-ax.barh(
-    pivot.index,
-    pivot["No JIT"],
-    color=colors,
-    hatch=hatches,
-    edgecolor="white",
-    alpha=1.0,
-)
+if args.nojit:
+    # Full bar: JIT speedup (transparent)
+    ax.barh(
+        pivot.index,
+        pivot["JIT"],
+        color=colors,
+        hatch=hatches,
+        edgecolor="white",
+        alpha=0.35,
+    )
+    # Overlapping bar: No JIT speedup (opaque)
+    ax.barh(
+        pivot.index,
+        pivot["No JIT"],
+        color=colors,
+        hatch=hatches,
+        edgecolor="white",
+        alpha=1.0,
+    )
 
-for i, (_, row) in enumerate(pivot.iterrows()):
-    ax.text(
-        row["JIT"] * 1.08,
-        i,
-        f"{row['JIT']:.3g}×",
-        va="center",
-        ha="left",
-        color="k",
-        fontsize=10,
+    for i, (_, row) in enumerate(pivot.iterrows()):
+        ax.text(
+            row["JIT"] * 1.08,
+            i,
+            f"{row['JIT']:.3g}×",
+            va="center",
+            ha="left",
+            color="k",
+            fontsize=10,
+        )
+        ax.text(
+            row["No JIT"] * 1.08,
+            i,
+            f"{row['No JIT']:.3g}×",
+            va="center",
+            ha="left",
+            color="k",
+            fontsize=10,
+        )
+else:
+    ax.barh(
+        pivot.index,
+        pivot["JIT"],
+        color=colors,
+        hatch=hatches,
+        edgecolor="white",
+        alpha=1.0,
     )
-    ax.text(
-        row["No JIT"] * 1.08,
-        i,
-        f"{row['No JIT']:.3g}×",
-        va="center",
-        ha="left",
-        color="k",
-        fontsize=10,
-    )
+    for i, (_, row) in enumerate(pivot.iterrows()):
+        ax.text(
+            row["JIT"] * 1.08,
+            i,
+            f"{row['JIT']:.3g}×",
+            va="center",
+            ha="left",
+            color="k",
+            fontsize=10,
+        )
 
 ax.barh(
     ["Colossus (CPU)"],
@@ -92,6 +121,8 @@ ax.text(
 ax.axvline(1, color="k", ls="--", lw=0.8)
 ax.invert_yaxis()
 ax.set_xscale("log")
+ax.xaxis.set_major_formatter(plt.matplotlib.ticker.ScalarFormatter())
+ax.xaxis.set_minor_formatter(plt.matplotlib.ticker.NullFormatter())
 ax.set_xlabel("Speedup vs. CPU JIT Analytical (log scale; higher = better)")
 
 legend_handles = [
@@ -101,14 +132,19 @@ legend_handles = [
         facecolor="grey", hatch=r"xx", edgecolor="white", label="Analytical"
     ),
     Patch(facecolor="grey", hatch=r"//", edgecolor="white", label="Emulator"),
-    Patch(facecolor="grey", alpha=1.0, edgecolor="white", label="No JIT"),
-    Patch(facecolor="grey", alpha=0.35, edgecolor="white", label="JIT"),
-    plt.Line2D([0], [0], color="k", ls="--", lw=0.8, label="Baseline"),
 ]
+if args.nojit:
+    legend_handles += [
+        Patch(facecolor="grey", alpha=1.0, edgecolor="white", label="No JIT"),
+        Patch(facecolor="grey", alpha=0.35, edgecolor="white", label="JIT"),
+    ]
+legend_handles.append(
+    plt.Line2D([0], [0], color="k", ls="--", lw=0.8, label="Baseline")
+)
 ax.legend(handles=legend_handles, handlelength=2.5, handleheight=1.5)
 
 xmin, xmax = ax.get_xlim()
 ax.set_xlim(xmin, xmax * 4)
 fig.tight_layout()
-fig.savefig("benchmark_hmf_results.png", dpi=300)
+fig.savefig("../benchmark_hmf_results.png", dpi=500)
 plt.show()
