@@ -139,7 +139,7 @@ ax_bot.set_ylim(-0.5, 0.5)
 ax_bot.set_xlabel(r"$M$ [$h^{-1}\,M_\odot$]")
 
 fig.tight_layout()
-fig.savefig("sigmaM_emulator_validation.png", dpi=500)
+fig.savefig("../sigmaM_emulator_validation.png", dpi=500)
 
 # ===== HMF plot =====
 delta_c = 200.0
@@ -217,5 +217,5 @@ ax_bot2.set_ylim(-7.5, 7.5)
 ax_bot2.set_xlabel(r"$M$ [$h^{-1}\,M_\odot$]")
 
 fig2.tight_layout()
-fig2.savefig("hmf_emulator_validation.png", dpi=500)
+fig2.savefig("../hmf_emulator_validation.png", dpi=500)
 plt.show()
