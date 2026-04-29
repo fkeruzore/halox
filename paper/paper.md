@@ -20,7 +20,7 @@ affiliations:
    index: 2
  - name: Department of Physics, University of Maryland, College Park, MD 20742-2421, USA
    index: 3
-date: 28 April 2026
+date: 29 April 2026
 bibliography: paper.bib
 
 ---
@@ -58,7 +58,7 @@ The use of JAX as a backend allows these functions to be compiled and GPU-accele
 ## Available physical quantities
 
 The `halox` library seeks to provide JAX-based implementations of common models of dark matter halo properties and of large-scale structure.
-At the time of writing (software version 2.0.0), this includes the following properties:
+At the time of writing (software version 2.0.1), this includes the following properties:
 
 * Cosmological quantities: `halox` relies on JAX-cosmo [@Campagne:2023] for cosmology-dependent calculations, and includes wrapper functions to compute some additional properties, such as critical density $\rho_{\rm c}$ and differential comoving volume element ${\rm d}V_{c} / {\rm d}\Omega {\rm d}z$.
 * Radially-dependent physical properties of NFW and Einasto dark matter halos. Our NFW and Einasto implementations are based on the analytical derivations of @Lokas:2001 and @Retana-Montenegro:2012 respectively, and include the following quantities:
@@ -122,21 +122,19 @@ The emulator is accurate to within a percent for both $\sigma(M)$ and the halo b
 
 # Speedup
 
-Benchmarking `halox` involved testing on different architectures, both with and without JIT compilation.
-Since all functions in `halox` support JIT compilation, JIT-compiled performance is adopted as the baseline.
-JIT compilation alone provides a significant acceleration over non-JIT compiled functions on all architectures.
-Hardware acceleration with GPUs only provides a speedup when using JIT compilation, and underperforms CPUs for non-JIT compiled executions.
-Emulation provides additional acceleration to both JIT compilation and hardware acceleration.
-The JIT compiled emulated function executing on GPUs is the fastest configuration, with emulated executions on CPUs barely overperforming the baseline.
-`colossus` [@Diemer:2018] outperforms JIT-compiled `halox` on CPU architecture, for both emulated and non-emulated executions.
-Hardware acceleration using GPUs allows `halox` to outperform `colossus`, which does not natively support GPU acceleration.
+\autoref{fig:figure3} shows the performance of halo mass function computations in `halox` across hardware configurations, benchmarked against our slowest evaluation (analytical computation on CPU).
+For comparison, we also compare to the performance of `colossus` on the same computation.
+Three results stand out.
+First, we see that `colossus` outperforms `halox` on CPU, by about a factor of three for the analytic computation, owing to calls to highly efficient libraries such as CAMB [@Lewis:2011] and well-optimized interpolation and integration schemes.
+Second, using a GPU significantly accelerates `halox` predictions, by a factor of over 20 for the analytic computation, and of about 65 got the emulated version.
+Third, using the neural network emulator as a backend for the $\sigma(M)$ computation enables a substantial speedup, up to $95\times$ compared to baseline, and $34\times$ compared to `colossus`.
+These results demonstrate the strong potential of `halox` in GPU-based cosmological analyses, delivering considerable speedup in addition to automatic differentiation.
+
+Our benchmarks were run on an AMD EPYC 7742 CPU (2.25GHz) and an A100-SXM4-40GB GPU, evaluating the HMF on a grid of 256 halo masses $\times$ 256 redshifts, for a fixed cosmology.
+All `halox` computations were run after just-in-time compilation.
+All computations were made at double (FP64) precision; `halox` can be further accelerated, in particular on GPUs, by dropping to single (FP32) precision.
 
 ![The performance of HMF computation for the halox package on different architectures and against `colossus`. All CPU executions are still slower than `colossus` irrespective of emulation. GPU architecture enables further speedup, allowing for faster computations than `colossus` both with and without emulation, with significant speedup when using the emulated function over the standard calculation. \label{fig:figure3}](benchmark_hmf_results.png)
-
-Also mention:
-CPU: AMD EPYC 7742 2.25GHz
-GPU: A100-SXM4-40GB
-256 masses * 128 redshifts * 1 cosmology
 
 # Validation
 
@@ -147,7 +145,7 @@ These tests are included in an automatic CI/CD pipeline on the GitHub repository
 
 # Acknowledgments
 
-We would like to thank Andrew Hearin, Matt Becker, Georgios Zacharegkas, and Lindsey Bleem for useful discussions and feedback on `halox`.
+We would like to thank Lindsey Bleem, Andrew Hearin, Matt Becker, and Georgios Zacharegkas for useful discussions and feedback on `halox` and on this manuscript.
 This work was supported in part by the U.S. Department of Energy, Office of Science, Office of Workforce Development for Teachers and Scientists (WDTS) under the Science Undergraduate Laboratory Internships (SULI) Program.
 Argonne National Laboratory’s work was supported by the U.S. Department of Energy, Office of Science, Office of High Energy Physics, under contract DE-AC02-06CH11357.
 
