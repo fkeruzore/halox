@@ -32,6 +32,16 @@ def test_convert_delta_parallel():
     assert jnp.all(jnp.isfinite(res)), f"Infinite predictions: {res}"
 
 
+# --- pytree tests ---
+
+
+def test_emulator_pytree_roundtrip():
+    leaves, treedef = jax.tree_util.tree_flatten(_emu)
+    emu2 = jax.tree_util.tree_unflatten(treedef, leaves)
+    assert emu2.n_layers == _emu.n_layers
+    assert jnp.allclose(emu2(_M, _z, _cosmo), _emu(_M, _z, _cosmo))
+
+
 # --- JIT tests ---
 
 

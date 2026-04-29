@@ -1,13 +1,14 @@
 import numpy as np
 import jax
 from jax import Array
+from jax.tree_util import register_pytree_node_class
 from jax.typing import ArrayLike
 import jax.numpy as jnp
 import jax_cosmo as jc
 from importlib import resources
-# use boolean to control the emus
 
 
+@register_pytree_node_class
 class SigmaMEmulator:
     """Neural network emulator for :math:`\\sigma(M, z)`.
 
@@ -27,19 +28,31 @@ class SigmaMEmulator:
             resources.files("halox.emus") / weight_file
         ) as data_path:
             raw = np.load(data_path, allow_pickle=True)
-            self.mins = raw["bounds"][:, 0]
-            self.ranges = raw["bounds"][:, 1] - self.mins
-            weights = {k:raw[k] for k in raw.files if k != "bounds"}
+            self.mins = jnp.asarray(raw["bounds"][:, 0])
+            self.ranges = jnp.asarray(raw["bounds"][:, 1]) - self.mins
+            weights = {k: raw[k] for k in raw.files if k != "bounds"}
 
-
-        # Convert keys → clean format
+        # Convert keys to clean format
         self.params = {}
         for k, v in weights.items():
             name = k.replace("('", "").replace("')", "").replace("', '", ".")
             self.params[name] = jnp.array(v)
-        
+
         # Detect number of layers from weight keys
         self.n_layers = sum(1 for k in self.params if k.endswith(".kernel"))
+
+    # pytree registration
+    def tree_flatten(self):
+        children = (self.params, self.mins, self.ranges)
+        aux = (self.n_layers,)
+        return children, aux
+
+    @classmethod
+    def tree_unflatten(cls, aux, children):
+        obj = cls.__new__(cls)
+        obj.params, obj.mins, obj.ranges = children
+        (obj.n_layers,) = aux
+        return obj
 
     @staticmethod
     def silu(x: Array) -> Array:
