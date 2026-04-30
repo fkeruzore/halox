@@ -2,6 +2,7 @@ halox.halo.nfw: The NFW profile
 ===============================
 
 ``halox`` provides utility functions to compute properties of halos with a Navarro-Frenk-White (NFW) profile.
+For examples, see :doc:`../notebooks/nfw`.
 
 .. currentmodule:: halox.halo.nfw
 
