@@ -82,7 +82,7 @@ At the time of writing (software version 2.0.1), this includes the following pro
 
 $\sigma^2(R)$ is the variance of the fluctuations of the matter density field in a sphere of radius $R$, given by:
 
-$$\sigma^2(R,z,\Omega) = \frac{1}{2 \pi^2} \int_0^\infty k^2 W^2(k, R) P(k, z, \Omega) {\rm d}k$$,
+$$\sigma^2(R,z,\Omega) = \frac{1}{2 \pi^2} \int_0^\infty k^2 W^2(k, R) P(k, z, \Omega) {\rm d}k,$$
 
 where $z$ denotes redshift, $\Omega$ cosmological parameters, and $k$ spatial frequency; $P(k,z,\Omega)$ is the power spectrum, and $W$ is the Fourier transform of the spherical top-hat window function.
 $\sigma$ is an essential ingredient in computing both halo mass function and halo bias in most standard parameterizations [*e.g.*, @Tinker:2010], and the numerical integration is computationally expensive, and often the primary bottleneck in such calculations.
@@ -91,27 +91,22 @@ To tackle this issue, `halox` also includes an emulated calculation of $\sigma$,
 Our emulator consists of a multi-layer perceptron with three hidden layers, each of width 64.
 The emulator was trained on the halox $\sigma(M)$ implementation.
 The training set is taken from a Sobol sample over log(M), log(1+z), and the cosmological parameters $\Omega_b$, $\Omega_c$, $h$, $n_s$, and $\sigma_8$.
-To compute $\sigma(M)$, HMF, or halo bias using the emulator, users may simply instantiate the emulator, then pass it in as an optional argument to the original $\sigma(M)$ function in halox:
 
-```py
-# analytical calculations
-sigma = halox.lss.sigmaM(M, z, cosmo)
-hmf = halox.hmf.tinker08_mass_function(M, z, cosmo)
-bias = halox.bias.tinker10(M, z, cosmo)
-
-# emulated calculations (using the default network weights)
-emu = emus.sigmaM.SigmaMEmulation()
-sigma_e = halox.lss.sigmaM(M, z, cosmo, emu=emu)
-hmf_e = halox.hmf.tinker08_mass_function(M, z, cosmo, emu=emu)
-bias_e = halox.bias.tinker10(M, z, cosmo, emu=emu)
-```
-
-The emulator is accurate to within a percent for both $\sigma(M)$ and the halo bias, and within six percent for the HMF across the tested parameter space.
-\autoref{fig:figure1} and \autoref{fig:figure2} show the accuracy of emulator-based predictions of $\sigma(M)$ and of the halo mass function for different cosmologies up to $z=1$, demonstrating remarkable accuracy.
+The emulator is accurate to within a percent for both $\sigma(M)$ and the halo bias, and within a few percent for the HMF across the tested parameter space.
+\autoref{fig:figure1} and \autoref{fig:figure2} show the accuracy of emulator-based predictions of $\sigma(M)$ and of the halo mass function for different cosmologies up to $z=1$, demonstrating remarkable accuracy, with an increase of error in the regime of extremely massive halos ($M_{200c} > 10^{15} \, h^{-1} M_\odot$), which are very rare occurences in both simulations and observations.
 
 ![*Top:* $\sigma(M)$ predicted using `colossus`, `halox`, and the `halox` emulator, varying redshift and cosmology. *Bottom:* Fractional difference between `halox` predictions and `colossus`.](sigmaM_emulator_validation.png){#fig:figure1 width="90%"}
 
 ![Same as Figure 1 for the halo mass function.](hmf_emulator_validation.png){#fig:figure2 width="90%"}
+
+To compute $\sigma(M)$, the HMF, or the halo bias using the emulator, users may simply instantiate the emulator, then pass it in as an optional argument to the original $\sigma(M)$ function in halox:
+
+```py
+emu = emus.sigmaM.SigmaMEmulation()               # instantiate emulator
+sigma_a = halox.lss.sigmaM(M, z, cosmo)           # analytic sigma(M)
+sigma_e = halox.lss.sigmaM(M, z, cosmo, emu=emu)  # emulated sigma(M)
+```
+
 
 ## Automatic differentiation and hardware acceleration
 
