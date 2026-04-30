@@ -123,7 +123,7 @@ The emulator is accurate to within a percent for both $\sigma(M)$ and the halo b
 # Speedup
 
 \autoref{fig:figure3} shows the performance of halo mass function computations in `halox` across hardware configurations, benchmarked against our slowest evaluation (analytical computation on CPU).
-For comparison, we also compare to the performance of `colossus` on the same computation^[ Our benchmarks were run on an AMD EPYC 7742 CPU (2.25GHz) and an A100-SXM4-40GB GPU, evaluating the HMF on a grid of 256 halo masses $\times$ 256 redshifts, for a fixed cosmology.  All `halox` computations were run after just-in-time compilation.].
+For comparison, we also compare to the performance of `colossus` on the same computation^[ Our benchmarks were run on an AMD EPYC 7742 CPU (2.25GHz) and an NVIDIA A100-SXM4-40GB GPU, evaluating the HMF on a grid of 256 halo masses $\times$ 256 redshifts, for a fixed cosmology.  All `halox` computations were run after just-in-time compilation.].
 Three results stand out.
 First, we see that `colossus` outperforms `halox` on CPU, by about a factor of three for the analytic computation, owing to calls to highly efficient libraries such as CAMB [@Lewis:2011] and well-optimized interpolation and integration schemes.
 Second, using a GPU significantly accelerates `halox` predictions, by a factor of over 20 for the analytic computation, and of about 65 for the emulated version.
