@@ -78,13 +78,6 @@ At the time of writing (software version 2.0.1), this includes the following pro
 * Halo bias: The linear bias model of @Tinker:2010 as a function of halo mass $M$, redshift $z$, and cosmology.
 * Overdensities: All properties in `halox` can be computed for spherical overdensity (SO) halo masses defined for any critical overdensity value. Convenience functions are provided to convert halo properties from one critical overdensity to another, or to convert critical overdensities to mean matter overdensities.
 
-
-## Automatic differentiation and hardware acceleration
-
-All calculations available in `halox` are written using JAX and JAX-cosmo.
-As a result, all functions can be compiled just-in-time using `jax.jit`, hardware-accelerated, and are automatically differentiable with respect to their input parameters, including halo mass, redshift, and cosmological parameters.
-In addition, all JAX transformations can be used on `halox` functions, including native vectorization and parallelization using *e.g.* `jax.vmap`.
-
 ## Emulation
 
 $\sigma^2(R)$ is the variance of the fluctuations of the matter density field in a sphere of radius $R$, given by:
@@ -120,19 +113,24 @@ The emulator is accurate to within a percent for both $\sigma(M)$ and the halo b
 
 ![Same as Figure 1 for the halo mass function.](hmf_emulator_validation.png){#fig:figure2 width="90%"}
 
+## Automatic differentiation and hardware acceleration
+
+All calculations available in `halox` are written using JAX and JAX-cosmo.
+As a result, all functions can be compiled just-in-time using `jax.jit`, hardware-accelerated, and are automatically differentiable with respect to their input parameters, including halo mass, redshift, and cosmological parameters.
+In addition, all JAX transformations can be used on `halox` functions, including native vectorization and parallelization using *e.g.* `jax.vmap`.
+
+
 # Speedup
 
 \autoref{fig:figure3} shows the performance of halo mass function computations in `halox` across hardware configurations, benchmarked against our slowest evaluation (analytical computation on CPU).
-For comparison, we also compare to the performance of `colossus` on the same computation.
+For comparison, we also compare to the performance of `colossus` on the same computation^[ Our benchmarks were run on an AMD EPYC 7742 CPU (2.25GHz) and an NVIDIA A100-SXM4-40GB GPU, evaluating the HMF on a grid of 256 halo masses $\times$ 256 redshifts, for a fixed cosmology.  All `halox` computations were run after just-in-time compilation.].
 Three results stand out.
 First, we see that `colossus` outperforms `halox` on CPU, by about a factor of three for the analytic computation, owing to calls to highly efficient libraries such as CAMB [@Lewis:2011] and well-optimized interpolation and integration schemes.
 Second, using a GPU significantly accelerates `halox` predictions, by a factor of over 20 for the analytic computation, and of about 65 for the emulated version.
 Third, using the neural network emulator as a backend for the $\sigma(M)$ computation enables a substantial speedup, up to $95\times$ compared to baseline, and $34\times$ compared to `colossus`.
 These results demonstrate the strong potential of `halox` in GPU-based cosmological analyses, delivering considerable speedup in addition to automatic differentiation.
+We also note that all computations were made at double (FP64) precision; `halox` can be further accelerated, in particular on GPUs, by dropping to single (FP32) precision.
 
-Our benchmarks were run on an AMD EPYC 7742 CPU (2.25GHz) and an A100-SXM4-40GB GPU, evaluating the HMF on a grid of 256 halo masses $\times$ 256 redshifts, for a fixed cosmology.
-All `halox` computations were run after just-in-time compilation.
-All computations were made at double (FP64) precision; `halox` can be further accelerated, in particular on GPUs, by dropping to single (FP32) precision.
 
 ![The performance of HMF computation for the halox package on different architectures and against `colossus`. All CPU executions are still slower than `colossus` irrespective of emulation. GPU architecture enables further speedup, allowing for faster computations than `colossus` both with and without emulation, with significant speedup when using the emulated function over the standard calculation. \label{fig:figure3}](benchmark_hmf_results.png)
 
@@ -140,7 +138,7 @@ All computations were made at double (FP64) precision; `halox` can be further ac
 
 All functions available in `halox` are validated against existing, non-JAX-based software.
 Cosmology calculations are validated against Astropy [@Astropy:2022] for varying cosmological parameters and redshifts.
-Other quantities are validated against `colossus` [@Diemer:2018] for varying halo masses, redshifts, critical overdensities, and cosmological parameters.
+Other quantities are validated against either `colossus` [@Diemer:2018] or Gala [@Gala:2017] for varying halo masses, redshifts, critical overdensities, and cosmological parameters.
 These tests are included in an automatic CI/CD pipeline on the GitHub repository, and presented graphically in the online documentation.
 
 # Acknowledgments
