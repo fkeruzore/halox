@@ -9,7 +9,7 @@ authors:
     orcid: 0000-0002-9605-5588
     affiliation: 1
     equal-contrib: true
-  - name: Lance Moreau
+  - name: Lance A. Moreau
     orcid: 0009-0004-5742-8478
     affiliation: "3, 2, 1"
     equal-contrib: true
