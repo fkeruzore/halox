@@ -66,6 +66,33 @@ def overdensity_c_to_m(
     return delta_c * rho_c / rho_m
 
 
+def overdensity_m_to_c(
+    delta_m: float, z: ArrayLike, cosmo: jc.Cosmology
+) -> Array:
+    """Convert mean overdensity to critical overdensity.
+
+    Parameters
+    ----------
+    delta_m : float
+        Overdensity with respect to mean matter density
+    z : Array
+        Redshift
+    cosmo : jc.Cosmology
+        Underlying cosmology
+
+    Returns
+    -------
+    Array
+        Overdensity with respect to critical density
+    """
+    z = jnp.asarray(z)
+    rho_m = (
+        cosmo.Omega_m * cosmology.critical_density(0.0, cosmo) * (1 + z) ** 3
+    )
+    rho_c = cosmology.critical_density(z, cosmo)
+    return delta_m * rho_m / rho_c
+
+
 def sigma_R(
     R: ArrayLike,
     z: ArrayLike,
