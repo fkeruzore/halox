@@ -107,6 +107,7 @@ sigma_a = halox.lss.sigmaM(M, z, cosmo)           # analytic sigma(M)
 sigma_e = halox.lss.sigmaM(M, z, cosmo, emu=emu)  # emulated sigma(M)
 ```
 
+The same calling sequence can be used to compute halo mass function or halo bias using the $\sigma(M)$ emulator.
 
 ## Automatic differentiation and hardware acceleration
 
