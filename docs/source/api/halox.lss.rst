@@ -10,11 +10,13 @@ Cosmology calculations (e.g. power spectra) rely on `jax-cosmo <https://github.c
     sigma_R
     sigma_M
     overdensity_c_to_m
+    overdensity_m_to_c
     mass_to_lagrangian_radius
     peak_height
 
 .. autofunction:: sigma_R
 .. autofunction:: sigma_M
 .. autofunction:: overdensity_c_to_m
+.. autofunction:: overdensity_m_to_c
 .. autofunction:: mass_to_lagrangian_radius
 .. autofunction:: peak_height
