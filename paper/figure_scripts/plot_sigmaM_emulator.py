@@ -17,11 +17,14 @@ jax.config.update("jax_enable_x64", True)
 
 plt.style.use(["seaborn-v0_8-darkgrid", "petroff10"])
 plt.rcParams.update({"xtick.direction": "in", "ytick.direction": "in"})
+
+
 def lighten_color(color, amount=0.5):
     c = mcolors.to_rgb(color)
-    h, l, s = colorsys.rgb_to_hls(*c)
-    l = 1 - (1 - l) * (1 - amount)
-    return colorsys.hls_to_rgb(h, l, s)
+    h, lum, s = colorsys.rgb_to_hls(*c)
+    lum = 1 - (1 - lum) * (1 - amount)
+    return colorsys.hls_to_rgb(h, lum, s)
+
 
 # --- Cosmologies ---
 cosmo_planck = cosmology.Planck18()
@@ -110,7 +113,7 @@ for label, color, sig_a, sig_e, sig_c in results:
     ax_top.loglog(
         masses_np,
         sig_e,
-        color=lighten_color(color, 1/3),
+        color=lighten_color(color, 1 / 3),
         ls=":",
         lw=2.5,
         label=f"{label}, emulator",
@@ -118,7 +121,7 @@ for label, color, sig_a, sig_e, sig_c in results:
     ax_top.loglog(
         masses_np,
         sig_c,
-        color=lighten_color(color, -1/3),
+        color=lighten_color(color, -1 / 3),
         ls="-",
         lw=1.5,
         zorder=0,
@@ -128,7 +131,9 @@ for label, color, sig_a, sig_e, sig_c in results:
     diff_a = (sig_a / sig_c - 1) * 100
     diff_e = (sig_e / sig_c - 1) * 100
     ax_bot.semilogx(masses_np, diff_a, color=color, ls="--", lw=2.0)
-    ax_bot.semilogx(masses_np, diff_e, color=lighten_color(color, 1/3), ls=":", lw=2.5)
+    ax_bot.semilogx(
+        masses_np, diff_e, color=lighten_color(color, 1 / 3), ls=":", lw=2.5
+    )
 
 ax_top.set_ylabel(r"$\sigma(M, z)$")
 ax_top.legend(fontsize=7, ncol=3)
@@ -188,7 +193,7 @@ for label, color, hmf_a, hmf_e, hmf_c in hmf_results:
     ax_top2.loglog(
         masses_np,
         hmf_e,
-        color=lighten_color(color, 1/3),
+        color=lighten_color(color, 1 / 3),
         ls=":",
         lw=2.5,
         label=f"{label}, emulator",
@@ -196,7 +201,7 @@ for label, color, hmf_a, hmf_e, hmf_c in hmf_results:
     ax_top2.loglog(
         masses_np,
         hmf_c,
-        color=lighten_color(color, -1/3),
+        color=lighten_color(color, -1 / 3),
         ls="-",
         lw=1.5,
         zorder=0,
@@ -206,7 +211,9 @@ for label, color, hmf_a, hmf_e, hmf_c in hmf_results:
     diff_a = (hmf_a / hmf_c - 1) * 100
     diff_e = (hmf_e / hmf_c - 1) * 100
     ax_bot2.semilogx(masses_np, diff_a, color=color, ls="--", lw=2.0)
-    ax_bot2.semilogx(masses_np, diff_e, color=lighten_color(color, 1/3), ls=":", lw=2.5)
+    ax_bot2.semilogx(
+        masses_np, diff_e, color=lighten_color(color, 1 / 3), ls=":", lw=2.5
+    )
 
 ax_top2.set_ylabel(r"${\rm d}n/{\rm d}\ln M$ [$h^{3}\,\mathrm{Mpc}^{-3}$]")
 ax_top2.legend(fontsize=7, ncol=3)

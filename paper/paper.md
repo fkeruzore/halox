@@ -148,4 +148,3 @@ We acknowledge the use of Anthropic's Claude (Sonnet 4.5, Opus 4.5, Opus 4.6) in
 We note that no AI was used in writing the unit test suite enforcing accuracy of the software.
 
 # References
-
