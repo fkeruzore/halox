@@ -29,15 +29,48 @@ For a manual installation, see the [documentation pages](https://halox.readthedo
 
 * [`halox.halo`](https://halox.readthedocs.io/en/latest/notebooks/nfw.html): Radial profiles of dark matter halos following Navarro-Frenk-White (NFW) and Einasto distributions;
 * [`halox.cm`](https://halox.readthedocs.io/en/latest/notebooks/cMrelations.html): Mass-concentration relations of dark matter halos;
+* [`halox.lss`](https://halox.readthedocs.io/en/latest/notebooks/lss.html): Large-scale structure ($\sigma(R)$, $\sigma(M)$);
 * [`halox.hmf`](https://halox.readthedocs.io/en/latest/notebooks/hmf.html): The halo mass function, quantifying the abundance of dark matter halos in mass and redshift and its dependence on cosmological parameters;
-* [`halox.bias`](https://halox.readthedocs.io/en/latest/notebooks/bias.html): The halo bias.
+* [`halox.bias`](https://halox.readthedocs.io/en/latest/notebooks/bias.html): The halo bias;
+* [`halox.emus`](https://halox.readthedocs.io/en/latest/notebooks/using_the_emulator.html): A neural-network emulator for $\sigma(M)$, providing up to 95× speedup over the analytic calculation while remaining differentiable and GPU-accelerated.
 
+All functions support `jax.jit`, `jax.vmap`, and `jax.grad`.
+Halo masses, redshifts, and cosmological parameters are all valid differentiation targets.
 All properties support cosmology dependence using [jax-cosmo](https://github.com/DifferentiableUniverseInitiative/jax_cosmo).
-More information on the modules available can be found in the [documentation pages](https://halox.readthedocs.io/en/latest/physics_modules.html).
+More information on the modules available can be found in the [documentation pages](https://halox.readthedocs.io/en/latest/).
+
+## Quick start
+
+```python
+import jax
+import jax.numpy as jnp
+from halox import cosmology, hmf, halo
+
+jax.config.update("jax_enable_x64", True)  # optional
+
+cosmo = cosmology.Planck18()
+
+# Halo mass function at z = 0.5
+M = jnp.logspace(13, 15, 100)
+dn_dlnM = hmf.tinker08_mass_function(M, 0.5, cosmo)
+
+# NFW profile
+h = halo.nfw.NFWHalo(1e14, 5.0, 0.0, cosmo)
+r = jnp.logspace(-1, 1, 50)
+rho = h.density(r)
+
+# Derivative w.r.t. halo mass
+dhmf_dM = jax.grad(lambda M: hmf.tinker08_mass_function(M, 0.5, cosmo))(1e14)
+```
+
+## Units
+
+All input/output units for `halox` functions are reported in docstrings.
+Units are assumed to be in proper coordinates (not comoving) and include factors of [little h](https://arxiv.org/abs/1308.4150).
 
 ## Testing
 
-All functions available in halox are validated against existing, non-JAX-based software.
+All functions available in halox are validated against existing, non-JAX-based software, and a 100% coverage threshold is enforced.
 Cosmology calculations are validated against [Astropy](https://www.astropy.org) for varying cosmological parameters and redshifts.
 Other quantities are validated against [Colossus](https://bdiemer.bitbucket.io/colossus/index.html#) or [gala](https://gala.adrian.pw/en/latest/) for varying halo masses, redshifts, critical overdensities, and cosmological parameters.
 These tests are included in the automatic CI/CD pipeline; a visual comparison is also included in the [documentation](https://halox.readthedocs.io/en/latest/notebooks/halox_vs_colossus.html).
@@ -45,6 +78,10 @@ These tests are included in the automatic CI/CD pipeline; a visual comparison is
 ## Documentation
 
 For more detail on the code and features, please visit our [documentation pages](https://halox.readthedocs.io/).
+
+## Contributing
+
+Contributions are welcome! See [CONTRIBUTING.md](CONTRIBUTING.md) for development setup, code conventions, and the pull-request process.
 
 ## Citation
 
@@ -66,4 +103,3 @@ archivePrefix = {arXiv},
  primaryClass = {astro-ph.IM},
 }
 ```
-
