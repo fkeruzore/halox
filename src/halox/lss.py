@@ -39,31 +39,52 @@ def mass_to_lagrangian_radius(M: ArrayLike, cosmo: jc.Cosmology) -> Array:
     return (3.0 * M / (4.0 * jnp.pi * rho_m0)) ** (1.0 / 3.0)
 
 
-def overdensity_c_to_m(
-    delta_c: float, z: ArrayLike, cosmo: jc.Cosmology
-) -> Array:
+def overdensity_c_to_m(delta_c: float, z: float, cosmo: jc.Cosmology) -> float:
     """Convert critical overdensity to mean overdensity.
 
     Parameters
     ----------
     delta_c : float
         Overdensity with respect to critical density
-    z : Array
+    z : float
         Redshift
     cosmo : jc.Cosmology
         Underlying cosmology
 
     Returns
     -------
-    Array
+    float
         Overdensity with respect to mean matter density
     """
-    z = jnp.asarray(z)
     rho_m = (
         cosmo.Omega_m * cosmology.critical_density(0.0, cosmo) * (1 + z) ** 3
     )
     rho_c = cosmology.critical_density(z, cosmo)
     return delta_c * rho_c / rho_m
+
+
+def overdensity_m_to_c(delta_m: float, z: float, cosmo: jc.Cosmology) -> float:
+    """Convert mean overdensity to critical overdensity.
+
+    Parameters
+    ----------
+    delta_m : float
+        Overdensity with respect to mean matter density
+    z : float
+        Redshift
+    cosmo : jc.Cosmology
+        Underlying cosmology
+
+    Returns
+    -------
+    float
+        Overdensity with respect to critical density
+    """
+    rho_m = (
+        cosmo.Omega_m * cosmology.critical_density(0.0, cosmo) * (1 + z) ** 3
+    )
+    rho_c = cosmology.critical_density(z, cosmo)
+    return delta_m * rho_m / rho_c
 
 
 def sigma_R(

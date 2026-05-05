@@ -123,6 +123,65 @@ def test_overdensity_c_to_m(delta_c, cosmo_name, return_vals=False):
     )
 
 
+@pytest.mark.parametrize("delta_m", test_deltas)
+@pytest.mark.parametrize("cosmo_name", test_cosmos.keys())
+def test_overdensity_m_to_c(delta_m, cosmo_name, return_vals=False):
+    cosmo_j, cosmo_c = test_cosmos[cosmo_name]
+    cosmo_c = cc.setCosmology(cosmo_c)
+
+    zs = test_mzs[:, 1]
+
+    d_c = jnp.array(
+        [
+            densityThreshold(zs[i], f"{delta_m:.0f}m") / cosmo_c.rho_c(zs[i])
+            for i in range(len(test_mzs))
+        ]
+    )
+    d_h = jnp.array(
+        [
+            halox.lss.overdensity_m_to_c(delta_m, zs[i], cosmo_j)
+            for i in range(len(test_mzs))
+        ]
+    )
+
+    if return_vals:
+        return d_h, d_c
+    discrepancy = d_h / d_c - 1.0
+    avg_disc = jnp.mean(discrepancy)
+    max_disc = jnp.max(jnp.abs(discrepancy))
+    assert max_disc < 5e-3, (
+        f"Bias in delta_c: avg={avg_disc:.3e}, max={max_disc:.3e}"
+    )
+
+
+@pytest.mark.parametrize("delta_c", test_deltas)
+@pytest.mark.parametrize("cosmo_name", test_cosmos.keys())
+def test_overdensity_2way(delta_c, cosmo_name, return_vals=False):
+    cosmo_j, cosmo_c = test_cosmos[cosmo_name]
+
+    zs = test_mzs[:, 1]
+
+    d_h = jnp.array(
+        [
+            halox.lss.overdensity_m_to_c(
+                halox.lss.overdensity_c_to_m(delta_c, zs[i], cosmo_j),
+                zs[i],
+                cosmo_j,
+            )
+            for i in range(len(test_mzs))
+        ]
+    )
+
+    if return_vals:
+        return d_h
+    discrepancy = d_h - delta_c
+    avg_disc = jnp.mean(discrepancy)
+    max_disc = jnp.max(jnp.abs(discrepancy))
+    assert max_disc < 5e-3, (
+        f"Bias in delta_c: avg={avg_disc:.3e}, max={max_disc:.3e}"
+    )
+
+
 if __name__ == "__main__":
     cosmo_j, cosmo_c = test_cosmos["70_0.3"]
     cosmo_c = cc.setCosmology(cosmo_c)

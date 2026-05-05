@@ -27,9 +27,9 @@ Learn more
 
    install
    notebooks/gradients.ipynb
-   notebooks/vmap_cosmo.ipynb
    notebooks/using_the_emulator.ipynb
    notebooks/halox_vs_colossus.ipynb
+   notebooks/others.ipynb
 
 
 .. toctree::
