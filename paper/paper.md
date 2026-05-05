@@ -139,7 +139,7 @@ These tests are included in an automatic CI/CD pipeline on the GitHub repository
 
 # Acknowledgments
 
-We would like to thank Lindsey Bleem, Andrew Hearin, Matt Becker, and Georgios Zacharegkas for useful discussions and feedback on `halox` and on this manuscript.
+We would like to thank Lindsey Bleem, Matt Becker, Jean-Éric Campagne, Andrew Hearin, and Georgios Zacharegkas for useful discussions and feedback on `halox` and on this manuscript.
 This work was supported in part by the U.S. Department of Energy, Office of Science, Office of Workforce Development for Teachers and Scientists (WDTS) under the Science Undergraduate Laboratory Internships (SULI) Program.
 Argonne National Laboratory’s work was supported by the U.S. Department of Energy, Office of Science, Office of High Energy Physics, under contract DE-AC02-06CH11357.
 
