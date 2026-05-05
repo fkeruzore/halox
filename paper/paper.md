@@ -58,7 +58,7 @@ The use of JAX as a backend allows these functions to be compiled and GPU-accele
 ## Available physical quantities
 
 The `halox` library seeks to provide JAX-based implementations of common models of dark matter halo properties and of large-scale structure.
-At the time of writing (software version 2.0.1), this includes the following properties:
+At the time of writing (software version 2.1.0), this includes the following properties:
 
 * Cosmological quantities: `halox` relies on JAX-cosmo [@Campagne:2023] for cosmology-dependent calculations, and includes wrapper functions to compute some additional properties, such as critical density $\rho_{\rm c}$ and differential comoving volume element ${\rm d}V_{c} / {\rm d}\Omega {\rm d}z$.
 * Radially-dependent physical properties of NFW and Einasto dark matter halos. Our NFW and Einasto implementations are based on the analytical derivations of @Lokas:2001 and @Retana-Montenegro:2012 respectively, and include the following quantities:
