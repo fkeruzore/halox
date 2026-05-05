@@ -4,7 +4,7 @@ Installation
 Standard installation
 ^^^^^^^^^^^^^^^^^^^^^
 
-``halox`` can be install via ``pip``:
+``halox`` can be installed via ``pip``:
 
 .. code-block:: bash
 
@@ -30,19 +30,24 @@ Dependencies are managed using `uv <https://docs.astral.sh/uv/>`_.
 Running tests
 ^^^^^^^^^^^^^
 
-When installing ``halox`` from source using ``uv``, you can install test dependencies:
+When installing ``halox`` from source using ``uv``, you can install optional dependency groups:
 
 .. code-block:: bash
 
    git clone git@github.com:fkeruzore/halox.git
    cd halox
-   uv sync --extra tests
+   uv sync --extra tests   # test dependencies (pytest, astropy, colossus, gala)
+   uv sync --extra docs    # documentation dependencies (sphinx, myst-nb, ...)
+   uv sync --all-extras    # all optional dependencies
    uv pip install .
 
-Then, you can run the full suite of unit tests:
+Running tests
+^^^^^^^^^^^^^
+
+After installing with ``--extra tests``, run the full suite of unit tests:
 
 .. code-block:: bash
 
    uv run pytest
 
-The test suite involves validation of physics modules against astropy/colossus, and a coverage check.
+The test suite validates physics modules against astropy/colossus/gala, and enforces a 100% coverage.
