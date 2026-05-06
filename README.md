@@ -29,10 +29,10 @@ For a manual installation, see the [documentation pages](https://halox.readthedo
 
 * [`halox.halo`](https://halox.readthedocs.io/en/latest/notebooks/nfw.html): Radial profiles of dark matter halos following Navarro-Frenk-White (NFW) and Einasto distributions;
 * [`halox.cm`](https://halox.readthedocs.io/en/latest/notebooks/cMrelations.html): Mass-concentration relations of dark matter halos;
-* [`halox.lss`](https://halox.readthedocs.io/en/latest/notebooks/lss.html): Large-scale structure ($\sigma(R)$, $\sigma(M)$);
+* [`halox.lss`](https://halox.readthedocs.io/en/latest/notebooks/lss.html): Large-scale structure ($$\sigma(R)$$, $$\sigma(M)$$);
 * [`halox.hmf`](https://halox.readthedocs.io/en/latest/notebooks/hmf.html): The halo mass function, quantifying the abundance of dark matter halos in mass and redshift and its dependence on cosmological parameters;
 * [`halox.bias`](https://halox.readthedocs.io/en/latest/notebooks/bias.html): The halo bias;
-* [`halox.emus`](https://halox.readthedocs.io/en/latest/notebooks/using_the_emulator.html): A neural-network emulator for $\sigma(M)$, providing up to 95× speedup over the analytic calculation while remaining differentiable and GPU-accelerated.
+* [`halox.emus`](https://halox.readthedocs.io/en/latest/notebooks/using_the_emulator.html): A neural-network emulator for $$\sigma(M)$$, providing up to 95× speedup over the analytic calculation while remaining differentiable and GPU-accelerated.
 
 All functions support `jax.jit`, `jax.vmap`, and `jax.grad`.
 Halo masses, redshifts, and cosmological parameters are all valid differentiation targets.
