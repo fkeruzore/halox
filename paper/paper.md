@@ -47,10 +47,10 @@ The `halox` library offers a JAX implementation of some widely used properties o
 The use of JAX as a backend allows these functions to be compiled and GPU-accelerated, enabling high-performance computations; and automatically differentiable, enabling their efficient use in gradient-based workflows, such as sensitivity analyses, Hamiltonian Monte-Carlo sampling for Bayesian inference, or machine learning-based methods.
 In addition, expensive computations of large-scale structure properties are further accelerated using neural network emulators, preserving hardware acceleration and differentiability while enabling faster calculations thanks to approximate calculations (see the **Software design** section).
 
-## State of the field
+# State of the field
 
 Many toolkits focused on halo modeling have been developed, such as, *e.g.*, halofit [@Smith:2003], halotools [@Hearin:2017], colossus [@Diemer:2018], and pyCCL [@Chisari:2019].
-While JAX-powered software exists for a wide variety of cosmological applications (see **Statement of Need**), the properties implemented in `halox` (listed in **Software design**), although available in other libraries focused on halo modeling, do not currently have a publicly available, differentiable and GPU-accelerated implementations.
+While JAX-powered software exists for a wide variety of cosmological applications (see **Statement of need**), the properties implemented in `halox` (listed in **Software design**), although available in other libraries focused on halo modeling, do not currently have publicly available, differentiable and hardware-accelerated implementations.
 
 # Software design
 
@@ -85,11 +85,12 @@ In addition, all JAX transformations can be used on `halox` functions, including
 
 ## Emulation
 
-$\sigma^2(R)$ is the variance of the fluctuations of the matter density field in a sphere of radius $R$, given by:
+$\sigma^2(R)$ is the variance of the fluctuations of the matter density field in a sphere of radius $R$.
+At redshift $z$ and for cosmological parameters $\Omega$, it is given by:
 
 $$\sigma^2(R,z,\Omega) = \frac{1}{2 \pi^2} \int_0^\infty k^2 W^2(k, R) P(k, z, \Omega) {\rm d}k,$$
 
-where $z$ denotes redshift, $\Omega$ cosmological parameters, and $k$ spatial frequency; $P(k,z,\Omega)$ is the power spectrum, and $W$ is the Fourier transform of the spherical top-hat window function.
+where $k$ denotes spatial frequency, $P(k,z,\Omega)$ is the power spectrum, and $W$ is the Fourier transform of the spherical top-hat window function.
 $\sigma$ is an essential ingredient in computing both halo mass function and halo bias in most standard parameterizations [*e.g.*, @Tinker:2010], and the numerical integration is computationally expensive, and often the primary bottleneck in such calculations.
 
 To tackle this issue, `halox` also includes an emulated calculation of $\sigma$, as a function of mass (the Lagrangian mass contained in a radius $R$), redshift, and cosmological parameters.
