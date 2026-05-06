@@ -64,6 +64,7 @@ try:
 except RuntimeError:
     print(r"/!\ No GPU found - GPU rows will be skipped.")
 
+
 def _to_device(tree, dev):
     """device_put every array leaf in a pytree onto ``dev``."""
     if tree is None:
@@ -86,8 +87,8 @@ for dev_name, dev in devices.items():
         # --- plain (no JIT) ---
         # nb: vmap still traces, but nothing is compiled ahead of time;
         # each call re-traces and compiles the inner vmap.
-        def _call_plain(_emu=_emu):
-            return hmf_grid(M_dev, z_dev, cosmo_dev, emu=_emu)
+        def _call_plain(_emu=_emu, _M=M_dev, _z=z_dev, _cosmo=cosmo_dev):
+            return hmf_grid(_M, _z, _cosmo, emu=_emu)
 
         # Sanity-check device placement on the first run of each combo.
         _probe = _call_plain()
@@ -104,11 +105,13 @@ for dev_name, dev in devices.items():
         # --- JIT-compiled ---
         # Wrap the full grid computation in jit so tracing happens once.
         _hmf_jit = jax.jit(
-            lambda M_, z_, _emu=_emu: hmf_grid(M_, z_, cosmo_dev, emu=_emu)
+            lambda M_, z_, _emu=_emu, _cosmo=cosmo_dev: hmf_grid(
+                M_, z_, _cosmo, emu=_emu
+            )
         )
 
-        def _call_jit(_fn=_hmf_jit):
-            return _fn(M_dev, z_dev)
+        def _call_jit(_fn=_hmf_jit, _M=M_dev, _z=z_dev):
+            return _fn(_M, _z)
 
         key_jit = (dev_name, "JIT")
         results.setdefault(key_jit, {})[col_label] = bench(
@@ -144,8 +147,7 @@ _colossus_ref = _call_colossus()
 _disc = _halox_ref / _colossus_ref - 1.0
 _max_disc = float(np.max(np.abs(_disc)))
 assert _max_disc < 2e-2, (
-    f"halox analytical vs colossus disagreement too large: "
-    f"max={_max_disc:.3e}"
+    f"halox analytical vs colossus disagreement too large: max={_max_disc:.3e}"
 )
 print(f"halox vs colossus max relative discrepancy: {_max_disc:.3e}")
 

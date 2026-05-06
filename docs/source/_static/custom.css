@@ -1,0 +1,8 @@
+.learn-more-cards a {
+  text-decoration: none;
+}
+
+.learn-more-cards a:hover,
+.learn-more-cards a:focus {
+  text-decoration: none;
+}

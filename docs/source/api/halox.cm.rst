@@ -1,7 +1,8 @@
-halox.cm: Mass-concentration Relations
+halox.cm: Mass-concentration relations
 ======================================
 
 ``halox`` provides utility functions to calculate concentration as a function of mass using several relations in the literature.
+For examples, see :doc:`../notebooks/cMrelations`.
 
 .. currentmodule:: halox.cm
 

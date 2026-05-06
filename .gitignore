@@ -24,9 +24,28 @@ imgs/*.key
 .coverage
 coverage.json
 
+# unfinished
+src/halox/halo/truncnfw.py
+
+# depricated emulator files
+src/halox/emus/sigma_0to5.npz
+src/halox/emus/sigma_5lay.npz
+src/halox/emus/sigma_10k.npz
+src/halox/emus/sigma_30k_miracle.npz
+src/halox/emus/sigma_40k_conv1.npz
+src/halox/emus/sigma_40k_conv2.npz
+src/halox/emus/sigma_40k_conv3.npz
+src/halox/emus/sigma_40k_conv4.npz
+src/halox/emus/sigma_40k_conv5.npz
+src/halox/emus/sigma_40k_conv6.npz
+src/halox/emus/sigma_40k_conv7.npz
+src/halox/emus/sigma_40k_conv8.npz
+src/halox/emus/sigma_200k_log.npz
+
 # Lance notebooks
 notebooks/T08_emulation.ipynb
 notebooks/emu_timing_tests.ipynb
 notebooks/sigmaM.ipynb
 notebooks/sigma_emulation.ipynb
 notebooks/lances_notebooks/*
+notebooks/presentation.ipynb

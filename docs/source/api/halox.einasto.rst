@@ -2,6 +2,7 @@ halox.halo.einasto: The Einasto profile
 =======================================
 
 ``halox`` provides utility functions to compute properties of halos with an Einasto profile.
+For examples, see :doc:`../notebooks/einasto`.
 
 .. currentmodule:: halox.halo.einasto
 
