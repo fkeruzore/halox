@@ -72,8 +72,41 @@ Units are assumed to be in proper coordinates (not comoving) and include factors
 Learn more
 ^^^^^^^^^^
 
+.. grid:: 1 1 3 3
+   :gutter: 2
+   :class-container: learn-more-cards
+
+   .. grid-item-card:: Tutorials
+
+      * :doc:`install`
+      * :doc:`Automatic differentiation and JAX features <notebooks/gradients>`
+      * :doc:`The σ(M) emulator <notebooks/using_the_emulator>`
+      * :doc:`Comparison with colossus <notebooks/halox_vs_colossus>`
+      * :doc:`Other utilities <notebooks/others>`
+
+   .. grid-item-card:: Physics modules gallery
+
+      * :doc:`NFW profiles <notebooks/nfw>`
+      * :doc:`Einasto profiles <notebooks/einasto>`
+      * :doc:`Concentration-mass relations <notebooks/cMrelations>`
+      * :doc:`Large-scale structure <notebooks/lss>`
+      * :doc:`Halo mass function <notebooks/hmf>`
+      * :doc:`Halo bias <notebooks/bias>`
+
+   .. grid-item-card:: Reference
+
+      * :doc:`Cosmology <api/halox.cosmology>`
+      * :doc:`NFW halos <api/halox.nfw>`
+      * :doc:`Einasto halos <api/halox.einasto>`
+      * :doc:`Concentration-mass relations <api/halox.cm>`
+      * :doc:`Large-scale structure <api/halox.lss>`
+      * :doc:`Emulators <api/halox.emus>`
+      * :doc:`Halo mass functions <api/halox.hmf>`
+      * :doc:`Halo bias <api/halox.bias>`
+
 .. toctree::
    :maxdepth: 1
+   :hidden:
    :caption: Tutorials
 
    install
@@ -82,9 +115,9 @@ Learn more
    Comparison with colossus <notebooks/halox_vs_colossus.ipynb>
    Other utilities <notebooks/others.ipynb>
 
-
 .. toctree::
    :maxdepth: 1
+   :hidden:
    :caption: Physics modules gallery
 
    notebooks/nfw.ipynb
@@ -94,9 +127,9 @@ Learn more
    notebooks/hmf.ipynb
    notebooks/bias.ipynb
 
-
 .. toctree::
    :maxdepth: 1
+   :hidden:
    :caption: Reference
 
    api/halox.cosmology

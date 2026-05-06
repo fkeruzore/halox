@@ -39,6 +39,7 @@ exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 
 html_theme = "sphinx_book_theme"
 html_static_path = ["_static"]
+html_css_files = ["custom.css"]
 html_logo = "../../imgs/logo_text.png"
 html_favicon = "../../imgs/logo.png"
 html_theme_options = {
