@@ -13,7 +13,6 @@ dependencies = [
     "jax==0.4.30; sys_platform == 'darwin' and platform_machine == 'x86_64'",
     # All other platforms: allow newer JAX
     "jax>=0.4.30; sys_platform != 'darwin' or platform_machine != 'x86_64'",
-
     "jax-cosmo>=0.1.0",
     "jaxopt>=0.8.0",
     "scipy>=1.13.1",
@@ -27,20 +26,17 @@ dev = [
 ]
 
 [project.optional-dependencies]
-tests_lite = [
+tests_lite = [  # only install / import tests, no accuracy vs other libs
     "pytest>=8.4.0",
     "pytest-cov>=6.2.1",
     "pytest-xdist>=3.7.0",
     "coverage-badge>=1.1.0",
 ]
-tests_accuracy = [
+tests = [  # full tests
+    "halox[tests_lite]",
     "astropy>=6.0.1",
     "colossus>=1.3.8",
     "gala>=1.8.1",
-]
-tests = [
-    "halox[tests_lite]",
-    "halox[tests_accuracy]",
 ]
 docs = [
     "matplotlib>=3.9.4",
