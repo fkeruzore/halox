@@ -101,10 +101,6 @@ The training set is taken from a Sobol sample over log(M), log(1+z), and the cos
 The emulator is accurate to within a percent for both $\sigma(M)$ and the halo bias, and within a few percent for the HMF across the tested parameter space.
 \autoref{fig:figure1} and \autoref{fig:figure2} show the accuracy of emulator-based predictions of $\sigma(M)$ and of the halo mass function for different cosmologies up to $z=1$, demonstrating remarkable accuracy, with an increase of error in the regime of extremely massive halos ($M_{200c} > 10^{15} \, h^{-1} M_\odot$), which are very rare occurences in both simulations and observations.
 
-![*Top:* $\sigma(M)$ predicted using `colossus`, `halox`, and the `halox` emulator, varying redshift and cosmology. *Bottom:* Fractional difference between `halox` predictions and `colossus`.](sigmaM_emulator_validation.png){#fig:figure1 width="90%"}
-
-![Same as Figure 1 for the halo mass function.](hmf_emulator_validation.png){#fig:figure2 width="90%"}
-
 To compute $\sigma(M)$, the HMF, or the halo bias using the emulator, users may simply instantiate the emulator, then pass it in as an optional argument to the original $\sigma(M)$ function in halox:
 
 ```py
@@ -114,6 +110,10 @@ sigma_e = halox.lss.sigmaM(M, z, cosmo, emu=emu)  # emulated sigma(M)
 ```
 
 The same calling sequence can be used to compute halo mass function or halo bias using the $\sigma(M)$ emulator.
+
+![*Top:* $\sigma(M)$ predicted using `colossus`, `halox`, and the `halox` emulator, varying redshift and cosmology. *Bottom:* Fractional difference between `halox` predictions and `colossus`.](sigmaM_emulator_validation.png){#fig:figure1 width="90%"}
+
+![Same as Figure 1 for the halo mass function.](hmf_emulator_validation.png){#fig:figure2 width="90%"}
 
 # Research impact statement
 
