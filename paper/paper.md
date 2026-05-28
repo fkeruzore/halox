@@ -118,7 +118,7 @@ The same calling sequence can be used to compute halo mass function or halo bias
 # Research impact statement
 
 At the time of writing, `halox` is being used in several upcoming analyses, including the development of a differentiable generator of halo catalogs and the creation of a suite of realistic simulations of the extragalactic millimeter-wave sky.
-In addition, it has already been referenced in cosmology publications, *e.g.*., [@Desc:2026; @Alarcon:2026].
+In addition, it has already been referenced in cosmology publications, *e.g.*., @Desc:2026, @Alarcon:2026.
 
 ## Performance benchmarks
 
