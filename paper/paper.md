@@ -30,17 +30,17 @@ bibliography: paper.bib
 Dark matter halos are fundamental structures in cosmology, forming the gravitational potential wells hosting galaxies and clusters of galaxies.
 Their properties and statistical distribution (including the halo mass function) are invaluable tools to infer the fundamental properties of the Universe.
 The `halox` package is a JAX-powered Python library enabling differentiable and accelerated computations of key properties of dark matter halos, and of the halo mass function.
-The automatic differentiation capabilities of `halox` enable its usage in gradient-based workflows, e.g. in efficient Hamiltonian Monte Carlo sampling or machine learning applications.
+The automatic differentiation capabilities of `halox` enable its usage in gradient-based workflows, *e.g.*. in efficient Hamiltonian Monte Carlo sampling or machine learning applications.
 The acceleration capabilities of `halox` enable significant speedups over existing packages such as `colossus` on GPU architectures, while offering comparable performance on CPUs.
 
 # Statement of need
 
 In cosmology and astrophysics, modeling dark matter halos is central to understanding the large-scale structure of the Universe and its formation.
-Recently, the AI-driven advent of novel computational frameworks such as JAX [@Bradbury:2018] has led to the development of differentiable and hardware-accelerated software to simulate and model physical processes, with e.g. Brax [@Brax:2021] and JAX, MD [@Jaxmd:2020].
+Recently, the AI-driven advent of novel computational frameworks such as JAX [@Bradbury:2018] has led to the development of differentiable and hardware-accelerated software to simulate and model physical processes, with *e.g.*. Brax [@Brax:2021] and JAX, MD [@Jaxmd:2020].
 The increasing complexity of cosmological data and astrophysical models has motivated the wide adoption of this framework in cosmology, where JAX-powered software has been published to address a wide variety of scientific goals, including
-modeling fundamental cosmological quantities, with, e.g., JAX-cosmo [@Campagne:2023] and LINX [@Giovanetti:2024];
-simulating density fields and observables, with, e.g., SHAMNet [@Hearin:2022], DISCO-DJ [@Hahn:2024], JAXpm [@Jaxpm:2025], and JAX-GalSim [@Mendoza:2025; @JaxGalSim:2025];
-emulating likelihoods for accelerated inference, with, e.g., CosmoPower-JAX [@Piras:2023] and candl [@Balkenhol:2024];
+modeling fundamental cosmological quantities, with, *e.g.*., JAX-cosmo [@Campagne:2023] and LINX [@Giovanetti:2024];
+simulating density fields and observables, with, *e.g.*., SHAMNet [@Hearin:2022], DISCO-DJ [@Hahn:2024], JAXpm [@Jaxpm:2025], and JAX-GalSim [@Mendoza:2025; @JaxGalSim:2025];
+emulating likelihoods for accelerated inference, with, *e.g.*., CosmoPower-JAX [@Piras:2023] and candl [@Balkenhol:2024];
 or modeling various physical properties of dark matter halos, such as mass accretion history [Diffmah, @Hearin:2021], galaxy star formation history [Diffstar, @Alarcon:2023], halo concentration [Diffprof, @Stevanovich:2023], gas-halo connection [picasso, @Keruzore:2024], and halo mass function [@Buisman:2025]^[Note that halox also provides an implementation of the halo mass function, but chooses a lighter, halo model-based approach; see **Software design**.].
 
 The `halox` library offers a JAX implementation of some widely used properties of dark matter halos.
@@ -49,7 +49,7 @@ In addition, expensive computations of large-scale structure properties are furt
 
 # State of the field
 
-Many toolkits focused on halo modeling have been developed, such as, e.g., halofit [@Smith:2003], halotools [@Hearin:2017], colossus [@Diemer:2018], and pyCCL [@Chisari:2019].
+Many toolkits focused on halo modeling have been developed, such as, *e.g.*., halofit [@Smith:2003], halotools [@Hearin:2017], colossus [@Diemer:2018], and pyCCL [@Chisari:2019].
 While JAX-powered software exists for a wide variety of cosmological applications (see **Statement of need**), the properties implemented in `halox` (listed in **Software design**), although available in other libraries focused on halo modeling, do not currently have publicly available, differentiable and hardware-accelerated implementations.
 
 # Software design
@@ -81,7 +81,7 @@ At the time of writing (software version 2.1.1), this includes the following pro
 
 All calculations available in `halox` are written using JAX and JAX-cosmo.
 As a result, all functions can be compiled just-in-time using `jax.jit`, hardware-accelerated, and are automatically differentiable with respect to their input parameters, including halo mass, redshift, and cosmological parameters.
-In addition, all JAX transformations can be used on `halox` functions, including native vectorization and parallelization using e.g. `jax.vmap`.
+In addition, all JAX transformations can be used on `halox` functions, including native vectorization and parallelization using *e.g.*. `jax.vmap`.
 
 ## Emulation
 
@@ -91,7 +91,7 @@ At redshift $z$ and for cosmological parameters $\Omega$, it is given by:
 $$\sigma^2(R,z,\Omega) = \frac{1}{2 \pi^2} \int_0^\infty k^2 W^2(k, R) P(k, z, \Omega) {\rm d}k,$$
 
 where $k$ denotes spatial frequency, $P(k,z,\Omega)$ is the power spectrum, and $W$ is the Fourier transform of the spherical top-hat window function.
-$\sigma$ is an essential ingredient in computing both halo mass function and halo bias in most standard parameterizations [e.g., @Tinker:2010], and the numerical integration is computationally expensive, and often the primary bottleneck in such calculations.
+$\sigma$ is an essential ingredient in computing both halo mass function and halo bias in most standard parameterizations [*e.g.*., @Tinker:2010], and the numerical integration is computationally expensive, and often the primary bottleneck in such calculations.
 
 To tackle this issue, `halox` also includes an emulated calculation of $\sigma$, as a function of mass (the Lagrangian mass contained in a radius $R$), redshift, and cosmological parameters.
 Our emulator consists of a multi-layer perceptron with three hidden layers, each of width 64.
@@ -118,7 +118,7 @@ The same calling sequence can be used to compute halo mass function or halo bias
 # Research impact statement
 
 At the time of writing, `halox` is being used in several upcoming analyses, including the development of a differentiable generator of halo catalogs and the creation of a suite of realistic simulations of the extragalactic millimeter-wave sky.
-In addition, it has already been referenced in cosmology publications [e.g., @Desc:2026; @Alarcon:2026].
+In addition, it has already been referenced in cosmology publications, *e.g.*., [@Desc:2026; @Alarcon:2026].
 
 ## Performance benchmarks
 
