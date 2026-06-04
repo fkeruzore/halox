@@ -148,17 +148,19 @@ If you use ``halox`` for your research, please cite the `original paper <https:/
 
 .. code-block:: bibtex
 
-   @ARTICLE{2025arXiv250922478K,
-          author = {{K{\'e}ruzor{\'e}}, Florian},
-           title = "{halox: Dark matter halo properties and large-scale structure calculations using JAX}",
-         journal = {arXiv e-prints},
-        keywords = {Instrumentation and Methods for Astrophysics, Cosmology and Nongalactic Astrophysics},
-            year = 2025,
-           month = sep,
-             eid = {arXiv:2509.22478},
-           pages = {arXiv:2509.22478},
-             doi = {10.48550/arXiv.2509.22478},
-   archivePrefix = {arXiv},
-          eprint = {2509.22478},
-    primaryClass = {astro-ph.IM},
-   }
+    @ARTICLE{2025arXiv250922478K,
+           author = {{K{\'e}ruzor{\'e}}, Florian and {Moreau}, Lance A.},
+            title = "{halox: Dark matter halo properties and large-scale structure calculations using JAX}",
+          journal = {arXiv e-prints},
+         keywords = {Instrumentation and Methods for Astrophysics, Cosmology and Nongalactic Astrophysics},
+             year = 2025,
+            month = sep,
+              eid = {arXiv:2509.22478},
+            pages = {arXiv:2509.22478},
+              doi = {10.48550/arXiv.2509.22478},
+    archivePrefix = {arXiv},
+           eprint = {2509.22478},
+     primaryClass = {astro-ph.IM},
+           adsurl = {https://ui.adsabs.harvard.edu/abs/2025arXiv250922478K},
+          adsnote = {Provided by the SAO/NASA Astrophysics Data System}
+    }

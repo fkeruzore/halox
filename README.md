@@ -89,7 +89,7 @@ If you use `halox` for your research, please cite the [original paper](https://a
 
 ```bib
 @ARTICLE{2025arXiv250922478K,
-       author = {{K{\'e}ruzor{\'e}}, Florian},
+       author = {{K{\'e}ruzor{\'e}}, Florian and {Moreau}, Lance A.},
         title = "{halox: Dark matter halo properties and large-scale structure calculations using JAX}",
       journal = {arXiv e-prints},
      keywords = {Instrumentation and Methods for Astrophysics, Cosmology and Nongalactic Astrophysics},
@@ -101,5 +101,7 @@ If you use `halox` for your research, please cite the [original paper](https://a
 archivePrefix = {arXiv},
        eprint = {2509.22478},
  primaryClass = {astro-ph.IM},
+       adsurl = {https://ui.adsabs.harvard.edu/abs/2025arXiv250922478K},
+      adsnote = {Provided by the SAO/NASA Astrophysics Data System}
 }
 ```
